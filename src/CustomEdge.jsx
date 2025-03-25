@@ -3,6 +3,8 @@ import {
   BaseEdge,
   EdgeLabelRenderer,
   getBezierPath,
+  getStraightPath,
+  getSmoothStepPath,
   useReactFlow,
 } from 'reactflow';
 

@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Handle, Position, NodeResizer } from 'reactflow';
+import { Handle, Position, NodeResizer, NodeToolbar } from 'reactflow';
 import './customnode.css';
 
 // Node colors
@@ -13,14 +13,7 @@ const nodeColors = {
   gray: "#95a5a6",
 };
 
-const labelStyle = {
-  display: 'flex',
-  alignItems: 'center',
-};
-
-const onConnect = (params) => console.log('handle onConnect', params);
-
-const CustomNode = ({ data, selected }) => {
+const CustomNode = ({ id, data, selected }) => {
 
   return (
   <div 
@@ -51,6 +44,11 @@ const CustomNode = ({ data, selected }) => {
   <Handle type="source"  id="right" position={Position.Right} />
   <Handle type="source"  id="top" position={Position.Top} />
   <Handle type="source"  id="bottom" position={Position.Bottom} />
+
+  <NodeToolbar isVisible={selected} position={Position.Top}>
+        <button>{id}</button>
+      </NodeToolbar>
+
     </div>
   );
 };
