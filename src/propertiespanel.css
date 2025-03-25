@@ -1,0 +1,23 @@
+.propertiespanel__controls {
+    position: absolute;
+    background-color: aquamarine;
+    right: 10px;
+    top: 10px;
+    z-index: 4;
+    font-size: 12px;
+  }
+  
+  .propertiespanel label {
+    display: block;
+  }
+  
+  .propertiespanel__bglabel {
+    margin-top: 10px;
+  }
+  
+  .propertiespanel__checkboxwrapper {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+  }
+  

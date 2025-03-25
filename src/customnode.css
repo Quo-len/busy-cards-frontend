@@ -1,0 +1,35 @@
+.customnode {
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 15px;
+    font-size: 12px;
+    position: relative;
+    min-width: 100px;
+    min-height: 30px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out, background 0.3s ease-in-out;
+  }
+  
+  /* Hover Effect */
+  .customnode:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* Highlight when Selected */
+  .customnode.selected {
+    border: 2px solid #ff0071;
+    box-shadow: 0px 0px 15px rgba(255, 0, 113, 0.5);
+    background: rgba(255, 0, 113, 0.1);
+  }
+  
+  /* Node Label */
+  .node-label {
+    font-weight: bold;
+    color: black;
+    user-select: none;
+  }
+  
