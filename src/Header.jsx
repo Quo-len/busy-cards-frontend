@@ -24,9 +24,9 @@ const Header = () => {
           margin: 0,
           padding: 0 
         }}>
-          <li>Home</li>
-          <li>Projects</li>
-          <li>Help</li>
+          <a href="#" style={{ textDecoration: 'none', color: '#333' }}>Home</a>
+          <a href="#" style={{ textDecoration: 'none', color: '#333' }}>Projects</a>
+          <a href="#" style={{ textDecoration: 'none', color: '#333' }}>Help</a>
         </ul>
       </nav>
     </header>

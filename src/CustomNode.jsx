@@ -25,8 +25,6 @@ const CustomNode = ({ id, data, selected }) => {
       borderRadius: '15px',
       fontSize: '12px',
       position: 'relative',
-      width: '100%',
-      height: '100%',
       minWidth: '100px',
       minHeight: '30px'
     }}
@@ -35,7 +33,7 @@ const CustomNode = ({ id, data, selected }) => {
     display: 'flex', 
     alignItems: 'center', 
     justifyContent: 'center',
-    height: '100%'
+    wordBreak: 'break-word',
     }}>
       {data.label}
   </div>
@@ -45,9 +43,11 @@ const CustomNode = ({ id, data, selected }) => {
   <Handle type="source"  id="top" position={Position.Top} />
   <Handle type="source"  id="bottom" position={Position.Bottom} />
 
-  <NodeToolbar isVisible={selected} position={Position.Top}>
-        <button>{id}</button>
-      </NodeToolbar>
+  <NodeToolbar isVisible={data.toolbarVisible} position={data.toolbarPosition}>
+      <button>delete</button>
+      <button>copy</button>
+      <button>expand</button>
+    </NodeToolbar>
 
     </div>
   );

@@ -1,9 +1,11 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import ReactFlow, {
     useNodes,
     useReactFlow
-  } from "reactflow";
+} from "reactflow";
 import "reactflow/dist/style.css";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
 
 // Node shapes
 const nodeShapes = {
@@ -26,65 +28,85 @@ const nodeColors = {
 function Sidebar() {
     const { setNodes } = useReactFlow();
     const nodes = useNodes();
+    const ydoc = useRef(null);
+    const provider = useRef(null);
+
+    // Initialize Yjs document and WebSocket provider
+    useEffect(() => {
+        const doc = new Y.Doc();
+        const wsProvider = new WebsocketProvider(
+            "ws://25.13.98.39:5000", 
+            "flow-room", 
+            doc
+        );
+        const nodesMap = doc.getMap("nodes");
+
+        ydoc.current = doc;
+        provider.current = wsProvider;
+
+        // Observe changes in the shared nodes map
+        nodesMap.observe((event) => {
+            // Update local nodes based on Yjs map changes
+            const updatedNodes = Array.from(nodesMap.values());
+            setNodes((currentNodes) => 
+                currentNodes.map(node => {
+                    const updatedNode = updatedNodes.find(n => n.id === node.id);
+                    return updatedNode ? { ...node, ...updatedNode } : node;
+                })
+            );
+        });
+
+        return () => {
+            wsProvider.destroy();
+            doc.destroy();
+        };
+    }, [setNodes]);
 
     // Get only the first selected node
     const selectedNode = nodes.find(node => node.selected);
 
+    // Update node properties with Yjs synchronization
+    const updateNodeProperty = useCallback((nodeId, propertyName, value) => {
+        if (!ydoc.current) return;
+
+        const nodesMap = ydoc.current.getMap("nodes");
+        const nodeData = nodesMap.get(nodeId) || {};
+
+        // Update node data in Yjs map
+        const updatedNodeData = {
+            ...nodeData,
+            data: {
+                ...nodeData.data,
+                [propertyName]: value
+            }
+        };
+
+        // Apply shape and style changes separately
+        if (propertyName === 'shape') {
+            updatedNodeData.style = {
+                ...(nodeData.style || {}),
+                ...nodeShapes[value]
+            };
+        }
+
+        nodesMap.set(nodeId, updatedNodeData);
+    }, []);
+
     const handleChangeName = useCallback((nodeId, newLabel) => {
-        setNodes((nds) => 
-          nds.map((node) => 
-            node.id === nodeId 
-              ? { ...node, data: { ...node.data, label: newLabel } } 
-              : node
-          )
-        );
-    }, [setNodes]);
+        updateNodeProperty(nodeId, 'label', newLabel);
+    }, [updateNodeProperty]);
     
     const handleChangeDescription = useCallback((nodeId, newDescription) => {
-        setNodes((nds) => 
-          nds.map((node) => 
-            node.id === nodeId 
-              ? { ...node, data: { ...node.data, description: newDescription } } 
-              : node
-          )
-        );
-    }, [setNodes]);
+        updateNodeProperty(nodeId, 'description', newDescription);
+    }, [updateNodeProperty]);
     
     const handleChangeShape = useCallback((nodeId, newShape) => {
-        setNodes((nds) => 
-          nds.map((node) => 
-            node.id === nodeId 
-              ? { 
-                  ...node, 
-                  data: { 
-                    ...node.data, 
-                    shape: newShape 
-                  },
-                  style: {
-                    ...node.style,
-                    ...nodeShapes[newShape]
-                  }
-                } 
-              : node
-          )
-        );
-    }, [setNodes]);
+        updateNodeProperty(nodeId, 'shape', newShape);
+    }, [updateNodeProperty]);
     
     const handleChangeColor = useCallback((nodeId, newColor) => {
-        setNodes((nds) => 
-          nds.map((node) => 
-            node.id === nodeId 
-              ? { 
-                  ...node, 
-                  data: { 
-                    ...node.data, 
-                    color: newColor 
-                  }
-                } 
-              : node
-          )
-        );
-    }, [setNodes]);
+        updateNodeProperty(nodeId, 'color', newColor);
+    }, [updateNodeProperty]);
 
     // If no nodes are selected, show a message
     if (!selectedNode) {
@@ -220,7 +242,7 @@ function Sidebar() {
           </div>
         </div>
       </aside>
-    )
+    );
 }
 
 export default Sidebar;

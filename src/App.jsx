@@ -4,6 +4,8 @@ import Canvas from './Canvas';
 import Header from './Header';
 import Footer from './Footer';
 import Sidebar from './Sidebar';
+import { WebSocketProvider } from './WebSocketContext';
+
 
 function App() {
   return (
@@ -26,10 +28,12 @@ function App() {
         overflow: 'hidden',
         position: 'relative'
       }}>
-        <ReactFlowProvider>
-          <Canvas />
-          <Sidebar />
-        </ReactFlowProvider>
+        <WebSocketProvider>
+          <ReactFlowProvider>
+            <Canvas />
+            <Sidebar />
+          </ReactFlowProvider>
+        </WebSocketProvider>
       </div>
       <Footer />
     </div>

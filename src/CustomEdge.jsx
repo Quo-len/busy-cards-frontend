@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   BaseEdge,
   EdgeLabelRenderer,
   getBezierPath,
-  getStraightPath,
-  getSmoothStepPath,
   useReactFlow,
 } from 'reactflow';
+import * as Y from 'yjs';
+import { WebsocketProvider } from 'y-websocket';
 
 import './buttonedge.css';
 
@@ -21,7 +21,40 @@ export default function CustomEdge({
   style = {},
   markerEnd,
 }) {
-  const { setEdges } = useReactFlow();
+  const { setEdges, getEdges } = useReactFlow();
+  const ydoc = useRef(null);
+  const provider = useRef(null);
+
+  // Initialize Yjs document and WebSocket provider
+  useEffect(() => {
+    const doc = new Y.Doc();
+    const wsProvider = new WebsocketProvider(
+      "ws://25.13.98.39:5000", 
+      "flow-room", 
+      doc
+    );
+    const edgesMap = doc.getMap("edges");
+
+    ydoc.current = doc;
+    provider.current = wsProvider;
+
+    return () => {
+      wsProvider.destroy();
+      doc.destroy();
+    };
+  }, []);
+
+  const onEdgeClick = () => {
+    if (!ydoc.current) return;
+
+    // Remove edge from Yjs shared map
+    const edgesMap = ydoc.current.getMap("edges");
+    edgesMap.delete(id);
+
+    // Remove edge from local state
+    setEdges((edges) => edges.filter((edge) => edge.id !== id));
+  };
+
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
@@ -30,10 +63,6 @@ export default function CustomEdge({
     targetY,
     targetPosition,
   });
-
-  const onEdgeClick = () => {
-    setEdges((edges) => edges.filter((edge) => edge.id !== id));
-  };
 
   return (
     <>
@@ -44,8 +73,6 @@ export default function CustomEdge({
             position: 'absolute',
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
             fontSize: 12,
-            // everything inside EdgeLabelRenderer has no pointer events by default
-            // if you have an interactive element, set pointer-events: all
             pointerEvents: 'all',
           }}
           className="nodrag nopan"
