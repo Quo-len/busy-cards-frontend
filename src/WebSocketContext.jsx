@@ -1,36 +1,54 @@
-import React, { createContext, useContext, useEffect, useRef } from 'react';
-import * as Y from 'yjs';
-import { WebsocketProvider } from 'y-websocket';
+import React, { createContext, useContext, useEffect, useState, useParams } from 'react';
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
 
-// Create a context for WebSocket and Yjs document
-const WebSocketContext = createContext(null);
+// Create a context for the WebSocket and Yjs document
+const WebSocketContext = createContext({
+  ydoc: null,
+  provider: null,
+});
+
+// Custom hook to use the WebSocket context
+export const useWebSocket = () => {
+  return useContext(WebSocketContext);
+};
 
 // WebSocket Provider Component
-export function WebSocketProvider({ children }) {
-  const ydoc = useRef(new Y.Doc());
-  const provider = useRef(null);
+export const WebSocketProvider = ({ children, mindmapId  }) => {
+  const [ydoc, setYdoc] = useState(null);
+  const [provider, setProvider] = useState(null);
 
   useEffect(() => {
-    // Create WebSocket connection
-    provider.current = new WebsocketProvider(
-      "ws://25.13.98.39:5000",
-      "flow-room",
-      ydoc.current
+
+    if (!mindmapId) return;
+    // Create Yjs document
+    const doc = new Y.Doc();
+    
+    console.log('Websocket: ' + mindmapId);
+
+    // Create WebSocket provider
+    const wsProvider = new WebsocketProvider(
+      "ws://localhost:5000", 
+      `mindmap-${mindmapId}`, 
+      doc
     );
+
+    // Store references
+    setYdoc(doc);
+    setProvider(wsProvider);
 
     // Cleanup function
     return () => {
-      if (provider.current) {
-        provider.current.destroy();
-      }
-      ydoc.current.destroy();
+        console.log('destroy socket: ' + mindmapId);
+        wsProvider.destroy();
+        doc.destroy();
     };
-  }, []);
+  }, [mindmapId]);
 
-  // Value to be provided to consumers
+  // Context value to be shared
   const contextValue = {
-    ydoc: ydoc.current,
-    provider: provider.current
+    ydoc,
+    provider,
   };
 
   return (
@@ -38,13 +56,4 @@ export function WebSocketProvider({ children }) {
       {children}
     </WebSocketContext.Provider>
   );
-}
-
-// Custom hook to use WebSocket context
-export function useWebSocket() {
-  const context = useContext(WebSocketContext);
-  if (!context) {
-    throw new Error('useWebSocket must be used within a WebSocketProvider');
-  }
-  return context;
-}
+};

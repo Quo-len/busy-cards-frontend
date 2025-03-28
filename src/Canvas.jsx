@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import { useParams } from 'react-router-dom';
 import ReactFlow, {
   Background,
   Controls,
@@ -12,14 +13,14 @@ import ReactFlow, {
   BackgroundVariant,
   ConnectionMode,
   useReactFlow,
+  useOnSelectionChange
 } from "reactflow";
 import "reactflow/dist/style.css";
 
-import { WebsocketProvider } from "y-websocket";
-import * as Y from "yjs";
-
+import Sidebar from './Sidebar';
 import CustomNode from './CustomNode';
 import CustomEdge from './CustomEdge';
+import { useWebSocket } from './WebSocketContext';
 import Cursor from './Cursor';
 
 const generateRandomColor = () =>
@@ -56,99 +57,61 @@ const edgeTypes = {
   custom: CustomEdge,
 };
 
-const initialNodes = [
-  { id: '1',  type: 'custom', data: { label: 'Node 1', description: 'First node'  }, position: { x: 100, y: 200 } },
-  { id: '2',  type: 'custom', data: { label: 'Node 2', description: 'Second  node' }, position: { x: 100, y: 300 } },
-  { id: '3',  type: 'custom', data: { label: 'Node 3', description: 'Thr node' }, position: { x: 100, y: 400 } },
-  { id: '4',  type: 'custom', data: { label: 'Node 4', description: 'Fo node' }, position: { x: 100, y: 500 } }
-];
+import { createNodesAndEdges } from './utils';
+
+const { nodes: initialNodes, edges: initialEdges } = createNodesAndEdges(
+  10,
+  10,
+);
+
+// const initialNodes = [
+//   { id: '1',  type: 'custom', data: { label: 'Node 1', description: 'First node'  }, position: { x: 100, y: 200 } },
+//   { id: '2',  type: 'custom', data: { label: 'Node 2', description: 'Second  node' }, position: { x: 100, y: 300 } },
+//   { id: '3',  type: 'custom', data: { label: 'Node 3', description: 'Thr node' }, position: { x: 100, y: 400 } },
+//   { id: '4',  type: 'custom', data: { label: 'Node 4', description: 'Fo node' }, position: { x: 100, y: 500 } }
+// ];
+// const initialEdges = [
+//   { id: 'e1-2', type: 'custom', source: '1', target: '2', },
+//   { id: 'e1-3', type: 'custom', source: '1', target: '3', },
+// ];
 
 export default function Canvas() {
+  const { mindmapId } = useParams();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [cursors, setCursors] = useState(new Map());
   const [selectedNodeId, setSelectedNodeId] = useState(null);
 
-  const ydoc = useRef();
-  const provider = useRef();
+  useEffect(() => {
+    console.log('Current Mindmap ID:', mindmapId);
+    // You can do additional setup or logging here
+  }, [mindmapId]);
+
+  /////
+  const [selectedNodes, setSelectedNodes] = useState([]);
+  const [selectedEdges, setSelectedEdges] = useState([]);
+
+  const onChange = useCallback(({ nodes, edges }) => {
+    setSelectedNodes(nodes.map((node) => node.id));
+    setSelectedEdges(edges.map((edge) => edge.id));
+  }, []);
+ 
+  useOnSelectionChange({
+    onChange,
+  });
+  ///////
+
+  // Use the WebSocket context
+  const { ydoc, provider } = useWebSocket();
+
   const flowRef = useRef(null);
   const userColor = useRef(generateRandomColor());
-
-  useEffect(() => {
-    const doc = new Y.Doc();
-    const wsProvider = new WebsocketProvider(
-      "ws://25.13.98.39:5000",
-      "flow-room",
-      doc
-    );
-    const nodesMap = doc.getMap("nodes");
-    const edgesMap = doc.getMap("edges");
-
-    ydoc.current = doc;
-    provider.current = wsProvider;
-
-    wsProvider.awareness.setLocalState({
-      cursor: null,
-      color: userColor.current,
-      clientId: wsProvider.awareness.clientID
-    });
-
-    wsProvider.awareness.on("change", () => {
-      const states = new Map(
-        wsProvider.awareness.getStates()
-      );
-      setCursors(states);
-    });
-
-    if (nodesMap.size === 0) {
-      initialNodes.forEach((node) => {
-        nodesMap.set(node.id, JSON.parse(JSON.stringify(node)));
-      });
-    }
-
-    nodesMap.observe(() => {
-      const yNodes = Array.from(nodesMap.values());
-      const validNodes = yNodes.map((node) => ({
-        id: node.id,
-        type: node.type || "default",
-        data: node.data,
-        position: {
-          x: node.position.x,
-          y: node.position.y,
-        },
-      }));
-      setNodes(validNodes);
-    });
-
-    edgesMap.observe(() => {
-      const yEdges = Array.from(edgesMap.values());
-      setEdges(yEdges);
-    });
-
-    const initialYNodes = Array.from(nodesMap.values());
-    const validNodes = initialYNodes.map((node) => ({
-      id: node.id,
-      type: node.type || "default",
-      data: node.data,
-      position: {
-        x: node.position.x,
-        y: node.position.y,
-      },
-    }));
-    setNodes(validNodes);
-    setEdges(Array.from(edgesMap.values()));
-
-    return () => {
-      wsProvider.destroy();
-      doc.destroy();
-    };
-  }, []);
 
   const handleNodesChange = useCallback(
     (changes) => {
       onNodesChange(changes);
 
-      if (!ydoc.current) return;
+      if (!ydoc) return;
 
       changes.forEach((change) => {
         if (change.type === "position" ) {
@@ -157,34 +120,32 @@ export default function Canvas() {
             const updatedNode = {
               ...node,
               position: change.position || node.position,
-            //  style: {
-                width: change.width,
-                height: change.height,
-           //  }
+              width: change.width,
+              height: change.height,
             };
-            ydoc.current
-              ?.getMap("nodes")
+            ydoc
+              .getMap("nodes")
               .set(change.id, JSON.parse(JSON.stringify(updatedNode)));
           }
         }
       });
     },
-    [nodes, onNodesChange]
+    [nodes, onNodesChange, ydoc]
   );
 
   const handleEdgesChange = useCallback(
     (changes) => {
       onEdgesChange(changes);
 
-      if (!ydoc.current) return;
+      if (!ydoc) return;
 
       changes.forEach((change) => {
         if (change.type === "remove") {
-          ydoc.current?.getMap("edges").delete(change.id);
+          ydoc.getMap("edges").delete(change.id);
         }
       });
     },
-    [onEdgesChange]
+    [onEdgesChange, ydoc]
   );
 
   const { getNodes, getEdges } = useReactFlow();
@@ -206,6 +167,7 @@ export default function Canvas() {
           (edge.source === connection.source && edge.target === connection.target) ||
           (edge.source === connection.target && edge.target === connection.source)
       );
+      
       if (existingEdge) return false;
 
       // Prevent cycles
@@ -213,14 +175,16 @@ export default function Canvas() {
           isNodeDescendant(targetNode, sourceNode, nodes, edges)) return false;
 
       const incomers = getIncomers(targetNode, nodes, edges);
-      if (incomers > 0) return false;
+      if (incomers.length > 0) return false;
       
-      return true
+      return true;
     },
-    [getNodes, getEdges],
+    [getNodes, getEdges]
   );
 
-  const addNewNode = () => {
+  const addNewNode = useCallback(() => {
+    if (!ydoc) return;
+
     const id = `node-${Date.now()}`;
     const newNode = {
       id,
@@ -233,11 +197,10 @@ export default function Canvas() {
       },
       type: 'custom',
     };
-    if (ydoc.current) {
-      ydoc.current.getMap("nodes").set(newNode.id, newNode);
-    }
+    
+    ydoc.getMap("nodes").set(newNode.id, newNode);
     setNodes((nds) => nds.concat(newNode));
-  };
+  }, [ydoc, setNodes]);
 
   const onReconnect = useCallback(
     (oldEdge, newConnection) =>
@@ -246,7 +209,7 @@ export default function Canvas() {
   );
 
   const onConnect = useCallback((connection) => {
-    if (!connection.source || !connection.target) return;
+    if (!connection.source || !connection.target || !ydoc) return;
 
     const newEdge = {
       id: `e${connection.source}-${connection.target}`,
@@ -257,17 +220,12 @@ export default function Canvas() {
       targetHandle: connection.targetHandle || undefined,
     }
 
-    if (ydoc.current) {
-      ydoc.current.getMap("edges").set(newEdge.id, newEdge);
-    }
-
+    ydoc.getMap("edges").set(newEdge.id, newEdge);
     setEdges((eds) => addEdge(connection, eds));
-    },
-    [setEdges]
-  );
+  }, [ydoc, setEdges]);
 
   const handleMouseMove = useCallback((e) => {
-    if (!provider.current?.awareness || !flowRef.current) return;
+    if (!provider?.awareness || !flowRef.current) return;
 
     const bounds = flowRef.current.getBoundingClientRect();
     const cursor = {
@@ -275,22 +233,101 @@ export default function Canvas() {
       y: e.clientY - bounds.top,
     };
 
-    provider.current.awareness.setLocalState({
+    provider.awareness.setLocalState({
       cursor,
       color: userColor.current,
-      clientId: provider.current.awareness.clientID,
+      clientId: provider.awareness.clientID,
     });
-  }, []);
+  }, [provider]);
 
   const handleMouseLeave = useCallback(() => {
-    if (!provider.current?.awareness) return;
+    if (!provider?.awareness) return;
 
-    provider.current.awareness.setLocalState({
+    provider.awareness.setLocalState({
       cursor: null,
       color: userColor.current,
-      clientId: provider.current.awareness.clientID,
+      clientId: provider.awareness.clientID,
     });
-  }, []);
+  }, [provider]);
+
+  useEffect(() => {
+    if (!ydoc || !provider) return;
+
+    const nodesMap = ydoc.getMap("nodes");
+    const edgesMap = ydoc.getMap("edges");
+
+    if (nodesMap.size === 0) {
+      initialNodes.forEach(node => 
+        nodesMap.set(node.id, JSON.parse(JSON.stringify(node)))
+      );
+    }
+  
+    if (edgesMap.size === 0) {
+      initialEdges.forEach(edge => 
+        edgesMap.set(edge.id, JSON.parse(JSON.stringify(edge)))
+      );
+    }
+
+    provider.awareness.setLocalState({
+      cursor: null,
+      color: userColor.current,
+      clientId: provider.awareness.clientID
+    });
+
+    provider.awareness.on("change", () => {
+      const states = new Map(
+        provider.awareness.getStates()
+      );
+      setCursors(states);
+    });
+
+    if (nodesMap.size === 0) {
+      initialNodes.forEach((node) => {
+        nodesMap.set(node.id, JSON.parse(JSON.stringify(node)));
+      });
+    }
+
+    const nodesObserver = () => {
+      const yNodes = Array.from(nodesMap.values());
+      const validNodes = yNodes.map((node) => ({
+        id: node.id,
+        type: node.type || "default",
+        data: node.data,
+        position: {
+          x: node.position.x,
+          y: node.position.y,
+        },
+      }));
+      setNodes(validNodes);
+    };
+
+    const edgesObserver = () => {
+      const yEdges = Array.from(edgesMap.values());
+      setEdges(yEdges);
+    };
+
+    nodesMap.observe(nodesObserver);
+    edgesMap.observe(edgesObserver);
+
+    const initialYNodes = Array.from(nodesMap.values());
+    const validNodes = initialYNodes.map((node) => ({
+      id: node.id,
+      type: node.type || "default",
+      data: node.data,
+      position: {
+        x: node.position.x,
+        y: node.position.y,
+      },
+    }));
+    setNodes(validNodes);
+    setEdges(Array.from(edgesMap.values()));
+
+    // Cleanup observers
+    return () => {
+      nodesMap.unobserve(nodesObserver);
+      edgesMap.unobserve(edgesObserver);
+    };
+  }, [ydoc, provider, setNodes, setEdges]);
 
   const handleNodeClick = useCallback((event, node) => {
     // Prevent default selection behavior
@@ -302,6 +339,34 @@ export default function Canvas() {
     );
   }, []);
 
+  const updatePos = useCallback(() => {
+    if (!ydoc) return;
+  
+    const nodesMap = ydoc.getMap("nodes");
+  
+    setNodes((nds) => {
+      return nds.map((node) => {
+        const newPosition = {
+          x: Math.random() * 1500,
+          y: Math.random() * 1500,
+        };
+  
+        // Update the node in the Yjs shared document
+        const updatedNode = {
+          ...node,
+          position: newPosition,
+        };
+  
+        nodesMap.set(node.id, updatedNode);
+  
+        return {
+          ...node,
+          position: newPosition,
+        };
+      });
+    });
+  }, [ydoc]);
+
   return (
     <div 
       style={{ flex: 1, 
@@ -311,6 +376,12 @@ export default function Canvas() {
       onMouseLeave={handleMouseLeave}
       ref={flowRef}
     >
+        <button
+          onClick={updatePos}
+          style={{ position: 'absolute', right: 10, top: 30, zIndex: 4 }}
+        >
+          change pos
+        </button>
         <button 
             onClick={addNewNode} 
             style={{ 
@@ -375,22 +446,25 @@ export default function Canvas() {
           maskColor="rgb(0,0,0, 0.1)"
         />
       </ReactFlow>
-      {Array.from(cursors.entries()).map(([clientId, state]) => {
-        if (
-          !state.cursor ||
-          clientId === provider.current?.awareness?.clientID
-        ) {
-          return null;
-        }
-        return (
-          <Cursor
-            key={clientId}
-            x={state.cursor.x}
-            y={state.cursor.y}
-            color={state.color}
-          />
-        );
-      })}
+      <Sidebar />
+      <div>
+        {Array.from(cursors.entries()).map(([clientId, state]) => {
+          if (
+            !state.cursor ||
+            clientId === provider.current?.awareness?.clientID
+          ) {
+            return null;
+          }
+          return (
+            <Cursor
+              key={clientId}
+              x={state.cursor.x}
+              y={state.cursor.y}
+              color={state.color}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

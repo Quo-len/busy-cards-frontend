@@ -34,6 +34,7 @@ const CustomNode = ({ id, data, selected }) => {
     alignItems: 'center', 
     justifyContent: 'center',
     wordBreak: 'break-word',
+    
     }}>
       {data.label}
   </div>
