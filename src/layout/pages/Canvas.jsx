@@ -17,11 +17,13 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 
+import { v4 as uuidv4 } from "uuid";
+
 import Sidebar from "../../components/components/Sidebar";
 import CustomNode from "../../components/components/CustomNode";
 import CustomEdge from "../../components/components/CustomEdge";
 import { useWebSocket } from "../../utils/WebSocketContext";
-import Cursor from "../../components/components/Cursor";
+import * as api from "../../api";
 
 const generateRandomColor = () => "#" + Math.floor(Math.random() * 16777215).toString(16);
 
@@ -70,15 +72,25 @@ const { nodes: initialNodes, edges: initialEdges } = createNodesAndEdges(15, 10)
 
 export default function Canvas() {
 	const { mindmapId } = useParams();
+	const [mindmap, setMindmap] = useState(null);
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-	const [cursors, setCursors] = useState(new Map());
 	const [selectedNodeId, setSelectedNodeId] = useState(null);
 
 	useEffect(() => {
-		console.log("Current Mindmap ID:", mindmapId);
-		// You can do additional setup or logging here
+		const fetchMindmap = async () => {
+			const response = await api.getMindmap(mindmapId);
+			setMindmap(response);
+		};
+
+		if (mindmapId) fetchMindmap();
 	}, [mindmapId]);
+
+	useEffect(() => {
+		if (mindmap && mindmap.title) {
+			document.title = `${mindmap.title} - Busy-cards`;
+		}
+	}, [mindmap]);
 
 	/////
 	const [selectedNodes, setSelectedNodes] = useState([]);
@@ -179,7 +191,7 @@ export default function Canvas() {
 	const addNewNode = useCallback(() => {
 		if (!ydoc) return;
 
-		const id = `node-${Date.now()}`;
+		const id = uuidv4();
 		const newNode = {
 			id,
 			position: {
@@ -204,9 +216,9 @@ export default function Canvas() {
 	const onConnect = useCallback(
 		(connection) => {
 			if (!connection.source || !connection.target || !ydoc) return;
-
+			const id = uuidv4();
 			const newEdge = {
-				id: `e${connection.source}-${connection.target}`,
+				id,
 				type: "custom",
 				source: connection.source,
 				target: connection.target,
@@ -219,35 +231,6 @@ export default function Canvas() {
 		},
 		[ydoc, setEdges]
 	);
-
-	const handleMouseMove = useCallback(
-		(e) => {
-			if (!provider?.awareness || !flowRef.current) return;
-
-			const bounds = flowRef.current.getBoundingClientRect();
-			const cursor = {
-				x: e.clientX - bounds.left,
-				y: e.clientY - bounds.top,
-			};
-
-			provider.awareness.setLocalState({
-				cursor,
-				color: userColor.current,
-				clientId: provider.awareness.clientID,
-			});
-		},
-		[provider]
-	);
-
-	const handleMouseLeave = useCallback(() => {
-		if (!provider?.awareness) return;
-
-		provider.awareness.setLocalState({
-			cursor: null,
-			color: userColor.current,
-			clientId: provider.awareness.clientID,
-		});
-	}, [provider]);
 
 	useEffect(() => {
 		if (!ydoc || !provider) return;
@@ -262,17 +245,6 @@ export default function Canvas() {
 		if (edgesMap.size === 0) {
 			initialEdges.forEach((edge) => edgesMap.set(edge.id, JSON.parse(JSON.stringify(edge))));
 		}
-
-		provider.awareness.setLocalState({
-			cursor: null,
-			color: userColor.current,
-			clientId: provider.awareness.clientID,
-		});
-
-		provider.awareness.on("change", () => {
-			const states = new Map(provider.awareness.getStates());
-			setCursors(states);
-		});
 
 		if (nodesMap.size === 0) {
 			initialNodes.forEach((node) => {
@@ -359,12 +331,7 @@ export default function Canvas() {
 	}, [ydoc]);
 
 	return (
-		<div
-			style={{ flex: 1, position: "relative", overflow: "hidden" }}
-			onMouseMove={handleMouseMove}
-			onMouseLeave={handleMouseLeave}
-			ref={flowRef}
-		>
+		<div style={{ flex: 1, position: "relative", overflow: "hidden" }} ref={flowRef}>
 			<button onClick={updatePos} style={{ position: "absolute", right: 10, top: 30, zIndex: 4 }}>
 				change pos
 			</button>
@@ -392,7 +359,6 @@ export default function Canvas() {
 				onConnect={onConnect}
 				nodeTypes={nodeTypes}
 				edgeTypes={edgeTypes}
-				onNodeDrag={handleMouseMove}
 				onNodeClick={handleNodeClick}
 				fitView
 				snapToGrid={true}
@@ -435,24 +401,6 @@ export default function Canvas() {
 				/>
 			</ReactFlow>
 			<Sidebar />
-			{/* <div>
-        {Array.from(cursors.entries()).map(([clientId, state]) => {
-          if (
-            !state.cursor ||
-            clientId === provider.current?.awareness?.clientID
-          ) {
-            return null;
-          }
-          return (
-            <Cursor
-              key={clientId}
-              x={state.cursor.x}
-              y={state.cursor.y}
-              color={state.color}
-            />
-          );
-        })}
-      </div> */}
 		</div>
 	);
 }

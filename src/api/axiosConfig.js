@@ -1,8 +1,9 @@
-import axios from './axiosConfig';
+import axios from 'axios';
+import { getAuthTokenFromCookies } from './../utils/utils';
 
 // Axios instance with base configuration
 const axiosInstance = axios.create({
-	baseURL: 'https://api.example.com/', // Replace with your base URL
+	baseURL: import.meta.env.DEV ? '/api/' : 'https://api.example.com/', // Replace with your base URL
 	timeout: 10000, // Timeout after 10 seconds
 	headers: {
 		'Content-Type': 'application/json',
@@ -12,7 +13,7 @@ const axiosInstance = axios.create({
 // Add request interceptor to include token in headers (if available)
 axiosInstance.interceptors.request.use(
 	(config) => {
-		const token = localStorage.getItem('authToken');
+		const token = getAuthTokenFromCookies();
 		if (token) {
 			config.headers['Authorization'] = `Bearer ${token}`;
 		}
@@ -30,6 +31,7 @@ axiosInstance.interceptors.response.use(
 		// Handle specific errors here (e.g., 401, 500, etc.)
 		if (error.response && error.response.status === 401) {
 			// Handle unauthorized access (e.g., redirect to login)
+			alert('test');
 			console.error('Unauthorized access! Please log in.');
 		}
 		return Promise.reject(error);

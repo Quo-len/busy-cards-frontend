@@ -33,3 +33,10 @@ export function createNodesAndEdges(xNodes = 10, yNodes = 10) {
 
 	return { nodes, edges };
 }
+
+export function getAuthTokenFromCookies() {
+	const cookieString = document.cookie;
+	const cookies = cookieString.split("; ");
+	const authTokenCookie = cookies.find((row) => row.startsWith("authToken="));
+	return authTokenCookie ? authTokenCookie.split("=")[1] : null;
+}

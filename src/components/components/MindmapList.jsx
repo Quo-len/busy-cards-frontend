@@ -1,51 +1,51 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import * as api from "./../../api";
+import MindmapCard from "./MindmapCard";
 
-const MindmapList = () => {
+const categoryEndpoints = {
+	my: "/api/mindmaps/my",
+	shared: "/api/mindmaps/shared",
+	favorites: "/api/mindmaps/favorites",
+	public: "/api/mindmaps/public",
+};
+
+const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
 	const [mindmaps, setMindmaps] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const navigate = useNavigate();
 
-	// Pagination state
 	const [currentPage, setCurrentPage] = useState(1);
-	const [totalPages, setTotalPages] = useState(0);
 	const [itemsPerPage, setItemsPerPage] = useState(10);
 	const [totalMindmaps, setTotalMindmaps] = useState(0);
+	const [totalPages, setTotalPages] = useState(0);
 
-	// Sorting state
 	const [sortBy, setSortBy] = useState("lastModified");
 	const [sortOrder, setSortOrder] = useState("desc");
 
 	useEffect(() => {
 		fetchMindmaps();
-	}, [currentPage, itemsPerPage, sortBy, sortOrder]);
+	}, [categoryType, refreshTrigger]);
 
 	const fetchMindmaps = async () => {
 		setLoading(true);
+		setError(null);
 		try {
-			const response = await axios.get("/api/mindmaps", {
-				params: {
-					page: currentPage,
-					limit: itemsPerPage,
-					sortBy: sortBy,
-					order: sortOrder,
-				},
-			});
+			const response = await api.getPaginatedMindmaps(currentPage, itemsPerPage, sortBy, sortOrder);
 
-			setMindmaps(response.data.mindmaps);
-			setTotalPages(response.data.pagination.totalPages);
-			setTotalMindmaps(response.data.pagination.totalMindmaps);
+			setMindmaps(response.mindmaps);
+
+			setCurrentPage(response.pagination.currentPage);
+			setItemsPerPage(response.pagination.itemsPerPage);
+			setTotalPages(response.pagination.totalPages);
+			setTotalMindmaps(response.pagination.totalMindmaps);
+
 			setLoading(false);
 		} catch (err) {
 			setError("Failed to fetch mindmaps");
 			setLoading(false);
 		}
-	};
-
-	const handleMindmapClick = (mindmapId) => {
-		navigate(`/mindmap/${mindmapId}`);
 	};
 
 	const handleCreateMindmap = async () => {
@@ -83,7 +83,7 @@ const MindmapList = () => {
 		setCurrentPage(1); // Reset to first page when changing items per page
 	};
 
-	if (loading && mindmaps.length === 0) return <div>Loading mindmaps...</div>;
+	if (loading && mindmaps.length === 0) return <div>Заватнаження інтелект-карт...</div>;
 	if (error) return <div>{error}</div>;
 
 	return (
@@ -118,7 +118,7 @@ const MindmapList = () => {
 						cursor: "pointer",
 					}}
 				>
-					Create New Mindmap
+					Створити нову інтелект-карту
 				</button>
 			</div>
 
@@ -174,7 +174,7 @@ const MindmapList = () => {
 			</div>
 
 			{mindmaps.length === 0 ? (
-				<div>No mindmaps found. Create your first mindmap!</div>
+				<div>Не знайдено жодної інтелект-карти. Створіть свою першу інтелект-карту!</div>
 			) : (
 				<>
 					<div
@@ -186,68 +186,7 @@ const MindmapList = () => {
 						}}
 					>
 						{mindmaps.map((mindmap) => (
-							<div
-								key={mindmap._id}
-								onClick={() => handleMindmapClick(mindmap._id)}
-								style={{
-									border: "1px solid #ddd",
-									borderRadius: "8px",
-									padding: "15px",
-									cursor: "pointer",
-									transition: "all 0.2s ease",
-									display: "flex",
-									flexDirection: "column",
-									backgroundColor: "#ffffff",
-								}}
-								onMouseEnter={(e) => {
-									e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
-									e.currentTarget.style.backgroundColor = "#f9f9f9";
-								}}
-								onMouseLeave={(e) => {
-									e.currentTarget.style.boxShadow = "none";
-									e.currentTarget.style.backgroundColor = "#ffffff";
-								}}
-							>
-								<div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-									<h3 style={{ margin: "0 0 8px 0" }}>{mindmap.title || "Untitled Mindmap"}</h3>
-
-									<div
-										style={{
-											display: "flex",
-											fontSize: "0.8rem",
-											color: "#888",
-											flexDirection: "column",
-											alignItems: "flex-end",
-										}}
-									>
-										<div>Created: {new Date(mindmap.createdAt).toLocaleDateString()}</div>
-										{mindmap.lastModified && <div>Modified: {new Date(mindmap.lastModified).toLocaleDateString()}</div>}
-									</div>
-								</div>
-
-								<p style={{ margin: "0 0 10px 0", color: "#555" }}>{mindmap.description || "No description"}</p>
-
-								{mindmap.participants && mindmap.participants.length > 0 && (
-									<div
-										style={{
-											marginTop: "8px",
-											fontSize: "0.85rem",
-											color: "#666",
-											display: "flex",
-											alignItems: "center",
-										}}
-									>
-										<span style={{ marginRight: "5px" }}>Shared with:</span>
-										{mindmap.participants.slice(0, 3).map((participant, index) => (
-											<span key={index} style={{ marginRight: "5px" }}>
-												{participant.user?.username || "Unknown user"}
-												{index < Math.min(mindmap.participants.length, 3) - 1 ? "," : ""}
-											</span>
-										))}
-										{mindmap.participants.length > 3 && <span>and {mindmap.participants.length - 3} more</span>}
-									</div>
-								)}
-							</div>
+							<MindmapCard key={mindmap._id} onEdit={() => onEditMindmap(mindmap)} mindmap={mindmap} />
 						))}
 					</div>
 
