@@ -10,6 +10,16 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 		navigate(`/mindmap/${mindmap._id}`);
 	};
 
+	const getParticipantWord = (count) => {
+		const lastDigit = count % 10;
+		const lastTwoDigits = count % 100;
+
+		if (lastTwoDigits >= 11 && lastTwoDigits <= 14) return "учасників";
+		if (lastDigit === 1) return "учасник";
+		if (lastDigit >= 2 && lastDigit <= 4) return "учасники";
+		return "учасників";
+	};
+
 	return (
 		<div
 			onClick={onEdit}
@@ -34,12 +44,10 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 			}}
 		>
 			<div style={{ display: "flex", justifyContent: "space-between", alignItems: "stretch", gap: "20px" }}>
-				{/* Left side - Mindmap */}
 				<div style={{ width: "100%", height: "200px", minWidth: "200px" }}>
 					<StaticMindmap nodes={mindmap.nodes} edges={mindmap.edges} panOnDrag={false} />
 				</div>
 
-				{/* Right side - Information */}
 				<div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
 					<div>
 						<h3 style={{ margin: "0 0 8px 0" }}>{mindmap.title || "Untitled Mindmap"}</h3>
@@ -59,26 +67,13 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 							{mindmap.lastModified && <div>Modified: {new Date(mindmap.lastModified).toLocaleDateString()}</div>}
 						</div>
 
-						{mindmap.participants && mindmap.participants.length > 0 && (
-							<div
-								style={{
-									marginTop: "8px",
-									fontSize: "0.85rem",
-									color: "#666",
-									display: "flex",
-									alignItems: "center",
-								}}
-							>
-								<span style={{ marginRight: "5px" }}>Shared with:</span>
-								{mindmap.participants.slice(0, 3).map((participant, index) => (
-									<span key={index} style={{ marginRight: "5px" }}>
-										{participant.user?.username || "Unknown user"}
-										{index < Math.min(mindmap.participants.length, 3) - 1 ? "," : ""}
-									</span>
-								))}
-								{mindmap.participants.length > 3 && <span>and {mindmap.participants.length - 3} more</span>}
-							</div>
-						)}
+						<div>{mindmap.isPublic ? "Загальнодоступна" : "Приватна"}</div>
+
+						<div>
+							{mindmap.participants.length !== 0
+								? `Спільна робота: ${mindmap.participants.length} ${getParticipantWord(mindmap.participants.length)}`
+								: "Учасники відсутні"}
+						</div>
 					</div>
 				</div>
 			</div>

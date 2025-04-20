@@ -12,7 +12,7 @@ export const getPaginatedMindmaps = async (currentPage, itemsPerPage, sortBy, so
 		});
 		return response.data;
 	} catch (error) {
-		console.error('Error fetching products:', error);
+		console.error('Error fetching mindmaps: ', error);
 		throw error;
 	}
 };
@@ -22,7 +22,7 @@ export const getMindmap = async (id) => {
 		const response = await axios.get(`/mindmaps/${id}`);
 		return response.data;
 	} catch (error) {
-		console.error('', error);
+		console.error('Error fetching mindmap', error);
 		throw error;
 	}
 };
@@ -32,30 +32,17 @@ export const updateMindmap = async (id, data) => {
 		const response = await axios.patch(`/mindmaps/${id}`, data);
 		return response.data;
 	} catch (error) {
-		console.error('', error);
+		console.error('Error updating mindmap', error);
 		throw error;
 	}
 };
 
-// export const deleteMindmap = async () => {
-// 	try {
-// 		const response = await axios.get('/mindmaps', {
-// 			params: {},
-// 		});
-// 		return response.data;
-// 	} catch (error) {
-// 		console.error('', error);
-// 		throw error;
-// 	}
-// };
-
-/*
-    const response = await axios.get("/mindmaps", {
-        params: {
-            page: currentPage,
-            limit: itemsPerPage,
-            sortBy: sortBy,
-            order: sortOrder,
-        },
-    });
-*/
+export const deleteMindmap = async () => {
+	try {
+		const response = await axios.delete('/mindmaps');
+		return response.data;
+	} catch (error) {
+		console.error('Error deleting mindmap', error);
+		throw error;
+	}
+};

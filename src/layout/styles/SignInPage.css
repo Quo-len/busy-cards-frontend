@@ -1,0 +1,166 @@
+.signin-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	padding: 20px;
+	background-color: #f5f7fa;
+	font-family: "Roboto", "Arial", sans-serif;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
+.signin-card {
+	width: 100%;
+	max-width: 450px;
+	padding: 40px;
+	background-color: white;
+	border-radius: 12px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+	margin: 0 auto;
+}
+
+.signin-title {
+	font-size: 28px;
+	font-weight: 700;
+	color: #333;
+	margin-bottom: 20px;
+	text-align: center;
+}
+
+.activation-message {
+	padding: 15px;
+	background-color: #e7f3ff;
+	border-radius: 8px;
+	color: #0066cc;
+	margin-bottom: 20px;
+	font-size: 14px;
+	text-align: center;
+}
+
+.signin-subtitle {
+	text-align: center;
+	margin-bottom: 30px;
+}
+
+.signin-subtitle p {
+	margin: 5px 0;
+	color: #444;
+}
+
+.secondary-text {
+	font-size: 14px;
+	color: #777;
+}
+
+.signin-form {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	width: 100%;
+}
+
+.form-group {
+	position: relative;
+	width: 100%;
+}
+
+.form-input {
+	width: 100%;
+	padding: 15px;
+	border: 1px solid #ddd;
+	border-radius: 8px;
+	font-size: 16px;
+	transition: border 0.3s ease;
+}
+
+.form-input:focus {
+	outline: none;
+	border-color: #4a90e2;
+	box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.input-error {
+	border-color: #e74c3c;
+}
+
+.error-message {
+	color: #e74c3c;
+	font-size: 12px;
+	margin-top: 5px;
+	display: block;
+}
+
+.password-group {
+	position: relative;
+}
+
+.password-toggle {
+	position: absolute;
+	right: 15px;
+	top: 15px;
+	background: none;
+	border: none;
+	color: #777;
+	cursor: pointer;
+	font-size: 14px;
+	padding: 0;
+}
+
+.password-toggle:hover {
+	color: #333;
+}
+
+.signin-button {
+	width: 100%;
+	padding: 15px;
+	background-color: #4a90e2;
+	color: white;
+	border: none;
+	border-radius: 8px;
+	font-size: 16px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.signin-button:hover {
+	background-color: #3d7ec9;
+}
+
+.signup-prompt {
+	text-align: center;
+	margin-top: 25px;
+}
+
+.signup-link {
+	color: #4a90e2;
+	cursor: pointer;
+	font-weight: 500;
+}
+
+.signup-link:hover {
+	text-decoration: underline;
+}
+
+.signup-text {
+	margin-top: 5px;
+	color: #777;
+	font-size: 14px;
+}
+
+@media (max-width: 500px) {
+	.signin-card {
+		padding: 25px;
+	}
+
+	.signin-title {
+		font-size: 24px;
+	}
+
+	.form-input {
+		padding: 12px;
+	}
+}

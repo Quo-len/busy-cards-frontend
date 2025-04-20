@@ -11,46 +11,49 @@ import ProfilePage from "./layout/pages/ProfilePage";
 import SignInPage from "./layout/pages/SignInPage";
 import SignUpPage from "./layout/pages/SignUpPage";
 import SettingsPage from "./layout/pages/SettingsPage";
+import { AuthProvider } from "./utils/authContext";
 
 function App() {
 	return (
-		<Router>
-			<div
-				style={{
-					display: "flex",
-					flexDirection: "column",
-					height: "100vh",
-					width: "100vw",
-					overflow: "hidden",
-					position: "fixed",
-					top: 0,
-					left: 0,
-					right: 0,
-					bottom: 0,
-				}}
-			>
-				<Header />
+		<AuthProvider>
+			<Router>
 				<div
 					style={{
 						display: "flex",
-						flex: 1,
+						flexDirection: "column",
+						height: "100vh",
+						width: "100vw",
 						overflow: "hidden",
-						position: "relative",
+						position: "fixed",
+						top: 0,
+						left: 0,
+						right: 0,
+						bottom: 0,
 					}}
 				>
-					<Routes>
-						<Route path="/" element={<HomePage />} />
-						<Route path="/signin/" element={<SignInPage />} />
-						<Route path="/signup/" element={<SignUpPage />} />
-						<Route path="/profile/:userId" element={<ProfilePage />} />
-						<Route path="/settings/" element={<SettingsPage />} />
-						<Route path="/mindmap/:mindmapId" element={<MindmapCanvasWrapper />} />
-						<Route path="*" element={<NotFoundPage />} />
-					</Routes>
+					<Header />
+					<div
+						style={{
+							display: "flex",
+							flex: 1,
+							overflow: "hidden",
+							position: "relative",
+						}}
+					>
+						<Routes>
+							<Route path="/" element={<HomePage />} />
+							<Route path="/signin/" element={<SignInPage />} />
+							<Route path="/signup/" element={<SignUpPage />} />
+							<Route path="/profile/:userId" element={<ProfilePage />} />
+							<Route path="/settings/" element={<SettingsPage />} />
+							<Route path="/mindmap/:mindmapId" element={<MindmapCanvasWrapper />} />
+							<Route path="*" element={<NotFoundPage />} />
+						</Routes>
+					</div>
+					<Footer />
 				</div>
-				<Footer />
-			</div>
-		</Router>
+			</Router>
+		</AuthProvider>
 	);
 }
 

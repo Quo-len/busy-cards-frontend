@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import * as api from "./../../api";
-import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import { useAuth } from "./../../utils/authContext";
+import "./../styles/SignInPage.css";
 
 const SignInPage = () => {
 	const navigator = useNavigate();
+	const { login } = useAuth();
 
 	const [passwordVisible, setPasswordVisible] = useState(false);
 
@@ -26,11 +28,21 @@ const SignInPage = () => {
 
 	const onSubmit = async (data) => {
 		const { email, password } = data;
-		const token = await api.login(email, password);
-		Cookies.set("authToken", token, {
-			expires: 7,
-			path: "/",
-		});
+		try {
+			const token = await api.login(email, password);
+			if (token) {
+				Cookies.set("authToken", token, {
+					expires: 7,
+					path: "/",
+				});
+				login();
+				navigator("/");
+			} else {
+				console.error("Login failed. No token received.");
+			}
+		} catch (error) {
+			console.error("Error during login:", error);
+		}
 	};
 
 	const togglePasswordVisibility = () => {
@@ -38,48 +50,65 @@ const SignInPage = () => {
 	};
 
 	return (
-		<div>
-			<form onSubmit={handleSubmit(onSubmit)}>
-				<div>Увійдіть</div>
-				{isActivated && <div>Ваш обліковий запис активовано. Увійдіть, щоб почати серйозну роботу над мапуванням.</div>}
-				<div>Зареєструйтеся та станьте частиною нашої спільноти.</div>
-				<div>З поверненням!</div>
-				<input
-					type="email"
-					className="email-input"
-					placeholder="example@example.com"
-					{...register("email", {
-						required: "Поле пошти - обов'якове",
-					})}
-				/>
-				{errors.email && <span className="error-message">{errors.email.message}</span>}
-				<input
-					type={passwordVisible ? "text" : "password"}
-					className="password-input"
-					placeholder="Пароль"
-					{...register("password", {
-						required: "Пароль обов'язковий",
-						minLength: {
-							value: 6,
-							message: "Пароль повинен містити щонайменше 6 символів",
-						},
-					})}
-				/>
-				<button type="button" onClick={togglePasswordVisibility} className="password-toggle">
-					{passwordVisible ? "Приховати" : "Показати"}
-				</button>
-				<div>
-					<div
-						onClick={() => {
-							navigator("/signup");
-						}}
-					>
-						Ще не маєте облікового запису?
+		<div className="signin-container">
+			<div className="signin-card">
+				<h1 className="signin-title">Увійдіть</h1>
+
+				{isActivated && (
+					<div className="activation-message">
+						Ваш обліковий запис активовано. Увійдіть, щоб почати серйозну роботу над мапуванням.
 					</div>
-					<div>Зареєструйтеся зараз!</div>
+				)}
+
+				<div className="signin-subtitle">
+					<p>З поверненням!</p>
+					<p className="secondary-text">Зареєструйтеся та станьте частиною нашої спільноти.</p>
 				</div>
-				<button>Увійти</button>
-			</form>
+
+				<form onSubmit={handleSubmit(onSubmit)} className="signin-form">
+					<div className="form-group">
+						<input
+							type="email"
+							className={`form-input ${errors.email ? "input-error" : ""}`}
+							placeholder="example@example.com"
+							{...register("email", {
+								required: "Поле пошти обов'язкове",
+							})}
+						/>
+						{errors.email && <span className="error-message">{errors.email.message}</span>}
+					</div>
+
+					<div className="form-group password-group">
+						<input
+							type={passwordVisible ? "text" : "password"}
+							className={`form-input ${errors.password ? "input-error" : ""}`}
+							placeholder="Пароль"
+							{...register("password", {
+								required: "Пароль обов'язковий",
+								minLength: {
+									value: 5,
+									message: "Пароль повинен містити щонайменше 6 символів",
+								},
+							})}
+						/>
+						<button type="button" onClick={togglePasswordVisibility} className="password-toggle">
+							{passwordVisible ? "Приховати" : "Показати"}
+						</button>
+						{errors.password && <span className="error-message">{errors.password.message}</span>}
+					</div>
+
+					<button type="submit" className="signin-button">
+						Увійти
+					</button>
+				</form>
+
+				<div className="signup-prompt">
+					<span className="signup-text">Ще не маєте облікового запису?</span>
+					<p className="signup-link" onClick={() => navigator("/signup")}>
+						Зареєструйтеся зараз!
+					</p>
+				</div>
+			</div>
 		</div>
 	);
 };

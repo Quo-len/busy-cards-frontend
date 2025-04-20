@@ -5,12 +5,14 @@ import ParticipantList from "./ParticipantList";
 const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 	const [title, setTitle] = useState(mindmap.title);
 	const [description, setDescription] = useState(mindmap.description || "");
+	const [isPublic, setIsPublic] = useState(mindmap.isPublic || false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
 		setTitle(mindmap.title);
 		setDescription(mindmap.description);
+		setIsPublic(mindmap.isPublic);
 	}, [mindmap]);
 
 	const handleSubmit = async (e) => {
@@ -19,7 +21,7 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 		setError(null);
 
 		try {
-			const response = await api.updateMindmap(mindmap._id, { title, description });
+			const response = await api.updateMindmap(mindmap.id, { title, description, isPublic });
 
 			if (onSave) onSave(response.data);
 		} catch (err) {
@@ -73,9 +75,11 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 
 				{error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
 
-				<div>
-					<div>Загальнодоступна?</div>
-					<input type="checkbox" />
+				<div style={{ marginBottom: "10px" }}>
+					<label>
+						<input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />{" "}
+						Загальнодоступна?
+					</label>
 				</div>
 
 				<div>

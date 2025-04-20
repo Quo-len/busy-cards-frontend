@@ -27,7 +27,7 @@ export const addParticipant = async (mindmapId, userId, accessLevel = "Гляд�
 	}
 };
 
-export const removeParticipant = async (mindmapId, userId) => {
+export const deleteParticipant = async (mindmapId, userId) => {
 	try {
 		const response = await axios.delete(`/participants/${mindmapId}/${userId}`, {});
 		return response.data;

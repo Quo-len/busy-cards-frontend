@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { getAuthTokenFromCookies } from './../utils/utils';
+import { getAuthTokenFromCookies, logout } from './../utils/utils';
+import { useNavigate } from 'react-router-dom';
 
 // Axios instance with base configuration
 const axiosInstance = axios.create({
@@ -28,11 +29,21 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
 	(response) => response,
 	(error) => {
-		// Handle specific errors here (e.g., 401, 500, etc.)
-		if (error.response && error.response.status === 401) {
-			// Handle unauthorized access (e.g., redirect to login)
-			alert('test');
-			console.error('Unauthorized access! Please log in.');
+		const { status, data } = error.response;
+
+		if (status === 401 && data.message === 'Token expired') {
+			logout();
+			alert('Session expired. Please log in again.');
+		}
+
+		if (status === 401 && data.message?.startsWith('Token is not valid')) {
+			logout();
+			alert('Invalid token. Please log in again.');
+		}
+
+		if (status === 401 && data) {
+			console.error(data.message);
+			alert(data.message);
 		}
 		return Promise.reject(error);
 	}

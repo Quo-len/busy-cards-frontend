@@ -1,50 +1,46 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./../../utils/authContext";
+import "./../styles/Header.css";
 
 const Header = () => {
 	const navigate = useNavigate();
+	const { user, isLoggedIn, logoutUser } = useAuth();
+
+	const handleLogout = () => {
+		logoutUser();
+	};
+
+	const handleSignIn = () => {
+		navigate("/signin");
+	};
+
+	const handleSettings = () => {
+		navigate("/settings");
+	};
 
 	return (
-		<header
-			style={{
-				display: "flex",
-				justifyContent: "space-between",
-				alignItems: "center",
-				padding: "10px 20px",
-				backgroundColor: "#f0f0f0",
-				borderBottom: "1px solid #e0e0e0",
-				height: "50px",
-				width: "100%",
-				boxSizing: "border-box",
-			}}
-		>
-			<div
-				onClick={() => {
-					navigate("/");
-				}}
-				style={{ fontWeight: "bold", fontSize: "1.2rem", cursor: "pointer" }}
-			>
+		<header className="header">
+			<div className="logo" onClick={() => navigate("/")}>
 				Busy-Cards
 			</div>
-			<nav>
-				<ul
-					style={{
-						display: "flex",
-						listStyle: "none",
-						gap: "15px",
-						margin: 0,
-						padding: 0,
-					}}
-				>
-					<a href="#" style={{ textDecoration: "none", color: "#333" }}>
-						Home
-					</a>
-					<a href="#" style={{ textDecoration: "none", color: "#333" }}>
-						Projects
-					</a>
-					<a href="#" style={{ textDecoration: "none", color: "#333" }}>
-						Help
-					</a>
-				</ul>
+			<nav className="nav">
+				{isLoggedIn ? (
+					<div className="user-controls">
+						<div className="welcome-text">Вітаю, {user?.username}</div>
+						<div className="buttons-group">
+							<button className="header-button settings-button" onClick={handleSettings}>
+								Налаштування
+							</button>
+							<button className="header-button logout-button" onClick={handleLogout}>
+								Вихід
+							</button>
+						</div>
+					</div>
+				) : (
+					<button className="header-button signin-button" onClick={handleSignIn}>
+						Вхід
+					</button>
+				)}
 			</nav>
 		</header>
 	);
