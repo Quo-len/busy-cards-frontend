@@ -1,131 +1,219 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import * as api from "./../../api";
-import "../styles/profilepage.css";
-import { useForm } from "react-hook-form";
 import { useAuth } from "./../../utils/authContext";
+import "./../styles/SettingsPage.css";
+import * as api from "./../../api";
 
 const SettingsPage = () => {
-	const { user } = useAuth();
+	const { user, setUser } = useAuth();
+	const [loading, setLoading] = useState(false);
+	const [successMessage, setSuccessMessage] = useState("");
 	const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
 	const [newPasswordVisible, setNewPasswordVisible] = useState(false);
 
-	const {
-		register,
-		handleSubmit,
-		formState: { errors },
-	} = useForm();
+	// Form state
+	const [username, setUsername] = useState("");
+	const [currentPassword, setCurrentPassword] = useState("");
+	const [newPassword, setNewPassword] = useState("");
+	const [email, setEmail] = useState("");
 
 	useEffect(() => {
 		document.title = `Налаштування - Busy-cards`;
-	}, []);
+		if (user?.email) {
+			setEmail(user.email);
+		}
+	}, [user]);
 
-	const fetchUser = async () => {
+	const handleUsernameSubmit = async (e) => {
+		e.preventDefault();
+		setLoading(true);
 		try {
-			const user = fetchUser();
-			setUser(user);
+			// API call would go here
+			const updatedData = { username: username };
+			const response = await api.updateUser(user._id, updatedData);
+			setUser(response);
+
+			console.log("Username updated:", username);
+			setSuccessMessage("Username updated successfully");
+			setTimeout(() => setSuccessMessage(""), 3000);
 		} catch (err) {
-			console.log("Failed to fetch user");
+			console.log("Failed to update username:" + err.message);
+		} finally {
+			setLoading(false);
 		}
 	};
 
-	const toggleCurrentPasswordVisibility = () => {
-		setCurrentPasswordVisible(!currentPasswordVisible);
+	const handlePasswordSubmit = async (e) => {
+		e.preventDefault();
+		setLoading(true);
+		try {
+			// API call would go here
+			await api.updatePassword(currentPassword, newPassword);
+
+			console.log("Password updated");
+			setSuccessMessage("Password updated successfully");
+			setTimeout(() => setSuccessMessage(""), 3000);
+			setCurrentPassword("");
+			setNewPassword("");
+		} catch (err) {
+			console.log("Failed to update password");
+		} finally {
+			setLoading(false);
+		}
 	};
 
-	const toggleNewPasswordVisibility = () => {
-		setNewPasswordVisible(!newPasswordVisible);
+	const handleEmailSubmit = async (e) => {
+		e.preventDefault();
+		setLoading(true);
+		try {
+			// API call would go here
+			const updatedData = { email: email };
+			const response = await api.updateUser(user._id, updatedData);
+			setUser(response);
+
+			console.log("Email updated:", email);
+			setSuccessMessage("Email updated successfully");
+			setTimeout(() => setSuccessMessage(""), 3000);
+		} catch (err) {
+			console.log("Failed to update email:" + err.message);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	const handleDeleteAccount = async () => {
+		if (window.confirm("Ви впевнені, що хочете видалити свій обліковий запис? Цю дію не можна скасувати.")) {
+			try {
+				// API call would go here
+				await api.updateUser(user.id);
+
+				console.log("Account deleted");
+				// Redirect to logout or home
+			} catch (err) {
+				console.log("Failed to delete account:" + err.message);
+			}
+		}
 	};
 
 	return (
-		<div>
-			<div>
+		<div className="settings-container">
+			{successMessage && <div className="success-message">{successMessage}</div>}
+
+			<section className="settings-section">
 				<h2>Ім&apos;я користувача</h2>
-				<div>
-					Ваше ім&apos;я користувача, яке використовується для входу в систему - <strong>{user?.username}</strong> -
-					наразі його не можна змінити. Але ви можете вільно вибрати ім&apos;я, яке буде відображатися для ваших колег і
-					в публічній галереї мапи думок.
-				</div>
-				<input
-					type="text"
-					className="password-input"
-					placeholder="Ваше ім'я"
-					{...register("username", {
-						required: "Username is required",
-						minLength: {
-							value: 6,
-							message: "Password must be at least 6 characters long",
-						},
-					})}
-				/>
-				<button>Оновити ім&apos;я</button>
-			</div>
+				<p className="settings-description">
+					Ваше ім&apos;я користувача, яке використовується лише для відображення в системі. Ім&apos;я, яке буде
+					відображатися для колег - <strong>{user?.username}</strong>
+				</p>
+				<form onSubmit={handleUsernameSubmit} className="settings-form">
+					<div className="form-group">
+						<input
+							type="text"
+							className="form-input"
+							placeholder="Ваше ім'я"
+							value={username}
+							onChange={(e) => setUsername(e.target.value)}
+							required
+							minLength={6}
+						/>
+					</div>
+					<button type="submit" className="btn-primary" disabled={loading}>
+						{loading ? "Оновлення..." : "Оновити ім'я"}
+					</button>
+				</form>
+			</section>
 
-			<div>
+			<section className="settings-section">
 				<h2>Пароль</h2>
-				<div>Змініть свій пароль: Для вашої безпеки введіть 6 символів або більше.</div>
-				<input
-					type={currentPasswordVisible ? "text" : "password"}
-					className="password-input"
-					placeholder="Пароль"
-					{...register("currentpassword", {
-						required: "Пароль обов'язковий",
-						minLength: {
-							value: 5,
-							message: "Пароль повинен містити щонайменше 6 символів",
-						},
-					})}
-				/>
-				<button type="button" onClick={toggleCurrentPasswordVisibility} className="password-toggle">
-					{currentPasswordVisible ? "Приховати" : "Показати"}
-				</button>
-				<input
-					type={newPasswordVisible ? "text" : "password"}
-					className="password-input"
-					placeholder="Пароль"
-					{...register("newPassword", {
-						required: "Пароль обов'язковий",
-						minLength: {
-							value: 5,
-							message: "Пароль повинен містити щонайменше 6 символів",
-						},
-					})}
-				/>
-				<button type="button" onClick={toggleNewPasswordVisibility} className="password-toggle">
-					{newPasswordVisible ? "Приховати" : "Показати"}
-				</button>
-				<button>Оновити пароль</button>
-			</div>
+				<p className="settings-description">Змініть свій пароль: Для вашої безпеки введіть 6 символів або більше.</p>
+				<form onSubmit={handlePasswordSubmit} className="settings-form">
+					<div className="form-group">
+						<div className="password-container">
+							<input
+								type={currentPasswordVisible ? "text" : "password"}
+								className="form-input"
+								placeholder="Поточний пароль"
+								value={currentPassword}
+								onChange={(e) => setCurrentPassword(e.target.value)}
+								required
+								minLength={6}
+							/>
+							<button
+								type="button"
+								className="password-toggle"
+								onClick={() => setCurrentPasswordVisible(!currentPasswordVisible)}
+							>
+								{currentPasswordVisible ? "Приховати" : "Показати"}
+							</button>
+						</div>
+					</div>
+					<div className="form-group">
+						<div className="password-container">
+							<input
+								type={newPasswordVisible ? "text" : "password"}
+								className="form-input"
+								placeholder="Новий пароль"
+								value={newPassword}
+								onChange={(e) => setNewPassword(e.target.value)}
+								required
+								minLength={6}
+							/>
+							<button
+								type="button"
+								className="password-toggle"
+								onClick={() => setNewPasswordVisible(!newPasswordVisible)}
+							>
+								{newPasswordVisible ? "Приховати" : "Показати"}
+							</button>
+						</div>
+					</div>
+					<button type="submit" className="btn-primary" disabled={loading}>
+						{loading ? "Оновлення..." : "Оновити пароль"}
+					</button>
+				</form>
+			</section>
 
-			<div>
-				<h2></h2>
-				<div>Змінити адресу електронної пошти.</div>
-				<input
-					type="email"
-					className="email-input"
-					defaultValue={user?.email}
-					{...register("email", {
-						required: "Email is required",
-					})}
-				/>
-				<button>Оновити пошту</button>
-			</div>
+			<section className="settings-section">
+				<h2>Електронна пошта</h2>
+				<p className="settings-description">Змінити адресу електронної пошти.</p>
+				<form onSubmit={handleEmailSubmit} className="settings-form">
+					<div className="form-group">
+						<input
+							type="email"
+							className="form-input"
+							placeholder="Email"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							required
+						/>
+					</div>
+					<button type="submit" className="btn-primary" disabled={loading}>
+						{loading ? "Оновлення..." : "Оновити пошту"}
+					</button>
+				</form>
+			</section>
 
-			<div>
+			<section className="settings-section">
 				<h2>Фото профілю</h2>
-				<div></div>
-				<img src="" alt="" />
-				<button>Оновити фото профілю</button>
-			</div>
+				<div className="profile-photo-container">
+					{user?.photoUrl ? (
+						<img src={user.photoUrl} alt="Profile" className="profile-photo" />
+					) : (
+						<div className="profile-initials">{user?.username ? user.username.charAt(0).toUpperCase() : "U"}</div>
+					)}
+				</div>
+				<button className="btn-secondary">Оновити фото профілю</button>
+			</section>
 
-			<div>
+			<section className="settings-section danger-zone">
 				<h2>Видалити акаунт</h2>
-				<div>
+				<p className="settings-description">
 					Щоб повністю видалити свій обліковий запис, включаючи всі створені вами інтелект-карти, натисніть кнопку
 					нижче.
-				</div>
-				<button>Видалити акаунт</button>
-			</div>
+				</p>
+				<button className="btn-danger" onClick={handleDeleteAccount}>
+					Видалити акаунт
+				</button>
+			</section>
 		</div>
 	);
 };

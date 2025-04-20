@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
 		} else {
 			setIsLoggedIn(false);
 			setUser(null);
+			logout();
 		}
 	}, [isLoggedIn]);
 
@@ -41,7 +42,9 @@ export const AuthProvider = ({ children }) => {
 		setIsLoggedIn(false);
 	};
 
-	return <AuthContext.Provider value={{ user, isLoggedIn, login, logoutUser }}>{children}</AuthContext.Provider>;
+	return (
+		<AuthContext.Provider value={{ user, setUser, isLoggedIn, login, logoutUser }}>{children}</AuthContext.Provider>
+	);
 };
 
 export const useAuth = () => {

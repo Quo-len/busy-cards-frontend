@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import * as api from "./../../api";
 import "../styles/profilepage.css";
+import MindmapList from "../../components/components/MindmapList";
 
 const ProfilePage = () => {
 	const { userId } = useParams();
@@ -13,7 +14,11 @@ const ProfilePage = () => {
 
 	const fetchUser = async () => {
 		try {
-		} catch (error) {}
+			const response = await api.getUser(userId);
+			setUser(response);
+		} catch (error) {
+			console.log("Failed to get user");
+		}
 	};
 
 	useEffect(() => {

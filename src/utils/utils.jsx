@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import Cookies from "js-cookie";
 
 export function createNodesAndEdges(xNodes = 10, yNodes = 10) {
 	const nodes = [];
@@ -10,13 +11,12 @@ export function createNodesAndEdges(xNodes = 10, yNodes = 10) {
 		for (let x = 0; x < xNodes; x++) {
 			const position = { x: x * 150, y: y * 100 };
 			const data = { label: `Node ${nodeId}` };
-			const id = uuidv4();
 			const node = {
-				id,
+				id: `stress-${nodeId.toString()}`,
 				style: { width: 100, fontSize: 15 },
 				data,
 				position,
-				type: "custom",
+				type: "default",
 			};
 			nodes.push(node);
 
@@ -25,7 +25,7 @@ export function createNodesAndEdges(xNodes = 10, yNodes = 10) {
 					id: `${x}-${y}`,
 					source: `stress-${recentNodeId.toString()}`,
 					target: `stress-${nodeId.toString()}`,
-					type: "custom",
+					type: "default",
 				});
 			}
 
@@ -45,7 +45,8 @@ export function getAuthTokenFromCookies() {
 }
 
 export const logout = () => {
-	document.cookie = "authToken=; Max-Age=0; path=/;";
+	Cookies.remove("authToken", { path: "/" });
+
 	// window.location.href = "/signin";
 };
 

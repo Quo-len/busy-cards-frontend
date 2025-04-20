@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MindmapList from "../../components/components/MindmapList";
 import MindmapEditCard from "../../components/components/MindmapEditCard";
+import "./../styles/HomePage.css";
 
 const categories = [
 	{ id: "my", label: "Мої інтелект-карти", endpoint: "/api/mindmaps/my" },
@@ -31,48 +32,15 @@ const HomePage = (props) => {
 	};
 
 	return (
-		<div
-			className="homepage-container"
-			style={{
-				padding: "20px",
-				display: "flex",
-				justifyContent: "center",
-			}}
-		>
-			<div
-				style={{
-					display: "flex",
-					gap: "20px",
-					maxWidth: "1200px",
-					width: "100%",
-				}}
-			>
+		<div className="homepage-container">
+			<div className="homepage-content">
 				{/* LEFT COLUMN: Vertical tabs */}
-				<div
-					className="category-tabs"
-					style={{
-						display: "flex",
-						flexDirection: "column",
-						minWidth: "200px",
-						borderRight: "1px solid #e0e0e0",
-						paddingRight: "10px",
-					}}
-				>
+				<div className="category-tabs">
 					{categories.map((category) => (
 						<div
 							key={category.id}
 							onClick={() => setActiveCategory(category.id)}
-							style={{
-								padding: "12px 16px",
-								cursor: "pointer",
-								borderLeft: activeCategory === category.id ? "4px solid #3498db" : "4px solid transparent",
-								color: activeCategory === category.id ? "#3498db" : "#333",
-								fontWeight: activeCategory === category.id ? "bold" : "normal",
-								backgroundColor: activeCategory === category.id ? "#f0f8ff" : "transparent",
-								transition: "background-color 0.2s",
-								marginBottom: "8px",
-								borderRadius: "4px",
-							}}
+							className={`category-tab ${activeCategory === category.id ? "active" : ""}`}
 						>
 							{category.label}
 						</div>
@@ -80,12 +48,12 @@ const HomePage = (props) => {
 				</div>
 
 				{/* CENTER COLUMN: Mindmap list */}
-				<div style={{ flex: "2" }}>
+				<div className="mindmap-list-column">
 					<MindmapList categoryType={activeCategory} onEditMindmap={handleMindmapClick} refreshTrigger={refreshKey} />
 				</div>
 
 				{/* RIGHT COLUMN: Mindmap editor */}
-				<div style={{ flex: "1", minWidth: "300px" }}>
+				<div className="editor-column">
 					{showEditor && selectedMindmap ? (
 						<MindmapEditCard
 							mindmap={selectedMindmap}
@@ -100,17 +68,22 @@ const HomePage = (props) => {
 							}}
 						/>
 					) : (
-						<div
-							style={{
-								opacity: 0.6,
-								fontStyle: "italic",
-								padding: "20px",
-								backgroundColor: "#f9f9f9",
-								border: "1px dashed #ddd",
-								borderRadius: "8px",
-								textAlign: "center",
-							}}
-						>
+						<div className="empty-editor-state">
+							<svg
+								width="48"
+								height="48"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								strokeWidth="1.5"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+							>
+								<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+								<polyline points="14 2 14 8 20 8"></polyline>
+								<line x1="12" y1="18" x2="12" y2="12"></line>
+								<line x1="9" y1="15" x2="15" y2="15"></line>
+							</svg>
 							Select a mindmap to edit
 						</div>
 					)}

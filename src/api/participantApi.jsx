@@ -29,7 +29,7 @@ export const addParticipant = async (mindmapId, userId, accessLevel = "Гляд�
 
 export const deleteParticipant = async (mindmapId, userId) => {
 	try {
-		const response = await axios.delete(`/participants/${mindmapId}/${userId}`, {});
+		const response = await axios.delete(`/participants/${mindmapId}/${userId}`);
 		return response.data;
 	} catch (error) {
 		console.error("Error fetching products:", error);
@@ -37,7 +37,7 @@ export const deleteParticipant = async (mindmapId, userId) => {
 	}
 };
 
-export const updateParticipant = async (mindmapId, userId, accessLevel = "Глядач") => {
+export const updateParticipant = async (mindmapId, userId, accessLevel) => {
 	try {
 		const response = await axios.patch(`/participants/${mindmapId}/${userId}`, {
 			accessLevel,

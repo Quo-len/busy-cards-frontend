@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import * as api from "./../../api";
 import ParticipantList from "./ParticipantList";
+import "./../styles/MindmapEditCard.css";
 
 const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 	const [title, setTitle] = useState(mindmap.title);
@@ -8,11 +9,12 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 	const [isPublic, setIsPublic] = useState(mindmap.isPublic || false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
+	const [exportType, setExportType] = useState("png");
 
 	useEffect(() => {
 		setTitle(mindmap.title);
-		setDescription(mindmap.description);
-		setIsPublic(mindmap.isPublic);
+		setDescription(mindmap.description || "");
+		setIsPublic(mindmap.isPublic || false);
 	}, [mindmap]);
 
 	const handleSubmit = async (e) => {
@@ -21,7 +23,11 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 		setError(null);
 
 		try {
-			const response = await api.updateMindmap(mindmap.id, { title, description, isPublic });
+			const response = await api.updateMindmap(mindmap.id, {
+				title,
+				description,
+				isPublic,
+			});
 
 			if (onSave) onSave(response.data);
 		} catch (err) {
@@ -32,92 +38,64 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 		}
 	};
 
+	const handleExport = (e) => {
+		e.preventDefault();
+		// Handle export functionality
+		console.log(`Exporting as ${exportType}`);
+		// Implement export logic
+	};
+
 	return (
-		<div
-			style={{
-				border: "1px solid #ddd",
-				padding: "20px",
-				borderRadius: "8px",
-				backgroundColor: "#f9f9f9",
-			}}
-		>
+		<div className="mindmap-edit-card">
 			<h3>Edit Mindmap</h3>
 			<form onSubmit={handleSubmit}>
-				<div style={{ marginBottom: "10px" }}>
-					<label style={{ display: "block", fontWeight: "bold" }}>Title</label>
+				<div className="form-group">
+					<label className="form-label">Title</label>
 					<input
 						type="text"
 						value={title}
 						onChange={(e) => setTitle(e.target.value)}
 						required
-						style={{
-							width: "100%",
-							padding: "8px",
-							borderRadius: "4px",
-							border: "1px solid #ccc",
-						}}
+						className="form-control"
+						placeholder="Enter mindmap title"
 					/>
 				</div>
-				<div style={{ marginBottom: "10px" }}>
-					<label style={{ display: "block", fontWeight: "bold" }}>Description</label>
+
+				<div className="form-group">
+					<label className="form-label">Description</label>
 					<textarea
 						value={description}
 						onChange={(e) => setDescription(e.target.value)}
 						rows={3}
-						style={{
-							width: "100%",
-							padding: "8px",
-							borderRadius: "4px",
-							border: "1px solid #ccc",
-						}}
+						className="form-control"
+						placeholder="Enter a brief description"
 					/>
 				</div>
 
-				{error && <div style={{ color: "red", marginBottom: "10px" }}>{error}</div>}
-
-				<div style={{ marginBottom: "10px" }}>
-					<label>
-						<input type="checkbox" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />{" "}
-						Загальнодоступна?
-					</label>
+				<div className="checkbox-wrapper">
+					<input type="checkbox" id="isPublic" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />
+					<label htmlFor="isPublic">Загальнодоступна?</label>
 				</div>
 
-				<div>
-					<select name="type">
+				<div className="export-container">
+					<select className="export-select" value={exportType} onChange={(e) => setExportType(e.target.value)}>
 						<option value="png">PNG</option>
 						<option value="pdf">PDF</option>
 					</select>
-					<button>Експорт</button>
+					<button type="button" className="export-button" onClick={handleExport}>
+						Експорт
+					</button>
 				</div>
+
+				{error && <div className="error-message">{error}</div>}
 
 				<ParticipantList mindmap={mindmap} isEditable={false} />
 
-				<div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
-					<button
-						type="button"
-						onClick={onCancel}
-						style={{
-							padding: "8px 12px",
-							backgroundColor: "#ccc",
-							border: "none",
-							borderRadius: "4px",
-							cursor: "pointer",
-						}}
-					>
+				<div className="button-group">
+					<button type="button" onClick={onCancel} className="btn btn-cancel">
 						Cancel
 					</button>
-					<button
-						type="submit"
-						disabled={loading}
-						style={{
-							padding: "8px 12px",
-							backgroundColor: "#3498db",
-							color: "white",
-							border: "none",
-							borderRadius: "4px",
-							cursor: "pointer",
-						}}
-					>
+					<button type="submit" disabled={loading} className="btn btn-primary">
 						{loading ? "Saving..." : "Save"}
 					</button>
 				</div>

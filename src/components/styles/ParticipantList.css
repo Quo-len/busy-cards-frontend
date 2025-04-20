@@ -1,0 +1,40 @@
+/* participant-styles.css */
+
+/* ParticipantList Component Styles */
+.participant-list-container {
+	margin: 24px 0;
+	border-radius: 8px;
+	overflow: hidden;
+}
+
+.participant-list-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px 16px;
+	background-color: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-top-left-radius: 8px;
+	border-top-right-radius: 8px;
+}
+
+.participant-list-title {
+	font-weight: 600;
+	font-size: 15px;
+	color: #4a5568;
+}
+
+.participants-wrapper {
+	border: 1px solid #e2e8f0;
+	border-top: none;
+	border-bottom-left-radius: 8px;
+	border-bottom-right-radius: 8px;
+}
+
+.empty-participants {
+	padding: 20px 16px;
+	text-align: center;
+	color: #718096;
+	font-style: italic;
+	background-color: #f8fafc;
+}
