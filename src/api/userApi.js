@@ -27,6 +27,21 @@ export const getUser = async (id) => {
 	}
 };
 
+export const uploadUserAvatar = async (id, file) => {
+	const formData = new FormData();
+	formData.append('avatar', file);
+
+	try {
+		const response = await axios.patch(`/users/avatar/${id}`, formData, {
+			headers: { 'Content-Type': 'multipart/form-data' },
+		});
+		return response.data;
+	} catch (error) {
+		console.error('Error uploading avatar:', error);
+		throw error;
+	}
+};
+
 export const updateUser = async (id, data) => {
 	try {
 		const response = await axios.patch(`/users/${id}`, data);

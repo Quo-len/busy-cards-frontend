@@ -49,7 +49,7 @@ const ParticipantItem = ({ participant, isEditable, onRemove }) => {
 	return (
 		<div className="participant-item">
 			<div className="participant-avatar">
-				{participant.user.avatar ? (
+				{participant.user?.avatar ? (
 					<img src={participant.user.avatar} alt={participant.user.username} />
 				) : (
 					getInitials()

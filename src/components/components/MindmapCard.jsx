@@ -1,13 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Background, ReactFlow } from "reactflow";
 import { useNavigate } from "react-router-dom";
 import StaticMindmap from "./StaticMindmap";
+import { useAuth } from "./../../utils/authContext";
+import * as api from "./../../api";
 
 const MindmapCard = ({ mindmap, onEdit }) => {
+	const { isLoggedIn, user } = useAuth();
+	const [isFavorite, setIsFavorite] = useState(false);
 	const navigate = useNavigate();
+
+	useEffect(() => {
+		const fetchFavorite = async () => {
+			try {
+				const response = await api.getFavorite(user._id, mindmap._id);
+				if (response) {
+					setIsFavorite(true);
+				} else {
+					setIsFavorite(true);
+				}
+			} catch (error) {
+				setIsFavorite(false);
+			}
+		};
+		fetchFavorite();
+	}, []);
 
 	const handleClick = () => {
 		navigate(`/mindmap/${mindmap._id}`);
+	};
+
+	const handleUserClick = () => {
+		navigate(`/profile/${mindmap.owner._id}`);
 	};
 
 	const getParticipantWord = (count) => {
@@ -18,6 +42,25 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 		if (lastDigit === 1) return "учасник";
 		if (lastDigit >= 2 && lastDigit <= 4) return "учасники";
 		return "учасників";
+	};
+
+	const toggleFavorite = async () => {
+		if (!user) {
+			return;
+		}
+
+		try {
+			if (isFavorite) {
+				await api.deleteFavorite(user._id, mindmap._id);
+				console.log("Mindmap removed from favorites");
+			} else {
+				await api.addFavorite(user._id, mindmap._id);
+				console.log("Mindmap added to favorites");
+			}
+			setIsFavorite(!isFavorite);
+		} catch (error) {
+			console.log("Error toggling favorite:" + error.message);
+		}
 	};
 
 	return (
@@ -68,6 +111,12 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 						</div>
 
 						<div>{mindmap.isPublic ? "Загальнодоступна" : "Приватна"}</div>
+
+						<div>
+							Власник: <strong onClick={handleUserClick}>{mindmap.owner.username}</strong>
+						</div>
+
+						{isLoggedIn && <div onClick={toggleFavorite}>{isFavorite ? "UnLike" : "Like"}</div>}
 
 						<div>
 							{mindmap.participants.length !== 0

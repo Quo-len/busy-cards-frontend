@@ -20,8 +20,8 @@ export const AuthProvider = ({ children }) => {
 						setUser(response);
 						setIsLoggedIn(true);
 					} catch (error) {
-						logout();
-						setIsLoggedIn(false);
+						// logout();
+						// setIsLoggedIn(false);
 					}
 				};
 				fetchUser();

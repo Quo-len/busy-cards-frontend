@@ -10,7 +10,7 @@ export const getParticipants = async (mindmapId, userId) => {
 		});
 		return response.data;
 	} catch (error) {
-		console.error("Error fetching products:", error);
+		console.error("Error fetching participants:", error);
 		throw error;
 	}
 };
@@ -22,7 +22,7 @@ export const addParticipant = async (mindmapId, userId, accessLevel = "Гляд�
 		});
 		return response.data;
 	} catch (error) {
-		console.error("Error fetching products:", error);
+		console.error("Error fetching participant:", error);
 		throw error;
 	}
 };
@@ -32,7 +32,7 @@ export const deleteParticipant = async (mindmapId, userId) => {
 		const response = await axios.delete(`/participants/${mindmapId}/${userId}`);
 		return response.data;
 	} catch (error) {
-		console.error("Error fetching products:", error);
+		console.error("Error removing participant:", error);
 		throw error;
 	}
 };
@@ -44,7 +44,7 @@ export const updateParticipant = async (mindmapId, userId, accessLevel) => {
 		});
 		return response.data;
 	} catch (error) {
-		console.error("Error fetching products:", error);
+		console.error("Error updating participant:", error);
 		throw error;
 	}
 };

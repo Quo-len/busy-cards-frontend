@@ -57,7 +57,7 @@ const edgeTypes = {
 
 import { createNodesAndEdges } from "../../utils/utils";
 
-const { nodes: initialNodes, edges: initialEdges } = createNodesAndEdges(15, 10);
+const { nodes: initialNodes, edges: initialEdges } = createNodesAndEdges(10, 10);
 
 // const initialNodes = [
 //   { id: '1',  type: 'custom', data: { label: 'Node 1', description: 'First node'  }, position: { x: 100, y: 200 } },

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import * as api from "./../../api";
+import "./../styles/MindmapList.css";
 import MindmapCard from "./MindmapCard";
 
 const categoryEndpoints = {
@@ -83,7 +84,7 @@ const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
 		setCurrentPage(1); // Reset to first page when changing items per page
 	};
 
-	if (loading && mindmaps.length === 0) return <div>Заватнаження інтелект-карт...</div>;
+	if (loading && mindmaps.length === 0) return <div>Завантаження інтелект-карт...</div>;
 	if (error) return <div>{error}</div>;
 
 	return (
@@ -95,7 +96,7 @@ const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
 				width: "100%",
 				maxWidth: "800px",
 				margin: "0 auto",
-				overflow: "auto",
+				overflow: "hidden",
 			}}
 		>
 			<div

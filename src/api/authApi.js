@@ -9,7 +9,7 @@ export const registration = async (email, username, password) => {
 		});
 		return response.data;
 	} catch (error) {
-		console.error('Error fetching products:', error);
+		console.error('Error registering', error);
 		throw error;
 	}
 };
@@ -19,7 +19,7 @@ export const login = async (email, password) => {
 		const response = await axios.post(`/auth/login`, { email, password });
 		return response.data.token;
 	} catch (error) {
-		console.error('', error);
+		console.error('Error logging in', error);
 		throw error;
 	}
 };
@@ -29,7 +29,7 @@ export const updatePassword = async (currentPassword, newPassword) => {
 		const response = await axios.post(`/password`, { currentPassword, newPassword });
 		return response.data;
 	} catch (error) {
-		console.error('', error);
+		console.error('Error updating password', error);
 		throw error;
 	}
 };
@@ -39,7 +39,7 @@ export const forgotPassword = async () => {
 		const response = await axios.post(`/forgotPassword`, {});
 		return response.data;
 	} catch (error) {
-		console.error('', error);
+		console.error('Error restoring forgotten password', error);
 		throw error;
 	}
 };
@@ -49,7 +49,7 @@ export const resetPassword = async () => {
 		const response = await axios.post(`/forgotPassword`, {});
 		return response.data;
 	} catch (error) {
-		console.error('', error);
+		console.error('Error reseting password', error);
 		throw error;
 	}
 };

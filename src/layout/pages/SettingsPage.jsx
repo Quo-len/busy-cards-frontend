@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "./../../utils/authContext";
 import "./../styles/SettingsPage.css";
 import * as api from "./../../api";
+import { useNavigate } from "react-router-dom";
 
 const SettingsPage = () => {
-	const { user, setUser } = useAuth();
-	const [loading, setLoading] = useState(false);
+	const navigate = useNavigate();
+	const { user, setUser, logoutUser } = useAuth();
 	const [successMessage, setSuccessMessage] = useState("");
 	const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
 	const [newPasswordVisible, setNewPasswordVisible] = useState(false);
 
-	// Form state
+	const [avatarFile, setAvatarFile] = useState(null);
 	const [username, setUsername] = useState("");
 	const [currentPassword, setCurrentPassword] = useState("");
 	const [newPassword, setNewPassword] = useState("");
@@ -18,16 +19,14 @@ const SettingsPage = () => {
 
 	useEffect(() => {
 		document.title = `Налаштування - Busy-cards`;
-		if (user?.email) {
-			setEmail(user.email);
+		if (!user) {
+			navigate("/signin");
 		}
 	}, [user]);
 
 	const handleUsernameSubmit = async (e) => {
 		e.preventDefault();
-		setLoading(true);
 		try {
-			// API call would go here
 			const updatedData = { username: username };
 			const response = await api.updateUser(user._id, updatedData);
 			setUser(response);
@@ -37,16 +36,12 @@ const SettingsPage = () => {
 			setTimeout(() => setSuccessMessage(""), 3000);
 		} catch (err) {
 			console.log("Failed to update username:" + err.message);
-		} finally {
-			setLoading(false);
 		}
 	};
 
 	const handlePasswordSubmit = async (e) => {
 		e.preventDefault();
-		setLoading(true);
 		try {
-			// API call would go here
 			await api.updatePassword(currentPassword, newPassword);
 
 			console.log("Password updated");
@@ -55,17 +50,13 @@ const SettingsPage = () => {
 			setCurrentPassword("");
 			setNewPassword("");
 		} catch (err) {
-			console.log("Failed to update password");
-		} finally {
-			setLoading(false);
+			console.log("Failed to update password" + err.message);
 		}
 	};
 
 	const handleEmailSubmit = async (e) => {
 		e.preventDefault();
-		setLoading(true);
 		try {
-			// API call would go here
 			const updatedData = { email: email };
 			const response = await api.updateUser(user._id, updatedData);
 			setUser(response);
@@ -75,19 +66,40 @@ const SettingsPage = () => {
 			setTimeout(() => setSuccessMessage(""), 3000);
 		} catch (err) {
 			console.log("Failed to update email:" + err.message);
-		} finally {
-			setLoading(false);
+		}
+	};
+
+	const handleAvatarChange = (e) => {
+		const file = e.target.files[0];
+		if (file) setAvatarFile(file);
+	};
+
+	const handleAvatarUpload = async () => {
+		if (!avatarFile) return;
+		try {
+			const updatedUser = await api.uploadUserAvatar(user._id, avatarFile);
+			const localAvatarURL = URL.createObjectURL(avatarFile);
+
+			setUser((prev) => ({
+				...prev,
+				...updatedUser,
+				avatar: localAvatarURL,
+			}));
+			setSuccessMessage("Аватар оновлено");
+			setTimeout(() => setSuccessMessage(""), 3000);
+			setAvatarFile(null);
+		} catch (err) {
+			console.error("Не вдалося оновити аватар:", err.message);
 		}
 	};
 
 	const handleDeleteAccount = async () => {
 		if (window.confirm("Ви впевнені, що хочете видалити свій обліковий запис? Цю дію не можна скасувати.")) {
 			try {
-				// API call would go here
 				await api.updateUser(user.id);
 
 				console.log("Account deleted");
-				// Redirect to logout or home
+				logoutUser();
 			} catch (err) {
 				console.log("Failed to delete account:" + err.message);
 			}
@@ -116,8 +128,8 @@ const SettingsPage = () => {
 							minLength={6}
 						/>
 					</div>
-					<button type="submit" className="btn-primary" disabled={loading}>
-						{loading ? "Оновлення..." : "Оновити ім'я"}
+					<button type="submit" className="btn-primary">
+						Оновити ім&apos;я
 					</button>
 				</form>
 			</section>
@@ -166,28 +178,29 @@ const SettingsPage = () => {
 							</button>
 						</div>
 					</div>
-					<button type="submit" className="btn-primary" disabled={loading}>
-						{loading ? "Оновлення..." : "Оновити пароль"}
+					<button type="submit" className="btn-primary">
+						Оновити пароль
 					</button>
 				</form>
 			</section>
 
 			<section className="settings-section">
 				<h2>Електронна пошта</h2>
-				<p className="settings-description">Змінити адресу електронної пошти.</p>
+				<p className="settings-description">
+					Змінити адресу електронної пошти - <strong>{user?.email}</strong>.
+				</p>
 				<form onSubmit={handleEmailSubmit} className="settings-form">
 					<div className="form-group">
 						<input
 							type="email"
 							className="form-input"
 							placeholder="Email"
-							value={email}
 							onChange={(e) => setEmail(e.target.value)}
 							required
 						/>
 					</div>
-					<button type="submit" className="btn-primary" disabled={loading}>
-						{loading ? "Оновлення..." : "Оновити пошту"}
+					<button type="submit" className="btn-primary">
+						Оновити пошту
 					</button>
 				</form>
 			</section>
@@ -195,13 +208,16 @@ const SettingsPage = () => {
 			<section className="settings-section">
 				<h2>Фото профілю</h2>
 				<div className="profile-photo-container">
-					{user?.photoUrl ? (
-						<img src={user.photoUrl} alt="Profile" className="profile-photo" />
+					{user?.avatar ? (
+						<img src={user.avatar} alt="Profile" className="profile-photo" />
 					) : (
 						<div className="profile-initials">{user?.username ? user.username.charAt(0).toUpperCase() : "U"}</div>
 					)}
 				</div>
-				<button className="btn-secondary">Оновити фото профілю</button>
+				<input type="file" onChange={handleAvatarChange} accept="image/*" />
+				<button className="btn-secondary" onClick={handleAvatarUpload}>
+					Оновити фото профілю
+				</button>
 			</section>
 
 			<section className="settings-section danger-zone">

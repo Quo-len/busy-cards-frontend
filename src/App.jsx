@@ -17,29 +17,9 @@ function App() {
 	return (
 		<AuthProvider>
 			<Router>
-				<div
-					style={{
-						display: "flex",
-						flexDirection: "column",
-						height: "100vh",
-						width: "100vw",
-						overflow: "hidden",
-						position: "fixed",
-						top: 0,
-						left: 0,
-						right: 0,
-						bottom: 0,
-					}}
-				>
+				<div>
 					<Header />
-					<div
-						style={{
-							display: "flex",
-							flex: 1,
-							overflow: "hidden",
-							position: "relative",
-						}}
-					>
+					<div>
 						<Routes>
 							<Route path="/" element={<HomePage />} />
 							<Route path="/signin/" element={<SignInPage />} />
@@ -49,8 +29,8 @@ function App() {
 							<Route path="/mindmap/:mindmapId" element={<MindmapCanvasWrapper />} />
 							<Route path="*" element={<NotFoundPage />} />
 						</Routes>
+						<Footer />
 					</div>
-					<Footer />
 				</div>
 			</Router>
 		</AuthProvider>
@@ -61,11 +41,25 @@ function MindmapCanvasWrapper() {
 	const { mindmapId } = useParams();
 
 	return (
-		<WebSocketProvider mindmapId={mindmapId}>
-			<ReactFlowProvider>
-				<Canvas />
-			</ReactFlowProvider>
-		</WebSocketProvider>
+		<div
+			style={{
+				display: "flex",
+				flexDirection: "column",
+				height: "86vh",
+				width: "100vw",
+				overflow: "hidden",
+				top: 0,
+				left: 0,
+				right: 0,
+				bottom: 0,
+			}}
+		>
+			<WebSocketProvider mindmapId={mindmapId}>
+				<ReactFlowProvider>
+					<Canvas />
+				</ReactFlowProvider>
+			</WebSocketProvider>
+		</div>
 	);
 }
 
