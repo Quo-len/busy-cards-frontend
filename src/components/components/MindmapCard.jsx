@@ -5,6 +5,16 @@ import StaticMindmap from "./StaticMindmap";
 import { useAuth } from "./../../utils/authContext";
 import * as api from "./../../api";
 
+import { GoHeartFill } from "react-icons/go";
+import { GoHeart } from "react-icons/go";
+import { FaUsers } from "react-icons/fa";
+import { FaUsersSlash } from "react-icons/fa";
+import { MdPublic } from "react-icons/md";
+import { MdPublicOff } from "react-icons/md";
+import { RxUpdate } from "react-icons/rx";
+import { MdOutlineDateRange } from "react-icons/md";
+import { FaRegUserCircle } from "react-icons/fa";
+
 const MindmapCard = ({ mindmap, onEdit }) => {
 	const { isLoggedIn, user } = useAuth();
 	const [isFavorite, setIsFavorite] = useState(false);
@@ -66,7 +76,6 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 	return (
 		<div
 			onClick={onEdit}
-			onDoubleClick={handleClick}
 			style={{
 				border: "1px solid #ddd",
 				borderRadius: "8px",
@@ -93,7 +102,9 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 
 				<div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
 					<div>
-						<h3 style={{ margin: "0 0 8px 0" }}>{mindmap.title || "Untitled Mindmap"}</h3>
+						<h3 onClick={handleClick} style={{ margin: "0 0 8px 0" }}>
+							{mindmap.title || "Untitled Mindmap"}
+						</h3>
 						<p style={{ margin: "0 0 10px 0", color: "#555" }}>{mindmap.description || "No description"}</p>
 					</div>
 
@@ -106,22 +117,34 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 								justifyContent: "space-between",
 							}}
 						>
-							<div>Created: {new Date(mindmap.createdAt).toLocaleDateString()}</div>
-							{mindmap.lastModified && <div>Modified: {new Date(mindmap.lastModified).toLocaleDateString()}</div>}
+							<div>
+								<MdOutlineDateRange /> {new Date(mindmap.createdAt).toLocaleDateString()}
+							</div>
+							{mindmap.lastModified && (
+								<div>
+									<RxUpdate />
+									{new Date(mindmap.lastModified).toLocaleDateString()}
+								</div>
+							)}
 						</div>
 
-						<div>{mindmap.isPublic ? "Загальнодоступна" : "Приватна"}</div>
+						<div>{mindmap.isPublic ? <MdPublic /> : <MdPublicOff />}</div>
 
 						<div>
-							Власник: <strong onClick={handleUserClick}>{mindmap.owner.username}</strong>
+							<FaRegUserCircle /> <strong onClick={handleUserClick}>{mindmap.owner.username}</strong>
 						</div>
 
-						{isLoggedIn && <div onClick={toggleFavorite}>{isFavorite ? "UnLike" : "Like"}</div>}
+						{isLoggedIn && <div onClick={toggleFavorite}>{isFavorite ? <GoHeartFill /> : <GoHeart />}</div>}
 
 						<div>
-							{mindmap.participants.length !== 0
-								? `Спільна робота: ${mindmap.participants.length} ${getParticipantWord(mindmap.participants.length)}`
-								: "Учасники відсутні"}
+							{mindmap.participants.length !== 0 ? (
+								<div>
+									<FaUsers />
+									{mindmap.participants.length} {getParticipantWord(mindmap.participants.length)}
+								</div>
+							) : (
+								<FaUsersSlash />
+							)}
 						</div>
 					</div>
 				</div>

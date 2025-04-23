@@ -1,25 +1,37 @@
-import { useCallback } from "react";
-import ReactFlow, { Background, BackgroundVariant, ReactFlowProvider } from "reactflow";
+import { useCallback, useMemo } from "react";
+import ReactFlow, { ReactFlowProvider, ConnectionMode } from "reactflow";
 import "reactflow/dist/style.css";
-import { createNodesAndEdges } from "./../../utils/utils";
 import CustomNode from "./CustomNode";
 import CustomEdge from "./CustomEdge";
 
-const nodeTypes = {
-	custom: CustomNode,
-};
+const nodeTypes = { custom: CustomNode };
+const edgeTypes = { custom: CustomEdge };
 
-const edgeTypes = {
-	custom: CustomEdge,
-};
-
-const StaticMindmap = ({ nodes1, edges1, panOnDrag }) => {
-	const { nodes, edges } = createNodesAndEdges(10, 15);
-
+const StaticMindmap = ({ nodes, edges, panOnDrag }) => {
 	const onNodeDragStart = useCallback((event) => {
 		event.preventDefault();
 		return false;
 	}, []);
+
+	const parsedNodes = useMemo(() => {
+		try {
+			const obj = JSON.parse(nodes);
+			return Object.values(obj);
+		} catch (e) {
+			console.error("Помилка парсингу вузлів:", e);
+			return [];
+		}
+	}, [nodes]);
+
+	const parsedEdges = useMemo(() => {
+		try {
+			const obj = JSON.parse(edges);
+			return Object.values(obj);
+		} catch (e) {
+			console.error("Помилка парсингу ребер:", e);
+			return [];
+		}
+	}, [edges]);
 
 	return (
 		<div style={{ width: "100%", height: "200px", cursor: "pointer" }}>
@@ -27,8 +39,8 @@ const StaticMindmap = ({ nodes1, edges1, panOnDrag }) => {
 				<ReactFlow
 					nodeTypes={nodeTypes}
 					edgeTypes={edgeTypes}
-					defaultNodes={nodes}
-					defaultEdges={edges}
+					defaultNodes={parsedNodes}
+					defaultEdges={parsedEdges}
 					nodesDraggable={false}
 					nodesConnectable={false}
 					elementsSelectable={false}
@@ -38,8 +50,9 @@ const StaticMindmap = ({ nodes1, edges1, panOnDrag }) => {
 					panOnDrag={panOnDrag}
 					onNodeDragStart={onNodeDragStart}
 					fitView
-					attributionPosition="bottom-right"
-				></ReactFlow>
+					connectionMode={ConnectionMode.Loose}
+					proOptions={{ hideAttribution: true }}
+				/>
 			</ReactFlowProvider>
 		</div>
 	);

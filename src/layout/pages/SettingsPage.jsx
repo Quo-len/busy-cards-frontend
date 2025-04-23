@@ -4,8 +4,12 @@ import "./../styles/SettingsPage.css";
 import * as api from "./../../api";
 import { useNavigate } from "react-router-dom";
 
+import Loader from "../../components/components/Loader";
+import NotFound from "../../components/components/NotFound";
+
 const SettingsPage = () => {
 	const navigate = useNavigate();
+	const [isLoading, setIsLoading] = useState(true);
 	const { user, setUser, logoutUser } = useAuth();
 	const [successMessage, setSuccessMessage] = useState("");
 	const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
@@ -16,13 +20,24 @@ const SettingsPage = () => {
 	const [currentPassword, setCurrentPassword] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [email, setEmail] = useState("");
+	const [bio, setBio] = useState("");
 
 	useEffect(() => {
 		document.title = `Налаштування - Busy-cards`;
+
 		if (!user) {
-			navigate("/signin");
+			const authCheckTimer = setTimeout(() => {
+				if (!user) {
+					navigate("/signin");
+				}
+				setIsLoading(false);
+			}, 500);
+
+			return () => clearTimeout(authCheckTimer);
+		} else {
+			setIsLoading(false);
 		}
-	}, [user]);
+	}, [user, navigate]);
 
 	const handleUsernameSubmit = async (e) => {
 		e.preventDefault();
@@ -36,6 +51,21 @@ const SettingsPage = () => {
 			setTimeout(() => setSuccessMessage(""), 3000);
 		} catch (err) {
 			console.log("Failed to update username:" + err.message);
+		}
+	};
+
+	const handleBioSubmit = async (e) => {
+		e.preventDefault();
+		try {
+			const updatedData = { bio: bio };
+			const response = await api.updateUser(user._id, updatedData);
+			setUser(response);
+
+			console.log("Bio updated:", username);
+			setSuccessMessage("Bio updated successfully");
+			setTimeout(() => setSuccessMessage(""), 3000);
+		} catch (err) {
+			console.log("Failed to update bio:" + err.message);
 		}
 	};
 
@@ -105,6 +135,14 @@ const SettingsPage = () => {
 			}
 		}
 	};
+
+	if (isLoading) {
+		return <Loader message="Завантаження налаштувань, зачекайте" />;
+	}
+
+	if (!user) {
+		return <NotFound message="Авторизуйтесь для продовження роботи" />;
+	}
 
 	return (
 		<div className="settings-container">
@@ -229,6 +267,25 @@ const SettingsPage = () => {
 				<button className="btn-danger" onClick={handleDeleteAccount}>
 					Видалити акаунт
 				</button>
+			</section>
+
+			<section className="settings-section">
+				<h2>Про себе</h2>
+				<p className="settings-description">Змінини інформацію та опис про себе.</p>
+				<form onSubmit={handleBioSubmit} className="settings-form">
+					<div className="form-group">
+						<input
+							type="bio"
+							className="form-input"
+							defaultValue={user?.bio}
+							onChange={(e) => setBio(e.target.value)}
+							required
+						/>
+					</div>
+					<button type="submit" className="btn-primary">
+						Оновити інформацію про себе
+					</button>
+				</form>
 			</section>
 		</div>
 	);

@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import * as api from "./../../api";
 import "./../styles/MindmapList.css";
 import MindmapCard from "./MindmapCard";
+import ReactPaginate from "react-paginate";
+
+import Loader from "../../components/components/Loader";
+import Empty from "../../components/components/Empty";
 
 const categoryEndpoints = {
 	my: "/api/mindmaps/my",
@@ -11,9 +15,11 @@ const categoryEndpoints = {
 	public: "/api/mindmaps/public",
 };
 
+// https://github.com/deoxyribonuclease/over-shoped-frontend/blob/5324592cd82877555d91441ac68cd259801ef58d/src/components/components/ProductGrid.jsx#L13
+
 const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
 	const [mindmaps, setMindmaps] = useState([]);
-	const [loading, setLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const navigate = useNavigate();
 
@@ -26,28 +32,26 @@ const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
 	const [sortOrder, setSortOrder] = useState("desc");
 
 	useEffect(() => {
+		const fetchMindmaps = async () => {
+			setIsLoading(true);
+			setError(null);
+			try {
+				const response = await api.getPaginatedMindmaps(currentPage, itemsPerPage, sortBy, sortOrder);
+
+				setMindmaps(response.mindmaps);
+
+				setCurrentPage(response.pagination.currentPage);
+				setItemsPerPage(response.pagination.itemsPerPage);
+				setTotalPages(response.pagination.totalPages);
+				setTotalMindmaps(response.pagination.totalMindmaps);
+			} catch (err) {
+				setError("Failed to fetch mindmaps");
+			}
+			setIsLoading(false);
+		};
+
 		fetchMindmaps();
 	}, [categoryType, refreshTrigger]);
-
-	const fetchMindmaps = async () => {
-		setLoading(true);
-		setError(null);
-		try {
-			const response = await api.getPaginatedMindmaps(currentPage, itemsPerPage, sortBy, sortOrder);
-
-			setMindmaps(response.mindmaps);
-
-			setCurrentPage(response.pagination.currentPage);
-			setItemsPerPage(response.pagination.itemsPerPage);
-			setTotalPages(response.pagination.totalPages);
-			setTotalMindmaps(response.pagination.totalMindmaps);
-
-			setLoading(false);
-		} catch (err) {
-			setError("Failed to fetch mindmaps");
-			setLoading(false);
-		}
-	};
 
 	const handleCreateMindmap = async () => {
 		try {
@@ -84,8 +88,15 @@ const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
 		setCurrentPage(1); // Reset to first page when changing items per page
 	};
 
-	if (loading && mindmaps.length === 0) return <div>Завантаження інтелект-карт...</div>;
 	if (error) return <div>{error}</div>;
+
+	if (isLoading) {
+		return <Loader message="Завантаження інтелект-карт, зачекайте" />;
+	}
+
+	if (mindmaps.length === 0) {
+		return <Empty message="Інтелект-карти не знайдено" />;
+	}
 
 	return (
 		<div
@@ -174,128 +185,107 @@ const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
 				</div>
 			</div>
 
-			{mindmaps.length === 0 ? (
-				<div>Не знайдено жодної інтелект-карти. Створіть свою першу інтелект-карту!</div>
-			) : (
-				<>
-					<div
-						style={{
-							display: "flex",
-							flexDirection: "column",
-							gap: "12px",
-							marginBottom: "20px",
-						}}
-					>
-						{mindmaps.map((mindmap) => (
-							<MindmapCard key={mindmap._id} onEdit={() => onEditMindmap(mindmap)} mindmap={mindmap} />
-						))}
-					</div>
-
-					{/* Pagination controls */}
-					<div
-						style={{
-							display: "flex",
-							justifyContent: "space-between",
-							alignItems: "center",
-							marginTop: "20px",
-							padding: "10px",
-							backgroundColor: "#f8f9fa",
-							borderRadius: "5px",
-						}}
-					>
-						<div>
-							Showing {mindmaps.length} of {totalMindmaps} mindmaps
-						</div>
-
-						<div style={{ display: "flex", alignItems: "center" }}>
-							<button
-								onClick={() => handlePageChange(1)}
-								disabled={currentPage === 1}
-								style={{
-									padding: "5px 10px",
-									margin: "0 5px",
-									backgroundColor: currentPage === 1 ? "#f0f0f0" : "#fff",
-									border: "1px solid #ddd",
-									borderRadius: "3px",
-									cursor: currentPage === 1 ? "default" : "pointer",
-									opacity: currentPage === 1 ? 0.6 : 1,
-								}}
-							>
-								&laquo;
-							</button>
-
-							<button
-								onClick={() => handlePageChange(currentPage - 1)}
-								disabled={currentPage === 1}
-								style={{
-									padding: "5px 10px",
-									margin: "0 5px",
-									backgroundColor: currentPage === 1 ? "#f0f0f0" : "#fff",
-									border: "1px solid #ddd",
-									borderRadius: "3px",
-									cursor: currentPage === 1 ? "default" : "pointer",
-									opacity: currentPage === 1 ? 0.6 : 1,
-								}}
-							>
-								&lsaquo;
-							</button>
-
-							<span style={{ margin: "0 10px" }}>
-								Page {currentPage} of {totalPages}
-							</span>
-
-							<button
-								onClick={() => handlePageChange(currentPage + 1)}
-								disabled={currentPage === totalPages}
-								style={{
-									padding: "5px 10px",
-									margin: "0 5px",
-									backgroundColor: currentPage === totalPages ? "#f0f0f0" : "#fff",
-									border: "1px solid #ddd",
-									borderRadius: "3px",
-									cursor: currentPage === totalPages ? "default" : "pointer",
-									opacity: currentPage === totalPages ? 0.6 : 1,
-								}}
-							>
-								&rsaquo;
-							</button>
-
-							<button
-								onClick={() => handlePageChange(totalPages)}
-								disabled={currentPage === totalPages}
-								style={{
-									padding: "5px 10px",
-									margin: "0 5px",
-									backgroundColor: currentPage === totalPages ? "#f0f0f0" : "#fff",
-									border: "1px solid #ddd",
-									borderRadius: "3px",
-									cursor: currentPage === totalPages ? "default" : "pointer",
-									opacity: currentPage === totalPages ? 0.6 : 1,
-								}}
-							>
-								&raquo;
-							</button>
-						</div>
-					</div>
-				</>
-			)}
-
-			{loading && mindmaps.length > 0 && (
+			<div>
 				<div
 					style={{
-						position: "fixed",
-						top: "50%",
-						left: "50%",
-						transform: "translate(-50%, -50%)",
-						backgroundColor: "rgba(255, 255, 255, 0.8)",
-						padding: "20px",
-						borderRadius: "5px",
-						boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
+						display: "flex",
+						flexDirection: "column",
+						gap: "12px",
+						marginBottom: "20px",
 					}}
 				>
-					Loading...
+					{mindmaps.map((mindmap) => (
+						<MindmapCard key={mindmap._id} onEdit={() => onEditMindmap(mindmap)} mindmap={mindmap} />
+					))}
 				</div>
-			)}
+
+				{/* Pagination controls */}
+				<div
+					style={{
+						display: "flex",
+						justifyContent: "space-between",
+						alignItems: "center",
+						marginTop: "20px",
+						padding: "10px",
+						backgroundColor: "#f8f9fa",
+						borderRadius: "5px",
+					}}
+				>
+					<div>
+						Showing {mindmaps.length} of {totalMindmaps} mindmaps
+					</div>
+
+					<div style={{ display: "flex", alignItems: "center" }}>
+						<button
+							onClick={() => handlePageChange(1)}
+							disabled={currentPage === 1}
+							style={{
+								padding: "5px 10px",
+								margin: "0 5px",
+								backgroundColor: currentPage === 1 ? "#f0f0f0" : "#fff",
+								border: "1px solid #ddd",
+								borderRadius: "3px",
+								cursor: currentPage === 1 ? "default" : "pointer",
+								opacity: currentPage === 1 ? 0.6 : 1,
+							}}
+						>
+							&laquo;
+						</button>
+
+						<button
+							onClick={() => handlePageChange(currentPage - 1)}
+							disabled={currentPage === 1}
+							style={{
+								padding: "5px 10px",
+								margin: "0 5px",
+								backgroundColor: currentPage === 1 ? "#f0f0f0" : "#fff",
+								border: "1px solid #ddd",
+								borderRadius: "3px",
+								cursor: currentPage === 1 ? "default" : "pointer",
+								opacity: currentPage === 1 ? 0.6 : 1,
+							}}
+						>
+							&lsaquo;
+						</button>
+
+						<span style={{ margin: "0 10px" }}>
+							Page {currentPage} of {totalPages}
+						</span>
+
+						<button
+							onClick={() => handlePageChange(currentPage + 1)}
+							disabled={currentPage === totalPages}
+							style={{
+								padding: "5px 10px",
+								margin: "0 5px",
+								backgroundColor: currentPage === totalPages ? "#f0f0f0" : "#fff",
+								border: "1px solid #ddd",
+								borderRadius: "3px",
+								cursor: currentPage === totalPages ? "default" : "pointer",
+								opacity: currentPage === totalPages ? 0.6 : 1,
+							}}
+						>
+							&rsaquo;
+						</button>
+
+						<button
+							onClick={() => handlePageChange(totalPages)}
+							disabled={currentPage === totalPages}
+							style={{
+								padding: "5px 10px",
+								margin: "0 5px",
+								backgroundColor: currentPage === totalPages ? "#f0f0f0" : "#fff",
+								border: "1px solid #ddd",
+								borderRadius: "3px",
+								cursor: currentPage === totalPages ? "default" : "pointer",
+								opacity: currentPage === totalPages ? 0.6 : 1,
+							}}
+						>
+							&raquo;
+						</button>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 };

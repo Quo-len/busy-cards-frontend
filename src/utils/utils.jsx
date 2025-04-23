@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { getOutgoers, getIncomers } from "reactflow";
 import Cookies from "js-cookie";
 
 export function createNodesAndEdges(xNodes = 10, yNodes = 10) {
@@ -36,6 +37,30 @@ export function createNodesAndEdges(xNodes = 10, yNodes = 10) {
 
 	return { nodes, edges };
 }
+
+export function generateRandomColor() {
+	"#" + Math.floor(Math.random() * 16777215).toString(16);
+}
+
+export const isNodeDescendant = (node, targetNode, nodes, edges) => {
+	const visited = new Set();
+
+	const checkDescendants = (currentNode) => {
+		if (visited.has(currentNode.id)) return false;
+		visited.add(currentNode.id);
+
+		const relatives = [...getIncomers(currentNode, nodes, edges), ...getOutgoers(currentNode, nodes, edges)];
+
+		for (const relative of relatives) {
+			if (relative.id === targetNode.id) return true;
+			if (checkDescendants(relative)) return true;
+		}
+
+		return false;
+	};
+
+	return checkDescendants(node);
+};
 
 export function getAuthTokenFromCookies() {
 	const cookieString = document.cookie;

@@ -2,11 +2,14 @@ import React, { useState, useEffect } from "react";
 import * as api from "./../../api";
 import "../styles/profilepage.css";
 import InvitationCard from "../../components/components/InvitationCard";
+import Loader from "../../components/components/Loader";
+import NotFound from "../../components/components/NotFound";
+import Empty from "../../components/components/Empty";
 
 const InvitationsPage = () => {
-	document.title = `Busy-cards: Invitations`;
+	document.title = `Запрошення- Busy-cards`;
+	const [isLoading, setIsLoading] = useState(true);
 	const [invitations, setInvitations] = useState([]);
-	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 
 	useEffect(() => {
@@ -14,18 +17,25 @@ const InvitationsPage = () => {
 	}, []);
 
 	const fetchInvitations = async () => {
-		setLoading(true);
 		setError(null);
 		try {
 			const response = await api.getInvitationsByReceiverId(userId);
 
 			setInvitations(response);
-			setLoading(false);
+			setIsLoading(false);
 		} catch (err) {
 			setError("Failed to fetch invitations");
-			setLoading(false);
+			setIsLoading(false);
 		}
 	};
+
+	if (invitations.length === 0) {
+		return <Empty message="Запрошення відсутні, спробуйте пізніше" />;
+	}
+
+	if (isLoading) {
+		return <Loader message="Завантаження запрошень, зачекайте" />;
+	}
 
 	return (
 		<div>

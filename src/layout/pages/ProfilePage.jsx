@@ -3,8 +3,11 @@ import { useParams } from "react-router-dom";
 import * as api from "./../../api";
 import "../styles/ProfilePage.css";
 import MindmapList from "../../components/components/MindmapList";
+import Loader from "../../components/components/Loader";
+import NotFound from "../../components/components/NotFound";
 
 const ProfilePage = () => {
+	const [isLoading, setIsLoading] = useState(true);
 	const { userId } = useParams();
 	const [user, setUser] = useState(null);
 
@@ -18,6 +21,7 @@ const ProfilePage = () => {
 				} catch (error) {
 					console.log("Failed to get user");
 				}
+				setIsLoading(false);
 			};
 			fetchUser();
 		}
@@ -26,6 +30,14 @@ const ProfilePage = () => {
 	useEffect(() => {
 		document.title = `Профіль: ${user?.username} - Busy-cards`;
 	}, [user]);
+
+	if (isLoading) {
+		return <Loader message="Завантаження профілю користувача, зачекайте" />;
+	}
+
+	if (!user) {
+		return <NotFound message="Користувача не знайдено, перевірте посилання" />;
+	}
 
 	return (
 		<div>
@@ -39,11 +51,11 @@ const ProfilePage = () => {
 			<div>Пошта:</div>
 			<div>{user?.email}</div>
 			<div>Приєднався:</div>
-			<div>{user?.createdAt}</div>
+			<div>{new Date(user?.createdAt).toLocaleDateString()}</div>
 			<div>Остання активність:</div>
-			<div>{user?.lastLogin}</div>
+			<div>{new Date(user?.lastLogin).toLocaleDateString()}</div>
 			<div>Про себе:</div>
-			<div>{user?.about}</div>
+			<div>{user?.bio}</div>
 			<button>Запросити</button>
 			<div>Інтелект-карти:</div>
 			{}

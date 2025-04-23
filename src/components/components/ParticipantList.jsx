@@ -3,21 +3,26 @@ import * as api from "./../../api";
 import ParticipantItem from "./ParticipantItem";
 import "./../styles/ParticipantList.css";
 
+import Loader from "../../components/components/Loader";
+import Empty from "../../components/components/Empty";
+
 const ParticipantList = ({ mindmap, isEditable }) => {
 	const [participants, setParticipants] = useState([]);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
+		const fetchParticipants = async () => {
+			try {
+				//const response = await api.getParticipants(mindmap._id);
+				setParticipants(mindmap.participants || []);
+			} catch (error) {
+				console.error("Error fetching participants:", error);
+			}
+			setIsLoading(false);
+		};
+
 		fetchParticipants();
 	}, [mindmap]);
-
-	const fetchParticipants = async () => {
-		try {
-			//const response = await api.getParticipants(mindmap._id);
-			setParticipants(mindmap.participants || []);
-		} catch (error) {
-			console.error("Error fetching participants:", error);
-		}
-	};
 
 	const handleRemove = (idToRemove) => {
 		setParticipants((prev) => prev.filter((p) => p._id !== idToRemove));
@@ -30,18 +35,24 @@ const ParticipantList = ({ mindmap, isEditable }) => {
 			</div>
 
 			<div className="participants-wrapper">
-				{participants.length === 0 ? (
-					<div className="empty-participants">Учасники відсутні.</div>
-				) : (
-					participants.map((participant) => (
+				{(() => {
+					if (isLoading) {
+						return <Loader message="Завантаження учасників, зачекайте" />;
+					}
+
+					if (participants.length === 0) {
+						return <Empty message="Учасники відсутні." />;
+					}
+
+					return participants.map((participant) => (
 						<ParticipantItem
 							key={participant._id}
 							participant={participant}
 							isEditable={true}
 							onRemove={handleRemove}
 						/>
-					))
-				)}
+					));
+				})()}
 			</div>
 		</div>
 	);
