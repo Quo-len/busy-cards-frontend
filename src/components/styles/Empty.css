@@ -1,0 +1,116 @@
+/* Empty.css */
+.empty-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 2rem;
+	text-align: center;
+	margin: 2rem auto;
+	max-width: 500px;
+	border-radius: 1rem;
+	background-color: #f7fafc;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s ease;
+}
+
+.empty-container:hover {
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08), 0 3px 6px rgba(0, 0, 0, 0.12);
+	transform: translateY(-2px);
+}
+
+.empty-icon {
+	font-size: 2.5rem;
+	margin-bottom: 1rem;
+	color: #a0aec0;
+}
+
+.empty-illustration {
+	width: 200px;
+	height: auto;
+	margin: 1.5rem 0;
+	border-radius: 0.5rem;
+	animation: float 3s ease-in-out infinite;
+	filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.empty-message {
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: #4a5568;
+	margin-bottom: 0.5rem;
+	background: linear-gradient(to right, #3182ce, #805ad5);
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+}
+
+.empty-description {
+	color: #718096;
+	margin-bottom: 1.5rem;
+	line-height: 1.6;
+}
+
+.empty-action-btn {
+	padding: 0.6rem 1.5rem;
+	background: linear-gradient(to right, #3182ce, #805ad5);
+	color: white;
+	border: none;
+	border-radius: 0.5rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	display: inline-flex;
+	align-items: center;
+}
+
+.empty-action-btn:hover {
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.empty-action-btn:before {
+	content: "➕";
+	margin-right: 0.5rem;
+}
+
+.empty-container.compact {
+	padding: 1rem;
+	margin: 1rem auto;
+}
+
+.empty-container.compact .empty-illustration {
+	width: 150px;
+}
+
+.empty-container.compact .empty-message {
+	font-size: 1.1rem;
+}
+
+@keyframes float {
+	0% {
+		transform: translateY(0px);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+	100% {
+		transform: translateY(0px);
+	}
+}
+
+/* Responsive styles */
+@media (max-width: 640px) {
+	.empty-container {
+		padding: 1.5rem;
+	}
+
+	.empty-illustration {
+		width: 150px;
+	}
+
+	.empty-message {
+		font-size: 1.1rem;
+	}
+}

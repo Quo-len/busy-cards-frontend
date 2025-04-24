@@ -1,46 +1,38 @@
-/* Settings Page Styles */
+/* SettingsPage.css */
 .settings-container {
-	max-width: 650px;
-	margin: 0 auto;
-	padding: 2rem 1rem;
-	color: #333;
-	overflow-y: visible;
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-	overflow-y: auto;
-	/* Smooth scrolling */
-	scroll-behavior: smooth;
-}
-
-.success-message {
-	background-color: #e6f7e6;
-	color: #2e7d32;
-	padding: 1rem;
-	margin-bottom: 1.5rem;
-	border-radius: 4px;
-	text-align: center;
+	max-width: 800px;
+	margin: 2rem auto;
+	padding: 1.5rem;
+	font-family: "Roboto", sans-serif;
 }
 
 .settings-section {
-	margin-bottom: 2.5rem;
-	padding-bottom: 2.5rem;
-	border-bottom: 1px solid #eaeaea;
+	background-color: #ffffff;
+	border-radius: 8px;
+	padding: 1.75rem;
+	margin-bottom: 2rem;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.settings-section:last-child {
-	border-bottom: none;
+.settings-section:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
 
 .settings-section h2 {
-	font-size: 1.25rem;
+	color: #4a5568;
+	font-size: 1.4rem;
 	font-weight: 600;
 	margin-bottom: 1rem;
-	color: #333;
+	padding-bottom: 0.5rem;
+	border-bottom: 2px solid #e2e8f0;
 }
 
 .settings-description {
-	font-size: 0.9rem;
-	color: #666;
-	margin-bottom: 1.25rem;
+	color: #718096;
+	font-size: 0.95rem;
+	margin-bottom: 1.5rem;
 	line-height: 1.5;
 }
 
@@ -52,24 +44,136 @@
 
 .form-group {
 	margin-bottom: 1rem;
+	width: 100%;
 }
 
 .form-input {
 	width: 100%;
-	padding: 0.75rem;
-	border: 1px solid #ddd;
+	padding: 0.75rem 1rem;
+	border: 1px solid #cbd5e0;
 	border-radius: 4px;
 	font-size: 1rem;
-	transition: border-color 0.2s;
+	color: #4a5568;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-input:focus {
-	border-color: #4a90e2;
 	outline: none;
+	border-color: #3182ce;
+	box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+}
+
+/* Rich text editor for bio */
+.bio-editor {
+	width: 100%;
+	border: 1px solid #cbd5e0;
+	border-radius: 4px;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+	margin-bottom: 1rem;
+}
+
+.bio-editor:focus-within {
+	border-color: #3182ce;
+	box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.2);
+}
+
+.bio-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	padding: 0.5rem;
+	background-color: #f7fafc;
+	border-bottom: 1px solid #e2e8f0;
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+}
+
+.bio-toolbar button {
+	background: #edf2f7;
+	border: 1px solid #e2e8f0;
+	border-radius: 4px;
+	padding: 0.25rem 0.5rem;
+	font-size: 0.85rem;
+	color: #4a5568;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.bio-toolbar button:hover {
+	background-color: #e2e8f0;
+}
+
+.bio-toolbar button.active {
+	background-color: #3182ce;
+	color: white;
+	border-color: #3182ce;
+}
+
+.bio-toolbar-separator {
+	width: 1px;
+	height: 24px;
+	background-color: #e2e8f0;
+	margin: 0 0.25rem;
+}
+
+.bio-content {
+	min-height: 150px;
+	padding: 0.75rem 1rem;
+	font-size: 1rem;
+	color: #4a5568;
+	line-height: 1.5;
+}
+
+.bio-content:focus {
+	outline: none;
+}
+
+.bio-content a {
+	color: #3182ce;
+	text-decoration: underline;
+}
+
+.bio-content strong,
+.bio-content b {
+	font-weight: 600;
+}
+
+.bio-content em,
+.bio-content i {
+	font-style: italic;
+}
+
+.bio-content ul,
+.bio-content ol {
+	padding-left: 1.5rem;
+	margin: 0.5rem 0;
+}
+
+.bio-content blockquote {
+	padding-left: 1rem;
+	border-left: 3px solid #e2e8f0;
+	color: #718096;
+	margin: 0.5rem 0;
+}
+
+.bio-preview {
+	margin-top: 1rem;
+	padding: 1rem;
+	border: 1px dashed #e2e8f0;
+	border-radius: 4px;
+	background-color: #f7fafc;
+}
+
+.bio-preview-title {
+	font-size: 0.9rem;
+	color: #718096;
+	margin-bottom: 0.5rem;
+	font-weight: 500;
 }
 
 .password-container {
 	position: relative;
+	width: 100%;
 }
 
 .password-toggle {
@@ -79,56 +183,72 @@
 	transform: translateY(-50%);
 	background: none;
 	border: none;
-	color: #4a90e2;
-	cursor: pointer;
+	color: #718096;
 	font-size: 0.8rem;
+	cursor: pointer;
+	transition: color 0.2s ease;
 }
 
-.btn-primary,
-.btn-secondary,
-.btn-danger {
-	padding: 0.75rem 1.5rem;
-	border: none;
-	border-radius: 4px;
-	font-size: 0.9rem;
-	font-weight: 500;
-	cursor: pointer;
-	transition: background-color 0.2s, transform 0.1s;
+.password-toggle:hover {
+	color: #3182ce;
 }
 
 .btn-primary {
-	background-color: #4a90e2;
-	color: white;
+	background: linear-gradient(to right, #3182ce, #805ad5);
+	color: #ffffff;
+	padding: 0.75rem 1.5rem;
+	border: none;
+	border-radius: 4px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
 	align-self: flex-start;
 }
 
 .btn-primary:hover {
-	background-color: #3a7aba;
-}
-
-.btn-primary:disabled {
-	background-color: #a0c3e8;
-	cursor: not-allowed;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .btn-secondary {
-	background-color: #f5f5f5;
-	color: #444;
-	border: 1px solid #ddd;
+	background: #e2e8f0;
+	color: #4a5568;
+	padding: 0.75rem 1.5rem;
+	border: none;
+	border-radius: 4px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+	margin-top: 1rem;
 }
 
 .btn-secondary:hover {
-	background-color: #eaeaea;
+	background: #cbd5e0;
+}
+
+.danger-zone {
+	border: 1px solid #fed7d7;
+	background-color: #fff5f5;
+}
+
+.danger-zone h2 {
+	color: #e53e3e;
+	border-bottom-color: #fed7d7;
 }
 
 .btn-danger {
-	background-color: #fff;
-	color: #e53935;
-	border: 1px solid #e53935;
+	background-color: #e53e3e;
+	color: #ffffff;
+	padding: 0.75rem 1.5rem;
+	border: none;
+	border-radius: 4px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
 }
 
 .btn-danger:hover {
-	background-color: #ffebee;
+	background-color: #c53030;
 }
 
 .profile-photo-container {
@@ -140,44 +260,131 @@
 .profile-photo {
 	width: 100px;
 	height: 100px;
-	border-radius: 50%;
 	object-fit: cover;
-	border: 1px solid #eaeaea;
+	border-radius: 50%;
+	border: 4px solid #e2e8f0;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .profile-initials {
 	width: 100px;
 	height: 100px;
-	border-radius: 50%;
-	background-color: #f2f2f2;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	border-radius: 50%;
+	background: linear-gradient(to right, #3182ce, #805ad5);
+	color: #ffffff;
 	font-size: 2.5rem;
-	font-weight: 500;
-	color: #666;
+	font-weight: 700;
+	border: 4px solid #e2e8f0;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.danger-zone {
-	background-color: #fff8f8;
-	padding: 1.5rem;
+/* Custom file input styling */
+input[type="file"] {
+	width: 100%;
+	padding: 0.5rem 0;
+	margin-bottom: 0.5rem;
+	color: #4a5568;
+}
+
+input[type="file"]::file-selector-button {
+	background: #e2e8f0;
+	border: none;
 	border-radius: 4px;
-	margin-top: 3rem;
+	padding: 0.5rem 1rem;
+	margin-right: 1rem;
+	color: #4a5568;
+	cursor: pointer;
+	transition: background 0.2s ease;
 }
 
-@media (max-width: 600px) {
+input[type="file"]::file-selector-button:hover {
+	background: #cbd5e0;
+}
+
+/* Bio content display formatting */
+.bio-content-display {
+	line-height: 1.6;
+	word-break: break-word;
+}
+
+.bio-content-display a {
+	color: #3182ce;
+	text-decoration: underline;
+	transition: color 0.2s ease;
+}
+
+.bio-content-display a:hover {
+	color: #2c5282;
+}
+
+.bio-content-display strong {
+	font-weight: 600;
+}
+
+.bio-content-display ul,
+.bio-content-display ol {
+	padding-left: 1.5rem;
+	margin: 0.5rem 0;
+}
+
+.bio-content-display blockquote {
+	padding-left: 1rem;
+	border-left: 3px solid #e2e8f0;
+	color: #718096;
+	margin: 0.5rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
 	.settings-container {
-		padding: 1rem 0.75rem;
+		padding: 1rem;
 	}
 
 	.settings-section {
-		margin-bottom: 2rem;
-		padding-bottom: 2rem;
+		padding: 1.25rem;
 	}
 
 	.btn-primary,
 	.btn-secondary,
 	.btn-danger {
 		width: 100%;
+		padding: 0.7rem 1rem;
+	}
+
+	.bio-toolbar {
+		flex-wrap: wrap;
+		gap: 0.25rem;
+	}
+
+	.bio-toolbar button {
+		padding: 0.2rem 0.4rem;
+		font-size: 0.8rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.settings-section h2 {
+		font-size: 1.2rem;
+	}
+
+	.settings-description {
+		font-size: 0.9rem;
+	}
+
+	.profile-photo,
+	.profile-initials {
+		width: 80px;
+		height: 80px;
+	}
+
+	.profile-initials {
+		font-size: 2rem;
+	}
+
+	.bio-toolbar-separator {
+		display: none;
 	}
 }

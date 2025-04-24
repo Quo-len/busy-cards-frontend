@@ -53,6 +53,10 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 
+const WS_HOST =
+	import.meta.env.VITE_NODE_ENV === "development" ? import.meta.env.VITE_DEV_IP : import.meta.env.VITE_PROD_IP;
+const WS_PORT = import.meta.env.VITE_WS_PORT;
+
 // Create a context for the WebSocket and Yjs document
 const WebSocketContext = createContext({
 	ydoc: null,
@@ -80,7 +84,8 @@ export const WebSocketProvider = ({ children, mindmapId }) => {
 		console.log(`Creating WebSocket connection for mindmap: ${mindmapId}`);
 
 		// Create WebSocket provider
-		const wsProvider = new WebsocketProvider("ws://localhost:5000", `mindmap-${mindmapId}`, doc, { connect: true });
+		const wsUrl = `ws://${WS_HOST}:${WS_PORT}`;
+		const wsProvider = new WebsocketProvider(wsUrl, `mindmap-${mindmapId}`, doc, { connect: true });
 
 		// Set up connection status listeners
 		wsProvider.on("status", (event) => {

@@ -1,19 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as api from "./../../api";
 import Cookies from "js-cookie";
 import { useAuth } from "./../../utils/authContext";
-import "./../styles/SignInPage.css";
+import { toast } from "react-toastify";
+
+// Material UI imports
+import {
+	Box,
+	Typography,
+	TextField,
+	Button,
+	Paper,
+	InputAdornment,
+	IconButton,
+	Container,
+	Alert,
+	Link,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const SignInPage = () => {
 	const navigator = useNavigate();
 	const { login } = useAuth();
-
 	const [passwordVisible, setPasswordVisible] = useState(false);
 
 	const {
-		register,
+		control,
 		handleSubmit,
 		formState: { errors },
 	} = useForm();
@@ -28,20 +42,19 @@ const SignInPage = () => {
 
 	const onSubmit = async (data) => {
 		const { email, password } = data;
-		try {
-			const token = await api.login(email, password);
-			if (token) {
-				Cookies.set("authToken", token, {
-					expires: 7,
-					path: "/",
-				});
-				login();
-				navigator("/");
-			} else {
-				console.error("Login failed. No token received.");
-			}
-		} catch (error) {
-			console.error("Error during login:", error);
+
+		const result = await api.login(email, password);
+
+		if (result.token) {
+			Cookies.set("authToken", result.token, {
+				expires: 7,
+				path: "/",
+			});
+			login();
+			navigator("/");
+			toast.success("Успішний вхід!");
+		} else {
+			toast.error(result.error);
 		}
 	};
 
@@ -50,115 +63,110 @@ const SignInPage = () => {
 	};
 
 	return (
-		<div className="signin-container">
-			<div className="signin-card">
-				<h1 className="signin-title">Увійдіть</h1>
+		<Container maxWidth="sm" sx={{ mt: 8, mb: 8 }}>
+			<Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+				<Typography variant="h4" component="h1" gutterBottom align="center" fontWeight="bold">
+					Увійдіть
+				</Typography>
 
 				{isActivated && (
-					<div className="activation-message">
+					<Alert severity="success" sx={{ mb: 3 }}>
 						Ваш обліковий запис активовано. Увійдіть, щоб почати серйозну роботу над мапуванням.
-					</div>
+					</Alert>
 				)}
 
-				<div className="signin-subtitle">
-					<p>З поверненням!</p>
-					<p className="secondary-text">Зареєструйтеся та станьте частиною нашої спільноти.</p>
-				</div>
+				<Box mb={3}>
+					<Typography variant="body1">З поверненням!</Typography>
+					<Typography variant="body2" color="text.secondary">
+						Зареєструйтеся та станьте частиною нашої спільноти.
+					</Typography>
+				</Box>
 
-				<form onSubmit={handleSubmit(onSubmit)} className="signin-form">
-					<div className="form-group">
-						<input
-							type="email"
-							className={`form-input ${errors.email ? "input-error" : ""}`}
-							placeholder="example@example.com"
-							{...register("email", {
-								required: "Поле пошти обов'язкове",
-							})}
-						/>
-						{errors.email && <span className="error-message">{errors.email.message}</span>}
-					</div>
+				<Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+					<Controller
+						name="email"
+						control={control}
+						defaultValue=""
+						rules={{
+							required: "Поле пошти обов'язкове",
+							pattern: {
+								value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+								message: "Невірний формат електронної пошти",
+							},
+						}}
+						render={({ field }) => (
+							<TextField
+								{...field}
+								margin="normal"
+								fullWidth
+								id="email"
+								label="Електронна пошта"
+								placeholder="example@example.com"
+								autoComplete="email"
+								error={!!errors.email}
+								helperText={errors.email ? errors.email.message : ""}
+							/>
+						)}
+					/>
 
-					<div className="form-group password-group">
-						<input
-							type={passwordVisible ? "text" : "password"}
-							className={`form-input ${errors.password ? "input-error" : ""}`}
-							placeholder="Пароль"
-							{...register("password", {
-								required: "Пароль обов'язковий",
-								minLength: {
-									value: 5,
-									message: "Пароль повинен містити щонайменше 6 символів",
-								},
-							})}
-						/>
-						<button type="button" onClick={togglePasswordVisibility} className="password-toggle">
-							{passwordVisible ? "Приховати" : "Показати"}
-						</button>
-						{errors.password && <span className="error-message">{errors.password.message}</span>}
-					</div>
+					<Controller
+						name="password"
+						control={control}
+						defaultValue=""
+						rules={{
+							required: "Пароль обов'язковий",
+							minLength: {
+								value: 5,
+								message: "Пароль повинен містити щонайменше 6 символів",
+							},
+						}}
+						render={({ field }) => (
+							<TextField
+								{...field}
+								margin="normal"
+								fullWidth
+								label="Пароль"
+								type={passwordVisible ? "text" : "password"}
+								id="password"
+								autoComplete="current-password"
+								error={!!errors.password}
+								helperText={errors.password ? errors.password.message : ""}
+								InputProps={{
+									endAdornment: (
+										<InputAdornment position="end">
+											<IconButton aria-label="toggle password visibility" onClick={togglePasswordVisibility} edge="end">
+												{passwordVisible ? <VisibilityOff /> : <Visibility />}
+											</IconButton>
+										</InputAdornment>
+									),
+								}}
+							/>
+						)}
+					/>
 
-					<button type="submit" className="signin-button">
+					<Button
+						type="submit"
+						fullWidth
+						variant="contained"
+						color="primary"
+						size="large"
+						sx={{ mt: 3, mb: 2, py: 1.5 }}
+					>
 						Увійти
-					</button>
-				</form>
+					</Button>
+				</Box>
 
-				<div className="signup-prompt">
-					<span className="signup-text">Ще не маєте облікового запису?</span>
-					<p className="signup-link" onClick={() => navigator("/signup")}>
+				<Box mt={2} textAlign="center">
+					<Typography variant="body2" display="inline" mr={1}>
+						Ще не маєте облікового запису?
+					</Typography>
+					<Link component="button" variant="body2" color="primary" onClick={() => navigator("/signup")}>
 						Зареєструйтеся зараз!
-					</p>
-				</div>
-			</div>
-		</div>
+					</Link>
+				</Box>
+			</Paper>
+		</Container>
 	);
 };
 
 export default SignInPage;
-
-/*
-
-Subject: 
-Busy-cards Підтвердження електронної пошти
-
-Message: 
-Привіт,
-
-Ви нещодавно змінили свою електронну адресу на ${email} на Busy-cards. Щоб підтвердити нову адресу електронної пошти, перейдіть за посиланням нижче.
-
-https://localhost:5137/confirmEmail?code=hCynzNaDSDvz4C2AcjGy4zhATmpoRZj%2BqjgFpEXrZXri5LFboQO5qPJM1Yb%2Bn2Hs
-
-З повагою,
-Busy-cards
-
----
-Це одноразове повідомлення
-
-*/
-
-/*
-
-Subject: 
-Busy-cards Відновлення паролю
-
-Message: 
-Привіт,
-
-Створено тимчасовий пароль для відновлення вашого облікового запису Mind42. Наведений нижче пароль буде діяти лише один раз і не замінить ваш поточний пароль. Використовуйте його для входу в Mind42, щоб відновити свій обліковий запис і встановити новий пароль.
-
-Ваше ім'я користувача Mind42: ${username}
-Ваш тимчасовий пароль: ${tempPassword}
-
-Ви можете використовувати ці дані для входу на:
-https://localhost:5137/signin
-
-Якщо ви не запитували відновлення облікового запису, ви можете проігнорувати цей лист. Ваш звичайний пароль все ще активний.
-
-З повагою
-Busy-cards
-
----
-Це одноразове повідомлення
-
-
-
-*/

@@ -22,7 +22,7 @@ import Sidebar from "../../components/components/Sidebar";
 import CustomNode from "../../components/components/CustomNode";
 import CustomEdge from "../../components/components/CustomEdge";
 import Loader from "../../components/components/Loader";
-import NotFound from "../../components/components/NotFound";
+import NotFoundPage from "./../pages/NotFoundPage";
 import { useWebSocket } from "../../utils/WebSocketContext";
 import { createNodesAndEdges, isNodeDescendant } from "../../utils/utils";
 import * as api from "../../api";
@@ -418,7 +418,9 @@ export default function Canvas() {
 	}
 
 	if (!mindmap) {
-		return <NotFound message="Інтелект-карту не знайдено, перевірте посилання" />;
+		return (
+			<NotFoundPage title="Інтелект-карта не знайдена" message="Інтелект-карту не знайдено, перевірте посилання." />
+		);
 	}
 
 	return (
@@ -426,19 +428,7 @@ export default function Canvas() {
 			<button onClick={updatePos} style={{ position: "absolute", right: 10, top: 30, zIndex: 4 }}>
 				change pos
 			</button>
-			<button
-				onClick={addNewNode}
-				style={{
-					padding: "8px 12px",
-					backgroundColor: "#3498db",
-					color: "white",
-					border: "none",
-					borderRadius: "4px",
-					cursor: "pointer",
-				}}
-			>
-				Add Node
-			</button>
+			<button onClick={addNewNode}>Add Node</button>
 			<button
 				onClick={() => {
 					console.log("Testing Y.js connection");
@@ -460,18 +450,11 @@ export default function Canvas() {
 						console.log("Y.doc not initialized");
 					}
 				}}
-				style={{
-					padding: "8px 12px",
-					backgroundColor: "#e74c3c",
-					color: "white",
-					border: "none",
-					borderRadius: "4px",
-					cursor: "pointer",
-					marginLeft: "10px",
-				}}
 			>
 				Debug Connection
 			</button>
+			<button>Delete Node</button>
+			<button>Re-sync</button>
 			<ReactFlow
 				nodes={styledNodes}
 				edges={edges}

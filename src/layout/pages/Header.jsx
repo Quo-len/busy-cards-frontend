@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./../../utils/authContext";
+import { PiGraphFill } from "react-icons/pi";
 import "./../styles/Header.css";
 
 const Header = () => {
@@ -21,6 +22,7 @@ const Header = () => {
 	return (
 		<header className="header">
 			<div className="logo" onClick={() => navigate("/")}>
+				<PiGraphFill className="logo spin" />
 				Busy-Cards
 			</div>
 			<nav className="nav">

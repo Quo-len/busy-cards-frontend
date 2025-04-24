@@ -1,17 +1,18 @@
+import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { toast } from "react-toastify";
+
+import NotFound from "../../components/components/NotFound";
+import Loader from "../../components/components/Loader";
 import { useAuth } from "./../../utils/authContext";
 import "./../styles/SettingsPage.css";
 import * as api from "./../../api";
-import { useNavigate } from "react-router-dom";
-
-import Loader from "../../components/components/Loader";
-import NotFound from "../../components/components/NotFound";
+import BioSection from "./../../components/components/BioSection";
 
 const SettingsPage = () => {
 	const navigate = useNavigate();
 	const [isLoading, setIsLoading] = useState(true);
 	const { user, setUser, logoutUser } = useAuth();
-	const [successMessage, setSuccessMessage] = useState("");
 	const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
 	const [newPasswordVisible, setNewPasswordVisible] = useState(false);
 
@@ -39,33 +40,22 @@ const SettingsPage = () => {
 		}
 	}, [user, navigate]);
 
-	const handleUsernameSubmit = async (e) => {
+	const handleFieldSubmit = async (e, fieldName, value) => {
 		e.preventDefault();
 		try {
-			const updatedData = { username: username };
+			const updatedData = { [fieldName]: value };
 			const response = await api.updateUser(user._id, updatedData);
 			setUser(response);
 
-			console.log("Username updated:", username);
-			setSuccessMessage("Username updated successfully");
-			setTimeout(() => setSuccessMessage(""), 3000);
-		} catch (err) {
-			console.log("Failed to update username:" + err.message);
-		}
-	};
+			const fieldNamesUa = {
+				username: "Ім'я користувача",
+				bio: "Біографія",
+				email: "Пошта",
+			};
 
-	const handleBioSubmit = async (e) => {
-		e.preventDefault();
-		try {
-			const updatedData = { bio: bio };
-			const response = await api.updateUser(user._id, updatedData);
-			setUser(response);
-
-			console.log("Bio updated:", username);
-			setSuccessMessage("Bio updated successfully");
-			setTimeout(() => setSuccessMessage(""), 3000);
-		} catch (err) {
-			console.log("Failed to update bio:" + err.message);
+			toast.success(`${fieldNamesUa[fieldName]} успішно оновлено.`);
+		} catch (error) {
+			toast.error(`Не вдалося оновити поле ${fieldName}: ${error.message}`);
 		}
 	};
 
@@ -75,27 +65,11 @@ const SettingsPage = () => {
 			await api.updatePassword(currentPassword, newPassword);
 
 			console.log("Password updated");
-			setSuccessMessage("Password updated successfully");
-			setTimeout(() => setSuccessMessage(""), 3000);
 			setCurrentPassword("");
 			setNewPassword("");
-		} catch (err) {
-			console.log("Failed to update password" + err.message);
-		}
-	};
-
-	const handleEmailSubmit = async (e) => {
-		e.preventDefault();
-		try {
-			const updatedData = { email: email };
-			const response = await api.updateUser(user._id, updatedData);
-			setUser(response);
-
-			console.log("Email updated:", email);
-			setSuccessMessage("Email updated successfully");
-			setTimeout(() => setSuccessMessage(""), 3000);
-		} catch (err) {
-			console.log("Failed to update email:" + err.message);
+			toast.success(`Пароль успішно оновлено.`);
+		} catch (error) {
+			toast.error(`Не вдалося оновити пароль: ${error.message}`);
 		}
 	};
 
@@ -115,11 +89,10 @@ const SettingsPage = () => {
 				...updatedUser,
 				avatar: localAvatarURL,
 			}));
-			setSuccessMessage("Аватар оновлено");
-			setTimeout(() => setSuccessMessage(""), 3000);
 			setAvatarFile(null);
-		} catch (err) {
-			console.error("Не вдалося оновити аватар:", err.message);
+			toast.success(`Аватар успішно оновлено.`);
+		} catch (error) {
+			toast.error(`Не вдалося оновити аватар : ${error.message}`);
 		}
 	};
 
@@ -130,31 +103,30 @@ const SettingsPage = () => {
 
 				console.log("Account deleted");
 				logoutUser();
-			} catch (err) {
-				console.log("Failed to delete account:" + err.message);
+				toast.success(`Профіль успішно видалено.`);
+			} catch (error) {
+				toast.error(`Не вдалося видалити профіль: ${error.message}`);
 			}
 		}
 	};
 
 	if (isLoading) {
-		return <Loader message="Завантаження налаштувань, зачекайте" />;
+		return <Loader message="Завантаження налаштувань, зачекайте." />;
 	}
 
 	if (!user) {
-		return <NotFound message="Авторизуйтесь для продовження роботи" />;
+		return <NotFound message="Авторизуйтесь для продовження роботи." code="403" />;
 	}
 
 	return (
 		<div className="settings-container">
-			{successMessage && <div className="success-message">{successMessage}</div>}
-
 			<section className="settings-section">
 				<h2>Ім&apos;я користувача</h2>
 				<p className="settings-description">
 					Ваше ім&apos;я користувача, яке використовується лише для відображення в системі. Ім&apos;я, яке буде
 					відображатися для колег - <strong>{user?.username}</strong>
 				</p>
-				<form onSubmit={handleUsernameSubmit} className="settings-form">
+				<form onSubmit={(e) => handleFieldSubmit(e, "username", username)} className="settings-form">
 					<div className="form-group">
 						<input
 							type="text"
@@ -227,7 +199,7 @@ const SettingsPage = () => {
 				<p className="settings-description">
 					Змінити адресу електронної пошти - <strong>{user?.email}</strong>.
 				</p>
-				<form onSubmit={handleEmailSubmit} className="settings-form">
+				<form onSubmit={(e) => handleFieldSubmit(e, "email", email)} className="settings-form">
 					<div className="form-group">
 						<input
 							type="email"
@@ -269,24 +241,7 @@ const SettingsPage = () => {
 				</button>
 			</section>
 
-			<section className="settings-section">
-				<h2>Про себе</h2>
-				<p className="settings-description">Змінини інформацію та опис про себе.</p>
-				<form onSubmit={handleBioSubmit} className="settings-form">
-					<div className="form-group">
-						<input
-							type="bio"
-							className="form-input"
-							defaultValue={user?.bio}
-							onChange={(e) => setBio(e.target.value)}
-							required
-						/>
-					</div>
-					<button type="submit" className="btn-primary">
-						Оновити інформацію про себе
-					</button>
-				</form>
-			</section>
+			<BioSection user={user} handleFieldSubmit={handleFieldSubmit} />
 		</div>
 	);
 };

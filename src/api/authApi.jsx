@@ -1,26 +1,28 @@
-import axios from './axiosConfig';
+import axios from "./axiosConfig";
 
 export const registration = async (email, username, password) => {
 	try {
-		const response = await axios.post('/auth/register', {
+		const response = await axios.post("/auth/register", {
 			email,
 			username,
 			password,
 		});
 		return response.data;
 	} catch (error) {
-		console.error('Error registering', error);
+		console.error("Помилка реєстрації:", error);
 		throw error;
 	}
 };
 
 export const login = async (email, password) => {
+	let response;
 	try {
-		const response = await axios.post(`/auth/login`, { email, password });
-		return response.data.token;
+		response = await axios.post(`/auth/login`, { email, password });
+		return { token: response.data.token };
 	} catch (error) {
-		console.error('Error logging in', error);
-		throw error;
+		console.error("Помилка авторизації:", error);
+
+		return { error: error.response.data.error };
 	}
 };
 
@@ -29,7 +31,7 @@ export const updatePassword = async (currentPassword, newPassword) => {
 		const response = await axios.post(`/password`, { currentPassword, newPassword });
 		return response.data;
 	} catch (error) {
-		console.error('Error updating password', error);
+		console.error("Помилка оновлення пароля:", error);
 		throw error;
 	}
 };
@@ -39,7 +41,7 @@ export const forgotPassword = async () => {
 		const response = await axios.post(`/forgotPassword`, {});
 		return response.data;
 	} catch (error) {
-		console.error('Error restoring forgotten password', error);
+		console.error("Помилка відновлення пароля:", error);
 		throw error;
 	}
 };
@@ -49,7 +51,7 @@ export const resetPassword = async () => {
 		const response = await axios.post(`/forgotPassword`, {});
 		return response.data;
 	} catch (error) {
-		console.error('Error reseting password', error);
+		console.error("Помилка скидання пароля:", error);
 		throw error;
 	}
 };

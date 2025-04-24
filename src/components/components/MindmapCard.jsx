@@ -1,22 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Background, ReactFlow } from "reactflow";
 import { useNavigate } from "react-router-dom";
 import StaticMindmap from "./StaticMindmap";
 import { useAuth } from "./../../utils/authContext";
 import * as api from "./../../api";
-
-import { GoHeartFill } from "react-icons/go";
-import { GoHeart } from "react-icons/go";
-import { FaUsers } from "react-icons/fa";
-import { FaUsersSlash } from "react-icons/fa";
-import { MdPublic } from "react-icons/md";
-import { MdPublicOff } from "react-icons/md";
+import { Card, CardContent, CardMedia, Typography, Box, Stack, IconButton, Avatar } from "@mui/material";
+import { MdOutlineDateRange, MdPublic, MdPublicOff } from "react-icons/md";
 import { RxUpdate } from "react-icons/rx";
-import { MdOutlineDateRange } from "react-icons/md";
-import { FaRegUserCircle } from "react-icons/fa";
+import { GoHeartFill, GoHeart } from "react-icons/go";
+import { FaUsers } from "react-icons/fa";
+import PropTypes from "prop-types";
 
 const MindmapCard = ({ mindmap, onEdit }) => {
-	const { isLoggedIn, user } = useAuth();
+	const { user } = useAuth();
 	const [isFavorite, setIsFavorite] = useState(false);
 	const navigate = useNavigate();
 
@@ -24,23 +19,20 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 		const fetchFavorite = async () => {
 			try {
 				const response = await api.getFavorite(user._id, mindmap._id);
-				if (response) {
-					setIsFavorite(true);
-				} else {
-					setIsFavorite(true);
-				}
-			} catch (error) {
+				setIsFavorite(!!response);
+			} catch {
 				setIsFavorite(false);
 			}
 		};
 		fetchFavorite();
-	}, []);
+	}, [user?._id, mindmap._id]);
 
 	const handleClick = () => {
 		navigate(`/mindmap/${mindmap._id}`);
 	};
 
-	const handleUserClick = () => {
+	const handleUserClick = (e) => {
+		e.stopPropagation();
 		navigate(`/profile/${mindmap.owner._id}`);
 	};
 
@@ -62,95 +54,225 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 		try {
 			if (isFavorite) {
 				await api.deleteFavorite(user._id, mindmap._id);
-				console.log("Mindmap removed from favorites");
 			} else {
 				await api.addFavorite(user._id, mindmap._id);
-				console.log("Mindmap added to favorites");
 			}
 			setIsFavorite(!isFavorite);
 		} catch (error) {
-			console.log("Error toggling favorite:" + error.message);
+			console.error("Error toggling favorite:", error);
 		}
 	};
 
 	return (
-		<div
-			onClick={onEdit}
-			style={{
-				border: "1px solid #ddd",
-				borderRadius: "8px",
-				padding: "15px",
-				cursor: "pointer",
-				transition: "all 0.2s ease",
+		<Box
+			sx={{
+				width: "100%",
+				height: "100%",
 				display: "flex",
 				flexDirection: "column",
-				backgroundColor: "#ffffff",
-			}}
-			onMouseEnter={(e) => {
-				e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.1)";
-				e.currentTarget.style.backgroundColor = "#f9f9f9";
-			}}
-			onMouseLeave={(e) => {
-				e.currentTarget.style.boxShadow = "none";
-				e.currentTarget.style.backgroundColor = "#ffffff";
+				position: "relative",
 			}}
 		>
-			<div style={{ display: "flex", justifyContent: "space-between", alignItems: "stretch", gap: "20px" }}>
-				<div style={{ width: "100%", height: "200px", minWidth: "200px" }}>
-					<StaticMindmap nodes={mindmap.nodes} edges={mindmap.edges} panOnDrag={false} />
-				</div>
-
-				<div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-					<div>
-						<h3 onClick={handleClick} style={{ margin: "0 0 8px 0" }}>
-							{mindmap.title || "Untitled Mindmap"}
-						</h3>
-						<p style={{ margin: "0 0 10px 0", color: "#555" }}>{mindmap.description || "No description"}</p>
-					</div>
-
-					<div style={{ marginTop: "auto" }}>
-						<div
-							style={{
-								display: "flex",
-								fontSize: "0.8rem",
-								color: "#888",
-								justifyContent: "space-between",
+			<Box
+				sx={{
+					position: "absolute",
+					top: 8,
+					right: 8,
+					display: "flex",
+					gap: 1,
+					zIndex: 2,
+					backgroundColor: "rgba(255, 255, 255, 0.9)",
+					padding: "4px 8px",
+					borderRadius: "12px",
+				}}
+			>
+				<IconButton
+					size="small"
+					onClick={(e) => {
+						e.stopPropagation();
+						toggleFavorite();
+					}}
+					sx={{
+						color: isFavorite ? "red" : "inherit",
+						"&:hover": {
+							backgroundColor: "rgba(0, 0, 0, 0.04)",
+						},
+					}}
+				>
+					{isFavorite ? <GoHeartFill /> : <GoHeart />}
+				</IconButton>
+				<IconButton
+					size="small"
+					sx={{
+						color: mindmap.isPublic ? "primary.main" : "inherit",
+						"&:hover": {
+							backgroundColor: "rgba(0, 0, 0, 0.04)",
+						},
+					}}
+				>
+					{mindmap.isPublic ? <MdPublic /> : <MdPublicOff />}
+				</IconButton>
+			</Box>
+			<Card
+				sx={{
+					width: "100%",
+					height: "100%",
+					display: "flex",
+					flexDirection: "column",
+					transition: "transform 0.2s",
+					"&:hover": {
+						transform: "scale(1.02)",
+						cursor: "pointer",
+					},
+				}}
+				onClick={onEdit}
+			>
+				<CardMedia
+					sx={{
+						height: 200,
+						position: "relative",
+						overflow: "hidden",
+						flexShrink: 0,
+					}}
+				>
+					<Box
+						sx={{
+							width: "100%",
+							height: "100%",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							backgroundColor: "#f5f5f5",
+						}}
+					>
+						<StaticMindmap nodes={mindmap.nodes} edges={mindmap.edges} panOnDrag={false} />
+					</Box>
+				</CardMedia>
+				<CardContent
+					sx={{
+						flexGrow: 1,
+						display: "flex",
+						flexDirection: "column",
+						overflow: "hidden",
+					}}
+				>
+					<Box
+						sx={{
+							display: "flex",
+							alignItems: "center",
+							gap: 1,
+							mb: 1,
+						}}
+					>
+						<Avatar
+							sx={{
+								width: 32,
+								height: 32,
+								cursor: "pointer",
+								"&:hover": {
+									opacity: 0.8,
+								},
+							}}
+							onClick={handleUserClick}
+							src={mindmap.owner?.avatar}
+							alt={mindmap.owner?.username || "User"}
+						>
+							{(mindmap.owner?.username || "U")[0].toUpperCase()}
+						</Avatar>
+						<Typography
+							variant="subtitle2"
+							onClick={handleUserClick}
+							sx={{
+								cursor: "pointer",
+								"&:hover": {
+									color: "primary.main",
+								},
 							}}
 						>
-							<div>
-								<MdOutlineDateRange /> {new Date(mindmap.createdAt).toLocaleDateString()}
-							</div>
-							{mindmap.lastModified && (
-								<div>
-									<RxUpdate />
-									{new Date(mindmap.lastModified).toLocaleDateString()}
-								</div>
-							)}
-						</div>
-
-						<div>{mindmap.isPublic ? <MdPublic /> : <MdPublicOff />}</div>
-
-						<div>
-							<FaRegUserCircle /> <strong onClick={handleUserClick}>{mindmap.owner.username}</strong>
-						</div>
-
-						{isLoggedIn && <div onClick={toggleFavorite}>{isFavorite ? <GoHeartFill /> : <GoHeart />}</div>}
-
-						<div>
-							{mindmap.participants.length !== 0 ? (
-								<div>
-									<FaUsers />
-									{mindmap.participants.length} {getParticipantWord(mindmap.participants.length)}
-								</div>
-							) : (
-								<FaUsersSlash />
-							)}
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+							{mindmap.owner?.username || "Unknown User"}
+						</Typography>
+					</Box>
+					<Typography
+						gutterBottom
+						variant="h5"
+						component="div"
+						onClick={handleClick}
+						sx={{
+							"&:hover": {
+								color: "primary.main",
+							},
+							overflow: "hidden",
+							textOverflow: "ellipsis",
+							whiteSpace: "nowrap",
+						}}
+					>
+						{mindmap.title || "Untitled Mindmap"}
+					</Typography>
+					<Typography
+						variant="body2"
+						color="text.secondary"
+						sx={{
+							mb: 2,
+							flexGrow: 1,
+							display: "-webkit-box",
+							WebkitLineClamp: 3,
+							WebkitBoxOrient: "vertical",
+							overflow: "hidden",
+							textOverflow: "ellipsis",
+						}}
+					>
+						{mindmap.description || "No description"}
+					</Typography>
+					<Stack
+						direction="row"
+						spacing={2}
+						alignItems="center"
+						sx={{
+							color: "text.secondary",
+							mt: "auto",
+						}}
+					>
+						<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+							<FaUsers />
+							<Typography variant="caption">
+								{mindmap.participants?.length || 0} {getParticipantWord(mindmap.participants?.length || 0)}
+							</Typography>
+						</Box>
+						<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+							<MdOutlineDateRange />
+							<Typography variant="caption">{new Date(mindmap.createdAt).toLocaleDateString()}</Typography>
+						</Box>
+						{mindmap.lastModified && (
+							<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+								<RxUpdate />
+								<Typography variant="caption">{new Date(mindmap.lastModified).toLocaleDateString()}</Typography>
+							</Box>
+						)}
+					</Stack>
+				</CardContent>
+			</Card>
+		</Box>
 	);
+};
+
+MindmapCard.propTypes = {
+	mindmap: PropTypes.shape({
+		_id: PropTypes.string.isRequired,
+		title: PropTypes.string,
+		description: PropTypes.string,
+		createdAt: PropTypes.string.isRequired,
+		lastModified: PropTypes.string,
+		nodes: PropTypes.array.isRequired,
+		edges: PropTypes.array.isRequired,
+		owner: PropTypes.shape({
+			_id: PropTypes.string.isRequired,
+			name: PropTypes.string,
+			avatar: PropTypes.string,
+		}).isRequired,
+		isPublic: PropTypes.bool,
+		participants: PropTypes.array,
+	}).isRequired,
+	onEdit: PropTypes.func.isRequired,
 };
 
 export default MindmapCard;

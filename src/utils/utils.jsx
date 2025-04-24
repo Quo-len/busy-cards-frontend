@@ -78,7 +78,7 @@ export const logout = () => {
 export const isTokenExpired = () => {
 	const token = getAuthTokenFromCookies();
 
-	if (!token) {
+	if (!token || token === "undefined") {
 		console.error("Token is missing.");
 		return true;
 	}
