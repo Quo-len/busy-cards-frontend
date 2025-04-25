@@ -1,0 +1,198 @@
+/* MindmapCard.css */
+.mindmap-card-container {
+	position: relative;
+	width: 700px;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}
+
+.mindmap-card-actions {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	display: flex;
+	gap: 0.5rem;
+	z-index: 10;
+	background-color: rgba(255, 255, 255, 0.9);
+	padding: 4px 8px;
+	border-radius: 12px;
+}
+
+.icon-button {
+	background: none;
+	border: none;
+	cursor: pointer;
+	border-radius: 50%;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.2s ease;
+	color: #666;
+}
+
+.icon-button:hover {
+	background-color: rgba(0, 0, 0, 0.04);
+}
+
+.favorite-active {
+	color: #e53e3e;
+}
+
+.public-icon {
+	color: #3182ce;
+}
+
+.mindmap-card {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	transition: transform 0.2s ease;
+	background: #ffffff;
+	font-family: "Roboto", sans-serif;
+}
+
+.mindmap-card:hover {
+	transform: scale(1.02);
+	cursor: pointer;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.mindmap-preview {
+	height: 200px;
+	background-color: #f5f5f5;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	position: relative;
+}
+
+.mindmap-content {
+	padding: 1rem;
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.mindmap-user {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 0.75rem;
+	cursor: pointer;
+}
+
+.mindmap-avatar {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	overflow: hidden;
+	background: linear-gradient(to right, #3182ce, #805ad5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #ffffff;
+	font-weight: 600;
+}
+
+.mindmap-avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.avatar-placeholder {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.mindmap-username {
+	font-weight: 500;
+	font-size: 0.9rem;
+	transition: color 0.2s ease;
+}
+
+.mindmap-user:hover .mindmap-username {
+	color: #3182ce;
+}
+
+.mindmap-title {
+	font-size: 1.3rem;
+	margin: 0 0 0.5rem 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	transition: color 0.2s ease;
+}
+
+.mindmap-title:hover {
+	color: #3182ce;
+}
+
+.mindmap-description {
+	flex-grow: 1;
+	color: #666;
+	font-size: 0.9rem;
+	margin-bottom: 1rem;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.mindmap-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+	margin-top: auto;
+}
+
+.meta-item {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	color: #666;
+	font-size: 0.8rem;
+}
+
+.meta-icon {
+	font-size: 1rem;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+	.mindmap-preview {
+		height: 160px;
+	}
+
+	.mindmap-content {
+		padding: 0.75rem;
+	}
+
+	.mindmap-title {
+		font-size: 1.1rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.mindmap-meta {
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.mindmap-avatar {
+		width: 28px;
+		height: 28px;
+	}
+}

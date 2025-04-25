@@ -1,25 +1,28 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import * as api from "./../../api";
-import "../styles/ProfilePage.css";
 import MindmapList from "../../components/components/MindmapList";
 import Loader from "../../components/components/Loader";
 import NotFoundPage from "./NotFoundPage";
 import { PiGraphBold } from "react-icons/pi";
+import "../styles/ProfilePage.css";
 
 const ProfilePage = () => {
 	const { userId } = useParams();
 	const [user, setUser] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
 
+	const [sortBy, setSortBy] = useState("lastModified");
+	const [sortOrder, setSortOrder] = useState("desc");
+	const [itemsPerPage, setItemsPerPage] = useState(5);
+
 	useEffect(() => {
 		const fetchUser = async () => {
 			try {
 				const response = await api.getUser(userId);
 				setUser(response);
-				console.log(response);
 			} catch (error) {
-				console.log("Failed to get user");
+				console.log("Failed to get user: " + error.response);
 			}
 			setIsLoading(false);
 		};
@@ -33,6 +36,17 @@ const ProfilePage = () => {
 			document.title = `Профіль: ${user?.username} - Busy-cards`;
 		}
 	}, [user]);
+
+	const filters = useMemo(
+		() => ({
+			sortBy: sortBy,
+			sortOrder: sortOrder,
+			itemsPerPage: itemsPerPage,
+			owner: user?._id,
+			isPublic: true,
+		}),
+		[sortBy, sortOrder, itemsPerPage, user]
+	);
 
 	if (isLoading) {
 		return <Loader message="Завантаження профілю користувача, зачекайте" flexLayout="true" fullPage="true" />;
@@ -92,7 +106,50 @@ const ProfilePage = () => {
 					<PiGraphBold className="logo" />
 					<h3>Інтелект-карти користувача</h3>
 				</div>
-				<MindmapList userId={userId} />
+				<div className="mindmaps-content">
+					<div className="mindmaps-list-container">
+						<MindmapList filters={filters} />
+					</div>
+					<div className="profile-filters-panel">
+						<h3 className="profile-filters-title">Фільтри</h3>
+						<div className="profile-filters-group">
+							<div className="profile-filter-item">
+								<label htmlFor="sort-filter">Сортування:</label>
+								<select
+									id="sort-filter"
+									value={`${sortBy}-${sortOrder}`}
+									onChange={(e) => {
+										const [newSortBy, newSortOrder] = e.target.value.split("-");
+										setSortBy(newSortBy);
+										setSortOrder(newSortOrder);
+									}}
+								>
+									<option value="lastModified-desc">Останні зміни</option>
+									<option value="lastModified-asc">Найстаріші зміни</option>
+									<option value="createdAt-desc">Нещодавно створені</option>
+									<option value="createdAt-asc">Найстаріші створення</option>
+									<option value="title-asc">Назва (А-Я)</option>
+									<option value="title-desc">Назва (Я-А)</option>
+								</select>
+							</div>
+
+							<div className="profile-filter-item">
+								<label htmlFor="items-per-page">Елементів на сторінці:</label>
+								<select
+									id="items-per-page"
+									value={itemsPerPage}
+									onChange={(e) => {
+										setItemsPerPage(parseInt(e.target.value));
+									}}
+								>
+									<option value={5}>5</option>
+									<option value={10}>10</option>
+									<option value={20}>20</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	);

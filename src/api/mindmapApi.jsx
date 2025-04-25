@@ -1,13 +1,17 @@
 import axios from "./axiosConfig";
 
-export const getPaginatedMindmaps = async (currentPage, itemsPerPage, sortBy, sortOrder) => {
+export const getPaginatedMindmaps = async (data) => {
 	try {
 		const response = await axios.get("/mindmaps", {
 			params: {
-				page: currentPage,
-				limit: itemsPerPage,
-				sortBy: sortBy,
-				order: sortOrder,
+				page: data.currentPage,
+				limit: data.itemsPerPage,
+				sortBy: data.sortBy,
+				sortOrder: data.sortOrder,
+				owner: data.owner,
+				participant: data.participant,
+				isPublic: data.isPublic,
+				favorite: data.favorite,
 			},
 		});
 		return response.data;

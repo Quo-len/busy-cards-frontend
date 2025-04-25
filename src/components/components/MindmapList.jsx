@@ -9,7 +9,7 @@ import Loader from "../../components/components/Loader";
 import Empty from "../../components/components/Empty";
 
 const categoryEndpoints = {
-	my: "/api/mindmaps/my",
+	mindmaps: "/api/mindmaps/my",
 	shared: "/api/mindmaps/shared",
 	favorites: "/api/mindmaps/favorites",
 	public: "/api/mindmaps/public",
@@ -21,7 +21,7 @@ function useQuery() {
 	return new URLSearchParams(useLocation().search);
 }
 
-const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
+const MindmapList = ({ filters, onEditMindmap, refreshTrigger }) => {
 	const navigate = useNavigate();
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -34,15 +34,16 @@ const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
 	const [itemsPerPage, setItemsPerPage] = useState(5);
 	const [totalPages, setTotalPages] = useState(0);
 
-	const [sortBy, setSortBy] = useState("lastModified");
-	const [sortOrder, setSortOrder] = useState("desc");
-
 	useEffect(() => {
 		const fetchMindmaps = async () => {
 			setIsLoading(true);
 			setError(null);
 			try {
-				const data = await api.getPaginatedMindmaps(currentPage, itemsPerPage, sortBy, sortOrder);
+				let data;
+				data = await api.getPaginatedMindmaps({
+					currentPage: currentPage,
+					...filters,
+				});
 
 				setMindmaps(data.mindmaps);
 
@@ -61,11 +62,7 @@ const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
 			top: 0,
 			behavior: "smooth",
 		});
-	}, [categoryType, refreshTrigger, currentPage, itemsPerPage, sortBy, sortOrder]);
-
-	useEffect(() => {
-		navigate(`?page=${1}`);
-	}, []);
+	}, [refreshTrigger, filters, currentPage]);
 
 	useEffect(() => {
 		navigate(`?page=${1}`);
@@ -88,41 +85,6 @@ const MindmapList = ({ categoryType, onEditMindmap, refreshTrigger }) => {
 
 	return (
 		<div className="mindmap-list-container">
-			<div className="filters-container">
-				<div className="sort-filter">
-					<span>Сортування за: </span>
-					<select
-						value={`${sortBy}-${sortOrder}`}
-						onChange={(e) => {
-							const [newSortBy, newSortOrder] = e.target.value.split("-");
-							setSortBy(newSortBy);
-							setSortOrder(newSortOrder);
-						}}
-					>
-						<option value="lastModified-desc">Останні зміни</option>
-						<option value="lastModified-asc">Найстаріші зміни</option>
-						<option value="createdAt-desc">Нещодавно створені</option>
-						<option value="createdAt-asc">Найстаріші створення</option>
-						<option value="title-asc">Назва (А-Я)</option>
-						<option value="title-desc">Назва (Я-А)</option>
-					</select>
-				</div>
-
-				<div className="items-per-page">
-					<span>Кількість елементів: </span>
-					<select
-						value={itemsPerPage}
-						onChange={(e) => {
-							setItemsPerPage(e.target.value);
-						}}
-					>
-						<option value={5}>5</option>
-						<option value={10}>10</option>
-						<option value={20}>20</option>
-					</select>
-				</div>
-			</div>
-
 			<div className="mindmap-cards">
 				{mindmaps.map((mindmap) => (
 					<MindmapCard key={mindmap._id} onEdit={() => onEditMindmap(mindmap)} mindmap={mindmap} />

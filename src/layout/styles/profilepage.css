@@ -108,6 +108,9 @@
 
 .mindmaps-section {
 	margin-top: 3rem;
+	position: relative;
+	display: flex;
+	flex-direction: column;
 }
 
 .section-title {
@@ -119,6 +122,77 @@
 	padding-bottom: 0.5rem;
 	display: flex;
 	align-items: center;
+}
+
+/* New layout for mindmaps section with sticky filters */
+.mindmaps-content {
+	display: flex;
+	gap: 2rem;
+}
+
+.mindmaps-list-container {
+	flex: 1;
+}
+
+.profile-filters-panel {
+	width: 250px;
+	position: sticky;
+	top: 5rem;
+	align-self: flex-start;
+	background-color: #f8fafc;
+	border-radius: 0.5rem;
+	padding: 1.5rem;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+	margin-left: 2rem;
+	height: fit-content;
+}
+
+.profile-filters-title {
+	font-size: 1.2rem;
+	font-weight: 600;
+	margin-bottom: 1rem;
+	color: #4a5568;
+	padding-bottom: 0.5rem;
+	border-bottom: 1px solid #e2e8f0;
+}
+
+.profile-filters-group {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.profile-filter-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.profile-filter-item label {
+	font-size: 0.9rem;
+	font-weight: 500;
+	color: #4a5568;
+}
+
+.profile-filter-item select {
+	padding: 0.5rem;
+	border-radius: 0.25rem;
+	border: 1px solid #e2e8f0;
+	background-color: white;
+	color: #2d3748;
+	font-size: 0.9rem;
+	cursor: pointer;
+	transition: border-color 0.2s ease;
+}
+
+.profile-filter-item select:hover {
+	border-color: #cbd5e0;
+}
+
+.profile-filter-item select:focus {
+	outline: none;
+	border-color: #805ad5;
+	box-shadow: 0 0 0 3px rgba(128, 90, 213, 0.2);
 }
 
 /* Responsive styles */
@@ -146,6 +220,18 @@
 	.profile-username {
 		text-align: center;
 		font-size: 2rem;
+	}
+
+	.mindmaps-content {
+		flex-direction: column;
+	}
+
+	.profile-filters-panel {
+		position: static;
+		width: 100%;
+		margin-left: 0;
+		margin-bottom: 1.5rem;
+		order: -1;
 	}
 }
 
