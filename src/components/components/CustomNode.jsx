@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { Handle, Position, NodeResizer, NodeToolbar } from "reactflow";
-import "../styles/customnode.css";
+import "../styles/CustomNode.css";
 
 // Node colors
 const nodeColors = {

@@ -37,7 +37,7 @@ const ParticipantList = ({ mindmap, isEditable }) => {
 			<div className="participants-wrapper">
 				{(() => {
 					if (isLoading) {
-						return <Loader message="Завантаження учасників, зачекайте" />;
+						return <Loader message="Завантаження учасників, зачекайте." flexLayout="true" />;
 					}
 
 					if (participants.length === 0) {

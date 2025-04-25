@@ -2,12 +2,12 @@ import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
-import NotFound from "../../components/components/NotFound";
+import NotFoundPage from "../pages/NotFoundPage";
 import Loader from "../../components/components/Loader";
 import { useAuth } from "./../../utils/authContext";
 import "./../styles/SettingsPage.css";
 import * as api from "./../../api";
-import BioSection from "./../../components/components/BioSection";
+//import BioSection from "./../../components/components/BioSection";
 
 const SettingsPage = () => {
 	const navigate = useNavigate();
@@ -100,8 +100,6 @@ const SettingsPage = () => {
 		if (window.confirm("Ви впевнені, що хочете видалити свій обліковий запис? Цю дію не можна скасувати.")) {
 			try {
 				await api.updateUser(user.id);
-
-				console.log("Account deleted");
 				logoutUser();
 				toast.success(`Профіль успішно видалено.`);
 			} catch (error) {
@@ -111,11 +109,11 @@ const SettingsPage = () => {
 	};
 
 	if (isLoading) {
-		return <Loader message="Завантаження налаштувань, зачекайте." />;
+		return <Loader message="Завантаження налаштувань, зачекайте." flexLayout="true" fullPage="true" />;
 	}
 
 	if (!user) {
-		return <NotFound message="Авторизуйтесь для продовження роботи." code="403" />;
+		return <NotFoundPage message="Авторизуйтесь для продовження роботи." code="403" />;
 	}
 
 	return (
@@ -241,7 +239,7 @@ const SettingsPage = () => {
 				</button>
 			</section>
 
-			<BioSection user={user} handleFieldSubmit={handleFieldSubmit} />
+			{/* <BioSection user={user} handleFieldSubmit={handleFieldSubmit} /> */}
 		</div>
 	);
 };

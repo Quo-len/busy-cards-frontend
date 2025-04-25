@@ -1,5 +1,31 @@
 import React from "react";
 import "./../styles/Empty.css";
+import { PiEmptyBold } from "react-icons/pi";
+
+const EmptyIcon = () => (
+	<div className="custom-empty-icon">
+		<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" className="empty-circle-animation">
+			<defs>
+				<linearGradient id="emptyGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+					<stop offset="0%" stopColor="#3182ce" />
+					<stop offset="100%" stopColor="#805ad5" />
+				</linearGradient>
+			</defs>
+			<circle
+				cx="100"
+				cy="100"
+				r="80"
+				fill="none"
+				stroke="url(#emptyGradient)"
+				strokeWidth="8"
+				strokeDasharray="15 8"
+			/>
+		</svg>
+		<div className="empty-icon-center">
+			<PiEmptyBold size={60} />
+		</div>
+	</div>
+);
 
 const Empty = ({
 	message = "Вміст не знайдено",
@@ -14,22 +40,20 @@ const Empty = ({
 }) => {
 	return (
 		<div className={`empty-container ${compact ? "compact" : ""} ${className}`} style={style}>
-			{icon && <div className="empty-icon">{icon}</div>}
+			<div className="empty-content">
+				<div className="empty-icon-container">{icon || <EmptyIcon />}</div>
 
-			<img
-				src="https://img.freepik.com/premium-vector/vector-illustration-about-concept-no-items-found-no-results-found_675567-6665.jpg"
-				alt="Немає даних"
-				className="empty-illustration"
-			/>
+				<div className="empty-text-container">
+					<div className="empty-message">{message}</div>
+					<div className="empty-description">{description}</div>
+				</div>
 
-			<div className="empty-message">{message}</div>
-			<div className="empty-description">{description}</div>
-
-			{showButton && (
-				<button className="empty-action-btn" onClick={onButtonClick}>
-					{buttonText}
-				</button>
-			)}
+				{showButton && (
+					<button className="empty-action-btn" onClick={onButtonClick}>
+						{buttonText}
+					</button>
+				)}
+			</div>
 		</div>
 	);
 };

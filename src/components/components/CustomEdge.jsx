@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, useReactFlow } from "reactflow";
 import { useWebSocket } from "../../utils/WebSocketContext";
-import "../styles/buttonedge.css";
+import "../styles/CustomEdge.css";
 
 const CustomEdge = ({
 	id,

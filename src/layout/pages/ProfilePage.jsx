@@ -35,7 +35,7 @@ const ProfilePage = () => {
 	}, [user]);
 
 	if (isLoading) {
-		return <Loader message="Завантаження профілю користувача, зачекайте" />;
+		return <Loader message="Завантаження профілю користувача, зачекайте" flexLayout="true" fullPage="true" />;
 	}
 
 	if (!user) {

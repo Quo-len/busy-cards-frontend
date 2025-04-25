@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import MindmapList from "../../components/components/MindmapList";
 import MindmapEditCard from "../../components/components/MindmapEditCard";
 import "./../styles/HomePage.css";
+import * as api from "../../api/";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const categories = [
 	{ id: "my", label: "Мої інтелект-карти", endpoint: "/api/mindmaps/my" },
@@ -11,11 +14,11 @@ const categories = [
 ];
 
 const HomePage = (props) => {
+	const navigate = useNavigate();
 	const [activeCategory, setActiveCategory] = useState("my");
 	const [selectedMindmap, setSelectedMindmap] = useState(null);
 	const [showEditor, setShowEditor] = useState(false);
 	const [refreshKey, setRefreshKey] = useState(0);
-
 	useEffect(() => {
 		const selectedCategory = categories.find((cat) => cat.id === activeCategory);
 		document.title = `${selectedCategory.label} - Busy-cards`;
@@ -28,6 +31,16 @@ const HomePage = (props) => {
 		} else {
 			setSelectedMindmap(null);
 			setShowEditor(false);
+		}
+	};
+
+	const handleCreateMindmap = async () => {
+		try {
+			const response = await api.createMindmap();
+			navigate(`/mindmap/${response._id}`);
+			toast.success(`Профіль успішно видалено.`);
+		} catch (error) {
+			toast.error(`Не вдалося видалити профіль: ${error.message}`);
 		}
 	};
 
@@ -46,6 +59,7 @@ const HomePage = (props) => {
 						</div>
 					))}
 				</div>
+				<button onClick={handleCreateMindmap}>Створити нову інтелект-карту</button>
 
 				{/* CENTER COLUMN: Mindmap list */}
 				<div className="mindmap-list-column">

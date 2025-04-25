@@ -1,10 +1,25 @@
 import React from "react";
+import "../styles/Loader.css";
 
-const Loader = ({ message = "Завантаження...", icon, style = {}, className = "" }) => {
+const Loader = ({ message = "Завантаження...", style = {}, className = "", fullPage = false, flexLayout = false }) => {
+	let containerClass = "loader-container";
+
+	if (fullPage) {
+		containerClass += " loader-fullpage";
+	} else if (flexLayout) {
+		containerClass += " loader-flex";
+	}
+
+	if (className) {
+		containerClass += ` ${className}`;
+	}
+
 	return (
-		<div className="no-mindmaps-placeholder-item">
-			<p>{message}</p>
-			<img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Loading_icon.gif" alt="empty" />
+		<div className={containerClass} style={style}>
+			<div className="loader-spinner">
+				<div className="loader-circle"></div>
+			</div>
+			<p className="loader-message">{message}</p>
 		</div>
 	);
 };

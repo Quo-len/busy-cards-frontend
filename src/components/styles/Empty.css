@@ -6,111 +6,187 @@
 	justify-content: center;
 	padding: 2rem;
 	text-align: center;
-	margin: 2rem auto;
-	max-width: 500px;
-	border-radius: 1rem;
-	background-color: #f7fafc;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-	transition: all 0.3s ease;
+	min-height: 300px;
+	font-family: "Roboto", sans-serif;
+	position: relative;
+	width: 100%;
 }
 
-.empty-container:hover {
-	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08), 0 3px 6px rgba(0, 0, 0, 0.12);
-	transform: translateY(-2px);
+.empty-container.compact {
+	min-height: 200px;
+	padding: 1.5rem;
 }
 
-.empty-icon {
-	font-size: 2.5rem;
-	margin-bottom: 1rem;
-	color: #a0aec0;
+.empty-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 450px;
+	animation: fadeIn 0.6s ease-in-out;
 }
 
-.empty-illustration {
-	width: 200px;
-	height: auto;
-	margin: 1.5rem 0;
-	border-radius: 0.5rem;
-	animation: float 3s ease-in-out infinite;
-	filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+.empty-icon-container {
+	margin-bottom: 1.5rem;
+	height: 140px;
+	width: 140px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.custom-empty-icon {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	animation: float 4s ease-in-out infinite;
+}
+
+.empty-circle-animation {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1;
+}
+
+.empty-circle-animation circle {
+	animation: dash 30s linear infinite;
+}
+
+.empty-icon-center {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	animation: pulse 2s ease-in-out infinite alternate;
+}
+
+.empty-icon-center svg {
+	fill: url(#emptyGradient);
+	color: #805ad5; /* Fallback color */
 }
 
 .empty-message {
-	font-size: 1.25rem;
+	font-size: 1.6rem;
 	font-weight: 600;
-	color: #4a5568;
-	margin-bottom: 0.5rem;
+	margin-bottom: 0.75rem;
 	background: linear-gradient(to right, #3182ce, #805ad5);
 	-webkit-background-clip: text;
 	background-clip: text;
-	color: transparent;
+	-webkit-text-fill-color: transparent;
+	letter-spacing: 0.02em;
 }
 
 .empty-description {
+	font-size: 1rem;
+	line-height: 1.5;
 	color: #718096;
 	margin-bottom: 1.5rem;
-	line-height: 1.6;
+	max-width: 360px;
 }
 
 .empty-action-btn {
 	padding: 0.6rem 1.5rem;
+	font-size: 0.9rem;
+	font-weight: 600;
+	border-radius: 6px;
+	border: none;
 	background: linear-gradient(to right, #3182ce, #805ad5);
 	color: white;
-	border: none;
-	border-radius: 0.5rem;
-	font-weight: 600;
 	cursor: pointer;
-	transition: all 0.2s ease;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-	display: inline-flex;
-	align-items: center;
+	transition: all 0.3s ease;
+	box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .empty-action-btn:hover {
-	transform: translateY(-1px);
-	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+	transform: translateY(-2px);
+	box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
 }
 
-.empty-action-btn:before {
-	content: "➕";
-	margin-right: 0.5rem;
+.empty-action-btn:active {
+	transform: translateY(1px);
 }
 
-.empty-container.compact {
-	padding: 1rem;
-	margin: 1rem auto;
-}
-
-.empty-container.compact .empty-illustration {
-	width: 150px;
-}
-
-.empty-container.compact .empty-message {
-	font-size: 1.1rem;
+/* Animations */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 @keyframes float {
 	0% {
-		transform: translateY(0px);
+		transform: translateY(0);
 	}
 	50% {
 		transform: translateY(-10px);
 	}
 	100% {
-		transform: translateY(0px);
+		transform: translateY(0);
+	}
+}
+
+@keyframes pulse {
+	0% {
+		opacity: 0.7;
+		transform: scale(0.95);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1.05);
+	}
+}
+
+@keyframes dash {
+	to {
+		stroke-dashoffset: 1000;
 	}
 }
 
 /* Responsive styles */
-@media (max-width: 640px) {
-	.empty-container {
-		padding: 1.5rem;
-	}
-
-	.empty-illustration {
-		width: 150px;
+@media (max-width: 768px) {
+	.empty-icon-container {
+		height: 120px;
+		width: 120px;
+		margin-bottom: 1.25rem;
 	}
 
 	.empty-message {
-		font-size: 1.1rem;
+		font-size: 1.4rem;
+	}
+
+	.empty-description {
+		font-size: 0.9rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.empty-container {
+		padding: 1.5rem 1rem;
+	}
+
+	.empty-icon-container {
+		height: 100px;
+		width: 100px;
+		margin-bottom: 1rem;
+	}
+
+	.empty-message {
+		font-size: 1.25rem;
+	}
+
+	.empty-container.compact {
+		min-height: 160px;
+		padding: 1rem;
 	}
 }

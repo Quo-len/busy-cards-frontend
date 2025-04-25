@@ -414,7 +414,7 @@ export default function Canvas() {
 	}, [nodes, selectedNodeId, connectionStartNodeId, invalidTargetNodes]);
 
 	if (isLoading) {
-		return <Loader message="Завантаження інтелект-карти, зачекайте" />;
+		return <Loader message="Завантаження інтелект-карти, будь ласка, зачекайте." flexLayout="false" />;
 	}
 
 	if (!mindmap) {
