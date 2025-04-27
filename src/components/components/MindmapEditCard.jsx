@@ -12,7 +12,7 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 	const [error, setError] = useState(null);
 	const [exportType, setExportType] = useState("png");
 
-	const isOwner = mindmap.owner._id === user._id;
+	const isOwner = mindmap.owner?._id === user?._id;
 
 	useEffect(() => {
 		setTitle(mindmap.title);

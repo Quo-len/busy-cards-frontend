@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useParams, useLocation } from "react-router-dom";
 import { ReactFlowProvider } from "reactflow";
-import Canvas from "./layout/pages/Canvas";
+import CanvasPage from "./layout/pages/Canvas";
 import Header from "./layout/pages/Header";
 import Footer from "./layout/pages/Footer";
 import { WebSocketProvider } from "./utils/WebSocketContext";
@@ -14,23 +14,11 @@ import SettingsPage from "./layout/pages/SettingsPage";
 import { AuthProvider } from "./utils/authContext";
 import { ToastContainer, Slide } from "react-toastify";
 
-function App() {
-	return (
-		<AuthProvider>
-			<Router>
-				<AppContent />
-			</Router>
-		</AuthProvider>
-	);
-}
-
 function AppContent() {
 	const location = useLocation();
 
-	// Define paths where Footer should not be shown
 	const noFooterPaths = ["/mindmap"];
 
-	// Check if current path starts with any of the paths in noFooterPaths
 	const shouldShowFooter = !noFooterPaths.some((path) => location.pathname.startsWith(path));
 
 	return (
@@ -43,7 +31,7 @@ function AppContent() {
 					<Route path="/signup/" element={<SignUpPage />} />
 					<Route path="/profile/:userId" element={<ProfilePage />} />
 					<Route path="/settings/" element={<SettingsPage />} />
-					<Route path="/mindmap/:mindmapId" element={<MindmapCanvasWrapper />} />
+					<Route path="/mindmap/:mindmapId" element={<CanvasPage />} />
 					<Route path="*" element={<NotFoundPage />} />
 				</Routes>
 				<ToastContainer
@@ -66,29 +54,13 @@ function AppContent() {
 	);
 }
 
-function MindmapCanvasWrapper() {
-	const { mindmapId } = useParams();
-
+function App() {
 	return (
-		<div
-			style={{
-				display: "flex",
-				flexDirection: "column",
-				height: "95vh",
-				width: "100vw",
-				overflow: "hidden",
-				top: 0,
-				left: 0,
-				right: 0,
-				bottom: 0,
-			}}
-		>
-			<WebSocketProvider mindmapId={mindmapId}>
-				<ReactFlowProvider>
-					<Canvas />
-				</ReactFlowProvider>
-			</WebSocketProvider>
-		</div>
+		<AuthProvider>
+			<Router>
+				<AppContent />
+			</Router>
+		</AuthProvider>
 	);
 }
 
