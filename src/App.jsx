@@ -1,10 +1,7 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route, useParams, useLocation } from "react-router-dom";
-import { ReactFlowProvider } from "reactflow";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import CanvasPage from "./layout/pages/Canvas";
 import Header from "./layout/pages/Header";
 import Footer from "./layout/pages/Footer";
-import { WebSocketProvider } from "./utils/WebSocketContext";
 import NotFoundPage from "./layout/pages/NotFoundPage";
 import HomePage from "./layout/pages/HomePage";
 import ProfilePage from "./layout/pages/ProfilePage";

@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import { Handle, Position } from "reactflow";
+import "../styles/ActorNode.css";
 
 const ActorNode = ({ id, data, selected }) => {
 	return (

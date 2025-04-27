@@ -1,5 +1,6 @@
 import React, { memo } from "react";
 import { Handle, Position } from "reactflow";
+import "../styles/ImageNode.css";
 
 const ImageNode = ({ id, data, selected }) => {
 	return (

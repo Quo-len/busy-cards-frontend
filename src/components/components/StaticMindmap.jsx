@@ -1,8 +1,8 @@
 import { useCallback, useMemo } from "react";
 import ReactFlow, { ReactFlowProvider, ConnectionMode } from "reactflow";
 import "reactflow/dist/style.css";
-import CustomNode from "./CustomNode";
-import CustomEdge from "./CustomEdge";
+import CustomNode from "../../diagram/components/CustomNode";
+import CustomEdge from "../../diagram/components/CustomEdge";
 
 const nodeTypes = { custom: CustomNode };
 const edgeTypes = { custom: CustomEdge };

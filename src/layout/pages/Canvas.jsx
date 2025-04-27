@@ -17,9 +17,12 @@ import { v4 as uuidv4 } from "uuid";
 
 import Draggable from "react-draggable"; // import the draggable component
 
+import { useNodeSearch } from "../../diagram/hooks/useNodeSearch";
+
 import Sidebar from "../../components/components/Sidebar";
-import CustomNode from "../../components/components/CustomNode";
-import CustomEdge from "../../components/components/CustomEdge";
+import CustomNode from "../../diagram/components/CustomNode";
+import ActorNode from "../../diagram/components/ActorNode";
+import CustomEdge from "../../diagram/components/CustomEdge";
 import Loader from "../../components/components/Loader";
 import NotFoundPage from "./../pages/NotFoundPage";
 import { useWebSocket, WebSocketProvider } from "../../utils/WebSocketContext";
@@ -28,12 +31,14 @@ import * as api from "../../api";
 import { DnDProvider, useDnD } from "../../utils/DnDContext";
 
 import DropBar from "../../diagram/components/DropBar";
+import SearchBar from "../../diagram/components/SearchBar";
 
 import CanvasControls from "../../diagram/components/CanvasControls";
 import CanvasMinimap from "../../diagram/components/CanvasMinimap";
 
 const nodeTypes = {
 	custom: CustomNode,
+	actor: ActorNode,
 };
 
 const edgeTypes = {
@@ -455,159 +460,15 @@ const Canvas = () => {
 		ydoc.getMap("nodes").set(newNode.id, newNode);
 	};
 
-	const searchNodes = (searchText, nodes) => {
-		if (!searchText || searchText.trim() === "") {
-			return []; // Return empty array if search text is empty
-		}
-
-		const normalizedSearchText = searchText.toLowerCase().trim();
-		const containsSearchText = (obj) => {
-			// Base case: if value is string, check if it contains search text
-			if (typeof obj === "string") {
-				return obj.toLowerCase().includes(normalizedSearchText);
-			}
-
-			// Base case: if value is number, convert to string and check
-			if (typeof obj === "number") {
-				return obj.toString().includes(normalizedSearchText);
-			}
-
-			// Skip if null or undefined
-			if (obj === null || obj === undefined) {
-				return false;
-			}
-
-			// For arrays, check if any element contains search text
-			if (Array.isArray(obj)) {
-				return obj.some((item) => containsSearchText(item));
-			}
-
-			// For objects, check all property values
-			if (typeof obj === "object") {
-				return Object.values(obj).some((value) => containsSearchText(value));
-			}
-
-			return false;
-		};
-
-		// Find all nodes that match the search text in any field
-		return nodes.filter((node) => {
-			// Check entire node object for search text
-			return containsSearchText(node);
-		});
-	};
-
-	const [searchQuery, setSearchQuery] = useState("");
-	const [searchResults, setSearchResults] = useState([]);
-	const [currentSearchIndex, setCurrentSearchIndex] = useState(-1);
-
-	const handleSearch = (event) => {
-		if (searchQuery === "") return;
-
-		const matchingNodes = searchNodes(searchQuery, nodes);
-		setSearchResults(matchingNodes);
-
-		// Highlight matching nodes (same as before)
-		if (searchQuery.trim() !== "") {
-			const matchingNodeIds = new Set(matchingNodes.map((node) => node.id));
-
-			if (matchingNodeIds.length > 0) setCurrentSearchIndex(-1);
-
-			setNodes((prevNodes) =>
-				prevNodes.map((node) => ({
-					...node,
-					style: {
-						...node.style,
-						...(matchingNodeIds.has(node.id)
-							? {
-									boxShadow: "0 0 10px #ff9900",
-									border: "2px solid #ff9900",
-							  }
-							: {}),
-					},
-				}))
-			);
-		} else {
-			// Reset highlighting
-			setNodes((prevNodes) =>
-				prevNodes.map((node) => ({
-					...node,
-					style: {
-						...node.style,
-						boxShadow: undefined,
-						border: undefined,
-					},
-				}))
-			);
-		}
-		navigateSearchResults(0);
-	};
-
-	const clearSearch = useCallback(() => {
-		setSearchQuery("");
-		setSearchResults([]);
-		setCurrentSearchIndex(0);
-
-		// Reset all node styles
-		setNodes((prevNodes) =>
-			prevNodes.map((node) => ({
-				...node,
-				style: {
-					...node.style,
-					boxShadow: undefined,
-					border: undefined,
-				},
-			}))
-		);
-	}, [setNodes]);
-
-	const navigateSearchResults = useCallback(
-		(direction) => {
-			if (searchResults.length === 0) return;
-
-			let newIndex;
-			if (direction > 0) {
-				newIndex = currentSearchIndex >= searchResults.length - 1 ? 0 : currentSearchIndex + 1;
-			} else if (direction < 0) {
-				newIndex = currentSearchIndex <= 0 ? searchResults.length - 1 : currentSearchIndex - 1;
-			} else {
-				newIndex = 0;
-			}
-
-			setCurrentSearchIndex(newIndex);
-
-			const targetNode = searchResults[newIndex];
-			if (targetNode) {
-				reactFlowInstance.setCenter(
-					targetNode.position.x + (targetNode.width || 0) / 2,
-					targetNode.position.y + (targetNode.height || 0) / 2,
-					{ zoom: 1.5, duration: 800 }
-				);
-
-				setNodes((prevNodes) =>
-					prevNodes.map((node) => ({
-						...node,
-						style: {
-							...node.style,
-							...(node.id === targetNode.id
-								? {
-										boxShadow: "0 0 15px #ff5500",
-										border: "3px solid #ff5500",
-										zIndex: 1000,
-								  }
-								: searchResults.some((r) => r.id === node.id)
-								? {
-										boxShadow: "0 0 10px #ff9900",
-										border: "2px solid #ff9900",
-								  }
-								: {}),
-						},
-					}))
-				);
-			}
-		},
-		[searchResults, currentSearchIndex, reactFlowInstance, setNodes]
-	);
+	const {
+		searchQuery,
+		setSearchQuery,
+		searchResults,
+		currentSearchIndex,
+		handleSearch,
+		clearSearch,
+		navigateSearchResults,
+	} = useNodeSearch(nodes, setNodes, reactFlowInstance);
 
 	if (isLoading) {
 		return <Loader message="Завантаження інтелект-карти, будь ласка, зачекайте." flexLayout="false" />;
@@ -681,47 +542,26 @@ const Canvas = () => {
 				{isOpen.minimap && (
 					<CanvasMinimap connectionStartNodeId={connectionStartNodeId} invalidTargetNodes={invalidTargetNodes} />
 				)}
-				{isOpen.leftBar && (
-					<div style={{ position: "absolute", left: 20, top: 150, zIndex: 10 }}>
-						<DropBar onAddNode={onAddNodeToCenter} />
-					</div>
-				)}
+
 				{isOpen.rightBar && <Sidebar />}
 				{isOpen.searchBar && (
-					<div>
-						<input
-							onChange={(e) => setSearchQuery(e.target.value)}
-							placeholder="Пошук по вузлах..."
-							style={{ position: "absolute", right: 10, top: 270, zIndex: 4 }}
-						></input>
-						<button onClick={handleSearch} style={{ position: "absolute", right: 10, top: 140, zIndex: 4 }}>
-							Знайти
-						</button>
-						<button
-							onClick={() => {
-								navigateSearchResults(-1);
-							}}
-							style={{ position: "absolute", right: 10, top: 170, zIndex: 4 }}
-						>
-							Минулий
-						</button>
-						<button
-							onClick={() => {
-								navigateSearchResults(+1);
-							}}
-							style={{ position: "absolute", right: 10, top: 200, zIndex: 4 }}
-						>
-							Наступний
-						</button>
-						<button onClick={clearSearch} style={{ position: "absolute", right: 10, top: 230, zIndex: 4 }}>
-							Очистити
-						</button>
-						<div style={{ position: "absolute", right: 10, top: 300, zIndex: 4 }}>
-							{currentSearchIndex + 1} із {searchResults.length}
-						</div>
-					</div>
+					<SearchBar
+						onSearch={handleSearch}
+						onClear={clearSearch}
+						onNavigatePrev={() => navigateSearchResults(-1)}
+						onNavigateNext={() => navigateSearchResults(+1)}
+						searchQuery={searchQuery}
+						setSearchQuery={setSearchQuery}
+						currentIndex={currentSearchIndex}
+						totalResults={searchResults.length}
+					/>
 				)}
 			</ReactFlow>
+			{isOpen.leftBar && (
+				<div style={{ position: "absolute", left: 20, top: 150, zIndex: 10 }}>
+					<DropBar onAddNode={onAddNodeToCenter} />
+				</div>
+			)}
 		</div>
 	);
 };

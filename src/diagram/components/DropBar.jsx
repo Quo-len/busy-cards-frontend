@@ -1,7 +1,8 @@
-import React from "react";
 import { useDnD } from "../../utils/DnDContext";
-import "../../components/styles/CustomNode.css";
 import "../styles/DropBar.css";
+
+import "../styles/CustomNode.css";
+import "../styles/ActorNode.css";
 
 const DropBar = ({ onAddNode }) => {
 	const [_, setType] = useDnD();
@@ -13,22 +14,8 @@ const DropBar = ({ onAddNode }) => {
 
 	return (
 		<aside>
-			<div className="description">You can drag these nodes to the pane on the right.</div>
-			<div
-				className="customnode"
-				onClick={() => onAddNode("custom")}
-				onDragStart={(event) => onDragStart(event, "custom")}
-				draggable
-			>
-				Input Node
-			</div>
-			<div
-				className="dndnode"
-				onClick={() => onAddNode("default")}
-				onDragStart={(event) => onDragStart(event, "default")}
-				draggable
-			>
-				Default Node
+			<div className="description">
+				Ви можете перетягнути ці вузли на панель праворуч або натиснути на них для додавання.
 			</div>
 			<div
 				className="customnode"
@@ -36,7 +23,7 @@ const DropBar = ({ onAddNode }) => {
 				onDragStart={(event) => onDragStart(event, "custom")}
 				draggable
 			>
-				Output Node
+				Вимога
 			</div>
 			<div
 				className="group"
@@ -44,7 +31,39 @@ const DropBar = ({ onAddNode }) => {
 				onDragStart={(event) => onDragStart(event, "group")}
 				draggable
 			>
-				Group
+				Група
+			</div>
+			<div
+				className="actor-node"
+				onClick={() => onAddNode("actor")}
+				onDragStart={(event) => onDragStart(event, "actor")}
+				draggable
+			>
+				Актор
+			</div>
+			<div
+				className="note-node"
+				onClick={() => onAddNode("note")}
+				onDragStart={(event) => onDragStart(event, "note")}
+				draggable
+			>
+				Замітка
+			</div>
+			<div
+				className="link-node"
+				onClick={() => onAddNode("link")}
+				onDragStart={(event) => onDragStart(event, "link")}
+				draggable
+			>
+				Посилання
+			</div>
+			<div
+				className="image-node"
+				onClick={() => onAddNode("image")}
+				onDragStart={(event) => onDragStart(event, "image")}
+				draggable
+			>
+				Зображення
 			</div>
 		</aside>
 	);

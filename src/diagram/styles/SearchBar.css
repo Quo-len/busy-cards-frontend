@@ -1,0 +1,122 @@
+/* SearchSidebar.css */
+.search-sidebar-container {
+	position: fixed;
+	top: 4rem;
+	left: 0;
+	right: 0;
+	display: flex;
+	justify-content: center;
+	z-index: 50;
+	pointer-events: none;
+}
+
+.search-sidebar {
+	width: 24rem;
+	max-width: 90%;
+	pointer-events: auto;
+}
+
+.search-sidebar-wrapper {
+	background-color: #ffffff;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	border-radius: 6px;
+	margin: 0.5rem;
+	border: 1px solid #e2e8f0;
+	overflow: hidden;
+}
+
+.search-sidebar-inner {
+	padding: 0.5rem;
+}
+
+.search-input-container {
+	display: flex;
+	align-items: center;
+	border: 1px solid #e2e8f0;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.search-input-container:focus-within {
+	border-color: #3182ce;
+	box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.2);
+}
+
+.search-sidebar-input {
+	flex-grow: 1;
+	padding: 0.5rem 0.75rem;
+	border: none;
+	outline: none;
+	font-size: 0.875rem;
+}
+
+.search-sidebar-controls {
+	display: flex;
+	background-color: #f8fafc;
+	border-left: 1px solid #e2e8f0;
+}
+
+.search-sidebar-button {
+	padding: 0.5rem;
+	background: transparent;
+	border: none;
+	color: #4a5568;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background-color 0.2s;
+}
+
+.search-sidebar-button:hover {
+	background-color: #edf2f7;
+}
+
+.search-sidebar-button:disabled {
+	color: #a0aec0;
+	cursor: not-allowed;
+}
+
+.search-sidebar-button svg {
+	width: 1.25rem;
+	height: 1.25rem;
+}
+
+.search-sidebar-results {
+	text-align: center;
+	font-size: 0.875rem;
+	padding: 0.25rem;
+	color: #4a5568;
+	background-color: #f8fafc;
+	margin-top: 0.25rem;
+	border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+	.search-sidebar {
+		max-width: 95%;
+	}
+
+	.search-sidebar-wrapper {
+		margin: 0.25rem;
+	}
+
+	.search-sidebar-inner {
+		padding: 0.375rem;
+	}
+
+	.search-sidebar-input {
+		padding: 0.375rem 0.5rem;
+		font-size: 0.8125rem;
+	}
+
+	.search-sidebar-button {
+		padding: 0.375rem;
+	}
+
+	.search-sidebar-button svg {
+		width: 1.125rem;
+		height: 1.125rem;
+	}
+}

@@ -1,57 +1,83 @@
-.dndflow {
-    flex-direction: column;
-    display: flex;
-    flex-grow: 1;
-    height: 100%;
-  }
-   
-  .dndflow aside {
-    border-right: 1px solid #eee;
-    padding: 15px 10px;
-    font-size: 12px;
-    background: #fcfcfc;
-  }
-   
-  .dndflow aside .description {
-    margin-bottom: 10px;
-  }
-   
-  .dndflow .dndnode {
-    height: 20px;
-    padding: 4px;
-    border: 1px solid #1a192b;
-    border-radius: 2px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: grab;
-  }
-   
-  .dndflow .dndnode.input {
-    border-color: #0041d0;
-  }
-   
-  .dndflow .dndnode.output {
-    border-color: #ff0072;
-  }
-   
-  .dndflow .reactflow-wrapper {
-    flex-grow: 1;
-    height: 100%;
-  }
-   
-  .dndflow .selectall {
-    margin-top: 10px;
-  }
-   
-  @media screen and (min-width: 768px) {
-    .dndflow {
-      flex-direction: row;
-    }
-   
-    .dndflow aside {
-      width: 20%;
-      max-width: 250px;
-    }
-  }
+/* DropBar.css */
+aside {
+	background-color: #f8f9fa;
+	color: #2d3748;
+	padding: 1.25rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	height: calc(100vh - 64px);
+	overflow-y: auto;
+	position: fixed;
+	top: 64px;
+	left: 0;
+	width: 300px;
+	font-family: "Roboto", sans-serif;
+	z-index: 90;
+	border-right: 1px solid #e2e8f0;
+}
+
+aside::-webkit-scrollbar {
+	width: 6px;
+}
+
+aside::-webkit-scrollbar-track {
+	background: #f1f1f1;
+	border-radius: 3px;
+}
+
+aside::-webkit-scrollbar-thumb {
+	background: #cbd5e0;
+	border-radius: 3px;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+	background: #a0aec0;
+}
+
+.description {
+	padding: 0.75rem 1rem;
+	background-color: #edf2f7;
+	border-radius: 6px;
+	margin-bottom: 0.75rem;
+	font-size: 0.9rem;
+	line-height: 1.5;
+	text-align: center;
+	color: #4a5568;
+	border-left: 3px solid #3182ce;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+	aside {
+		width: 260px;
+	}
+}
+
+@media (max-width: 768px) {
+	aside {
+		width: 240px;
+		padding: 1rem;
+	}
+
+	.description {
+		padding: 0.625rem;
+		font-size: 0.85rem;
+	}
+}
+
+@media (max-width: 576px) {
+	aside {
+		width: 220px;
+		padding: 0.875rem;
+	}
+}
+
+/* Adjust for different header heights on mobile if necessary */
+@media (max-width: 480px) {
+	aside {
+		top: 56px;
+		height: calc(100vh - 56px);
+	}
+}
