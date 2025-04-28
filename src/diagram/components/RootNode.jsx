@@ -1,10 +1,11 @@
 import React, { memo } from "react";
 import { Handle, Position } from "reactflow";
+import "../styles/RootNode.css";
 
 const RootNode = ({ id, data, selected }) => {
 	return (
-		<div className="root-node">
-			<div>{data.label}</div>
+		<div className="root-node nodrag">
+			<div className="root-node-content">{data.label}</div>
 			<Handle type="source" id="left" position={Position.Left} />
 			<Handle type="source" id="right" position={Position.Right} />
 			<Handle type="source" id="top" position={Position.Top} />

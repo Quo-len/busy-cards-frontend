@@ -95,6 +95,14 @@ const DropBar = () => {
 			>
 				Зображення
 			</div>
+			{/* <div
+				className="root-node"
+				onClick={() => onAddNodeToCenter("root")}
+				onDragStart={(event) => onDragStart(event, "root")}
+				draggable
+			>
+				Root
+			</div> */}
 		</aside>
 	);
 };

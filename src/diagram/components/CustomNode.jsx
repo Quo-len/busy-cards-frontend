@@ -38,8 +38,9 @@ const CustomNode = ({ id, data, selected }) => {
 			<Handle type="source" id="bottom" position={Position.Bottom} className="handle bottom" />
 
 			<NodeToolbar isVisible={data.toolbarVisible} position={data.toolbarPosition}>
-				<button>delete</button>
-				<button>copy</button>
+				<button>Видалити</button>
+				<button>Скопіювати</button>
+				<button>Вставити</button>
 			</NodeToolbar>
 		</div>
 	);

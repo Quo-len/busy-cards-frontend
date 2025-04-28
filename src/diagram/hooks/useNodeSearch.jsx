@@ -107,6 +107,19 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 		);
 	}, [setNodes]);
 
+	const navigateToNode = useCallback(
+		(targetNode) => {
+			if (targetNode) {
+				reactFlowInstance.setCenter(
+					targetNode.position.x + (targetNode.width || 0) / 2,
+					targetNode.position.y + (targetNode.height || 0) / 2,
+					{ zoom: 1.5, duration: 800 }
+				);
+			}
+		},
+		[reactFlowInstance]
+	);
+
 	const navigateSearchResults = useCallback(
 		(direction) => {
 			if (searchResults.length === 0) return;
@@ -124,11 +137,7 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 
 			const targetNode = searchResults[newIndex];
 			if (targetNode) {
-				reactFlowInstance.setCenter(
-					targetNode.position.x + (targetNode.width || 0) / 2,
-					targetNode.position.y + (targetNode.height || 0) / 2,
-					{ zoom: 1.5, duration: 800 }
-				);
+				navigateToNode(targetNode);
 
 				setNodes((prevNodes) =>
 					prevNodes.map((node) => ({
@@ -163,5 +172,6 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 		handleSearch,
 		clearSearch,
 		navigateSearchResults,
+		navigateToNode,
 	};
 };

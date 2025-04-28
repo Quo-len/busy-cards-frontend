@@ -69,6 +69,7 @@ const Canvas = () => {
 		handleSearch,
 		clearSearch,
 		navigateSearchResults,
+		navigateToNode,
 	} = useNodeSearch(nodes, setNodes, reactFlowInstance);
 
 	const updateIsOpen = (key, value) => {
@@ -129,6 +130,7 @@ const Canvas = () => {
 			if (!ydoc) return;
 
 			changes.forEach((change) => {
+				console.log(change);
 				if (change.type === "position") {
 					const node = nodes.find((n) => n.id === change.id);
 					if (node) {
@@ -140,7 +142,7 @@ const Canvas = () => {
 					}
 				}
 				if (change.type === "remove") {
-					if (change.type === "remove") {
+					if (change.id !== "-1") {
 						ydoc.getMap("nodes").delete(change.id);
 					}
 				}
@@ -416,6 +418,67 @@ const Canvas = () => {
 		event.dataTransfer.effectAllowed = "move";
 	};
 
+	const [buffer, setBuffer] = useState(null);
+
+	const copyToBuffer = (selectedNodeId) => {
+		const node = nodes.find((node) => node.id === selectedNodeId);
+
+		if (node) {
+			console.log("Copied node:", node);
+			setBuffer(node);
+		}
+	};
+
+	const pasteFromBuffer = () => {
+		if (buffer) {
+			const id = uuidv4();
+			const newNode = {
+				...buffer,
+				id: id,
+				position: {
+					x: buffer.position.x + 15,
+					y: buffer.position.y + 15,
+				},
+				data: {
+					...buffer.data,
+					label: buffer.data.label + "(копія)",
+				},
+			};
+
+			console.log("Pasted new node:", newNode);
+
+			ydoc.getMap("nodes").set(newNode.id, newNode);
+			setNodes((nds) => nds.concat(newNode));
+			setSelectedNodeId(id);
+			navigateToNode(newNode);
+		}
+	};
+
+	useEffect(() => {
+		const handleKeyDown = (event) => {
+			if (
+				(event.ctrlKey && event.key.toLowerCase() === "c") ||
+				event.key.toLowerCase() === "с" ||
+				event.key.toLowerCase() === "с"
+			) {
+				copyToBuffer(selectedNodeId);
+			}
+
+			if (
+				(event.ctrlKey && event.key.toLowerCase() === "v") ||
+				event.key.toLowerCase() === "м" ||
+				event.key.toLowerCase() === "м"
+			) {
+				pasteFromBuffer();
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => {
+			window.removeEventListener("keydown", handleKeyDown);
+		};
+	}, [ydoc, reactFlowInstance, setNodes, selectedNodeId, nodes, buffer]);
+
 	if (isLoading) {
 		return <Loader message="Завантаження інтелект-карти, будь ласка, зачекайте." flexLayout="false" />;
 	}
@@ -481,9 +544,11 @@ const Canvas = () => {
 				onDragStart={onDragStart}
 				onDragOver={onDragOver}
 				proOptions={{ hideAttribution: true }}
-				//	onlyRenderVisibleElements={true}
+				// onlyRenderVisibleElements={true}
 			>
-				<Background gap={10} color="#ccc" variant={BackgroundVariant.Dots} />
+				<Background id="1" gap={10} color="#f1f1f1" variant={BackgroundVariant.Lines} />
+
+				<Background id="2" gap={100} color="#ccc" variant={BackgroundVariant.Lines} />
 				<CanvasControls isOpen={isOpen} onUpdate={updateIsOpen} onCenter={handleToCenter} />
 				{isOpen.minimap && (
 					<CanvasMinimap connectionStartNodeId={connectionStartNodeId} invalidTargetNodes={invalidTargetNodes} />
