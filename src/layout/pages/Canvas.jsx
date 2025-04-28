@@ -15,57 +15,27 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
 
-import Draggable from "react-draggable"; // import the draggable component
-
-import { useNodeSearch } from "../../diagram/hooks/useNodeSearch";
-
-import Sidebar from "../../components/components/Sidebar";
-import CustomNode from "../../diagram/components/CustomNode";
-import ActorNode from "../../diagram/components/ActorNode";
-import CustomEdge from "../../diagram/components/CustomEdge";
 import Loader from "../../components/components/Loader";
 import NotFoundPage from "./../pages/NotFoundPage";
+
+import { createNodesAndEdges, isNodeDescendant } from "../../diagram/utils/utils";
 import { useWebSocket, WebSocketProvider } from "../../utils/WebSocketContext";
-import { createNodesAndEdges, isNodeDescendant } from "../../utils/utils";
+import { DnDProvider, useDnD } from "../../diagram/utils/DnDContext";
 import * as api from "../../api";
-import { DnDProvider, useDnD } from "../../utils/DnDContext";
 
-import DropBar from "../../diagram/components/DropBar";
+import Sidebar from "../../components/components/Sidebar";
 import SearchBar from "../../diagram/components/SearchBar";
-
+import DropBar from "../../diagram/components/DropBar";
 import CanvasControls from "../../diagram/components/CanvasControls";
 import CanvasMinimap from "../../diagram/components/CanvasMinimap";
 
-const nodeTypes = {
-	custom: CustomNode,
-	actor: ActorNode,
-};
-
-const edgeTypes = {
-	custom: CustomEdge,
-};
+import { useNodeSearch } from "../../diagram/hooks/useNodeSearch";
+import { nodeTypes, edgeTypes } from "../../diagram/components";
 
 const { nodes: initialNodes, edges: initialEdges } = createNodesAndEdges(0, 0);
 
 const Canvas = () => {
 	const { mindmapId } = useParams();
-	const [isLoading, setIsLoading] = useState(true);
-	const [type] = useDnD();
-
-	const [isOpen, setIsOpen] = useState({
-		leftBar: true,
-		rightBar: true,
-		searchBar: true,
-		minimap: true,
-	});
-
-	const updateIsOpen = (key, value) => {
-		setIsOpen((prev) => ({
-			...prev,
-			[key]: value,
-		}));
-	};
-
 	const [mindmap, setMindmap] = useState(null);
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -75,14 +45,44 @@ const Canvas = () => {
 	const [invalidTargetNodes, setInvalidTargetNodes] = useState([]);
 	const [connectionStartNodeId, setConnectionStartNodeId] = useState(null);
 
+	const [isLoading, setIsLoading] = useState(true);
+	const [type] = useDnD();
+
+	const { ydoc, provider } = useWebSocket();
+	const flowRef = useRef(null);
+	const { getNodes, getEdges, setViewport } = useReactFlow();
+
 	const reactFlowInstance = useReactFlow();
+
+	const [isOpen, setIsOpen] = useState({
+		leftBar: true,
+		rightBar: true,
+		searchBar: true,
+		minimap: true,
+	});
+
+	const {
+		searchQuery,
+		setSearchQuery,
+		searchResults,
+		currentSearchIndex,
+		handleSearch,
+		clearSearch,
+		navigateSearchResults,
+	} = useNodeSearch(nodes, setNodes, reactFlowInstance);
+
+	const updateIsOpen = (key, value) => {
+		setIsOpen((prev) => ({
+			...prev,
+			[key]: value,
+		}));
+	};
 
 	useEffect(() => {
 		const fetchMindmap = async () => {
 			try {
 				const response = await api.getMindmap(mindmapId);
 				setMindmap(response);
-				console.log(response);
 			} catch (error) {
 				console.log("Failed to get mindmap");
 			}
@@ -112,11 +112,15 @@ const Canvas = () => {
 		onChange,
 	});
 
-	// Use the WebSocket context
-	const { ydoc, provider } = useWebSocket();
+	const handleToCenter = useCallback(() => {
+		const flowWidth = flowRef.current?.clientWidth || window.innerWidth;
+		const flowHeight = flowRef.current?.clientHeight || window.innerHeight;
 
-	const flowRef = useRef(null);
-	const { getNodes, getEdges } = useReactFlow();
+		const x = flowWidth / 2;
+		const y = flowHeight / 2;
+
+		setViewport({ x, y, zoom: 1 }, { duration: 800 });
+	}, [setViewport, flowRef]);
 
 	const handleNodesChange = useCallback(
 		(changes) => {
@@ -125,36 +129,12 @@ const Canvas = () => {
 			if (!ydoc) return;
 
 			changes.forEach((change) => {
-				console.log(change);
-				if (change.resizing) {
-					console.log("ahhh");
-					const node = nodes.find((n) => n.id === change.id);
-					if (node) {
-						const updatedNode = {
-							...node,
-							position: change.position || node.position,
-							width: change.width,
-							height: change.height,
-							dimensions: {
-								height: change.dimensions?.height,
-								width: change.dimensions?.width,
-							},
-						};
-						ydoc.getMap("nodes").set(change.id, JSON.parse(JSON.stringify(updatedNode)));
-					}
-				}
 				if (change.type === "position") {
 					const node = nodes.find((n) => n.id === change.id);
 					if (node) {
 						const updatedNode = {
 							...node,
 							position: change.position || node.position,
-							width: change.width,
-							height: change.height,
-							dimensions: {
-								height: change.dimensions?.height,
-								width: change.dimensions?.width,
-							},
 						};
 						ydoc.getMap("nodes").set(change.id, JSON.parse(JSON.stringify(updatedNode)));
 					}
@@ -181,7 +161,7 @@ const Canvas = () => {
 				}
 			});
 		},
-		[onEdgesChange, ydoc]
+		[edges, onEdgesChange, ydoc]
 	);
 
 	const isValidConnection = useCallback(
@@ -436,40 +416,6 @@ const Canvas = () => {
 		event.dataTransfer.effectAllowed = "move";
 	};
 
-	const onAddNodeToCenter = (nodeType) => {
-		// Додаємо вузол в центр
-		const { x, y, zoom } = reactFlowInstance.getViewport();
-		const width = window.innerWidth;
-		const height = window.innerHeight;
-
-		const centerX = (width / 2 - x) / zoom - 50;
-		const centerY = (height / 2 - y) / zoom - 30;
-
-		const id = uuidv4();
-		const newNode = {
-			id,
-			position: { x: centerX, y: centerY },
-			data: { label: `${nodeType} node` },
-			type: nodeType,
-			dimensions: {
-				width: "300",
-			},
-		};
-
-		reactFlowInstance.addNodes(newNode); // додаємо одразу через reactflow
-		ydoc.getMap("nodes").set(newNode.id, newNode);
-	};
-
-	const {
-		searchQuery,
-		setSearchQuery,
-		searchResults,
-		currentSearchIndex,
-		handleSearch,
-		clearSearch,
-		navigateSearchResults,
-	} = useNodeSearch(nodes, setNodes, reactFlowInstance);
-
 	if (isLoading) {
 		return <Loader message="Завантаження інтелект-карти, будь ласка, зачекайте." flexLayout="false" />;
 	}
@@ -535,10 +481,10 @@ const Canvas = () => {
 				onDragStart={onDragStart}
 				onDragOver={onDragOver}
 				proOptions={{ hideAttribution: true }}
-				onlyRenderVisibleElements={true}
+				//	onlyRenderVisibleElements={true}
 			>
-				<Background id="1" gap={10} color="#ccc" variant={BackgroundVariant.Dots} />
-				<CanvasControls isOpen={isOpen} onUpdate={updateIsOpen} />
+				<Background gap={10} color="#ccc" variant={BackgroundVariant.Dots} />
+				<CanvasControls isOpen={isOpen} onUpdate={updateIsOpen} onCenter={handleToCenter} />
 				{isOpen.minimap && (
 					<CanvasMinimap connectionStartNodeId={connectionStartNodeId} invalidTargetNodes={invalidTargetNodes} />
 				)}
@@ -559,7 +505,7 @@ const Canvas = () => {
 			</ReactFlow>
 			{isOpen.leftBar && (
 				<div style={{ position: "absolute", left: 20, top: 150, zIndex: 10 }}>
-					<DropBar onAddNode={onAddNodeToCenter} />
+					<DropBar />
 				</div>
 			)}
 		</div>

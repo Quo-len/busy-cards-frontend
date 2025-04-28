@@ -15,7 +15,9 @@ import { TbLayoutSidebarRightExpandFilled } from "react-icons/tb";
 import { BiShow } from "react-icons/bi";
 import { BiHide } from "react-icons/bi";
 
-const CanvasControls = ({ isOpen, onUpdate }) => {
+import { LuShrink } from "react-icons/lu";
+
+const CanvasControls = ({ isOpen, onUpdate, onCenter }) => {
 	const setAllFields = (value) => {
 		onUpdate("leftBar", value);
 		onUpdate("rightBar", value);
@@ -61,13 +63,15 @@ const CanvasControls = ({ isOpen, onUpdate }) => {
 			>
 				{isOpen.searchBar ? <VscSearch /> : <VscSearchStop />}
 			</ControlButton>
-
 			<ControlButton
 				onClick={() => {
 					setAllFields(!Object.values(isOpen).some((value) => value === true));
 				}}
 			>
 				{Object.values(isOpen).some((value) => value === true) ? <BiShow /> : <BiHide />}
+			</ControlButton>
+			<ControlButton onClick={onCenter}>
+				<LuShrink />
 			</ControlButton>
 		</Controls>
 	);

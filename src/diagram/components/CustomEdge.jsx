@@ -1,21 +1,31 @@
-import React, { memo } from "react";
-import { BaseEdge, EdgeLabelRenderer, getBezierPath, useReactFlow } from "reactflow";
+import React, { memo, useCallback } from "react";
+import { useStore, BaseEdge, EdgeLabelRenderer, getBezierPath, useReactFlow } from "reactflow";
 import { useWebSocket } from "../../utils/WebSocketContext";
 import "../styles/CustomEdge.css";
 
-const CustomEdge = ({
-	id,
-	sourceX,
-	sourceY,
-	targetX,
-	targetY,
-	sourcePosition,
-	targetPosition,
-	style = {},
-	markerEnd,
-}) => {
+import { getEdgeParams } from "../utils/utils";
+
+const CustomEdge = ({ id, source, target, sourcePosition, targetPosition, style = {}, markerEnd }) => {
 	const { setEdges } = useReactFlow();
 	const { ydoc } = useWebSocket();
+
+	const sourceNode = useStore(useCallback((store) => store.nodeInternals.get(source), [source]));
+	const targetNode = useStore(useCallback((store) => store.nodeInternals.get(target), [target]));
+
+	if (!sourceNode || !targetNode) {
+		return null;
+	}
+
+	const { sx, sy, tx, ty, sourcePos, targetPos } = getEdgeParams(sourceNode, targetNode);
+
+	const [edgePath, labelX, labelY] = getBezierPath({
+		sourceX: sx,
+		sourceY: sy,
+		sourcePosition: sourcePos,
+		targetPosition: targetPos,
+		targetX: tx,
+		targetY: ty,
+	});
 
 	const onEdgeClick = () => {
 		if (!ydoc) return;
@@ -25,15 +35,6 @@ const CustomEdge = ({
 		// Remove edge from local state
 		setEdges((edges) => edges.filter((edge) => edge.id !== id));
 	};
-
-	const [edgePath, labelX, labelY] = getBezierPath({
-		sourceX,
-		sourceY,
-		sourcePosition,
-		targetX,
-		targetY,
-		targetPosition,
-	});
 
 	return (
 		<>

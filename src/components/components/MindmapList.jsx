@@ -73,13 +73,11 @@ const MindmapList = ({ filters, onEditMindmap, refreshTrigger }) => {
 		navigate(`?page=${newPage}`);
 	};
 
-	if (error) return <div>{error}</div>;
-
 	if (isLoading) {
 		return <Loader message="Завантаження інтелект-карт, будь ласка, зачекайте." flexLayout="true" />;
 	}
 
-	if (mindmaps.length === 0) {
+	if (mindmaps.length === 0 || error) {
 		return <Empty message="Інтелект-карти не знайдено." />;
 	}
 

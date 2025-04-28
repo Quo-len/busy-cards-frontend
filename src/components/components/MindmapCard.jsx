@@ -31,8 +31,7 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 		navigate(`/mindmap/${mindmap._id}`);
 	};
 
-	const handleUserClick = (e) => {
-		e.stopPropagation();
+	const handleUserClick = () => {
 		navigate(`/profile/${mindmap.owner._id}`);
 	};
 
@@ -80,19 +79,21 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 					<StaticMindmap nodes={mindmap.nodes} edges={mindmap.edges} panOnDrag={false} />
 				</div>
 				<div className="mindmap-content">
-					<div className="mindmap-user" onClick={handleUserClick}>
-						<div className="mindmap-avatar">
+					<div className="mindmap-user">
+						<div className="mindmap-avatar" onClick={handleUserClick}>
 							{mindmap.owner?.avatar ? (
 								<img src={mindmap.owner.avatar} alt={mindmap.owner?.username || "User"} />
 							) : (
 								<div className="avatar-placeholder">{(mindmap.owner?.username || "U")[0].toUpperCase()}</div>
 							)}
 						</div>
-						<span className="mindmap-username">{mindmap.owner?.username || "Unknown User"}</span>
+						<span className="mindmap-username" onClick={handleUserClick}>
+							{mindmap.owner?.username || "Unknown User"}
+						</span>
 					</div>
 
 					<h3 className="mindmap-title" onClick={handleClick}>
-						{mindmap.title || "Untitled Mindmap"}
+						<span onClick={handleClick}>{mindmap.title || "Untitled Mindmap"}</span>
 					</h3>
 
 					<p className="mindmap-description">{mindmap.description || "No description"}</p>

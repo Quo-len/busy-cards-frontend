@@ -1,7 +1,8 @@
-import React, { memo, useCallback } from "react";
-import { Handle, Position, NodeResizer, NodeToolbar, useReactFlow } from "reactflow";
-import "../styles/CustomNode.css";
+import { Handle, Position, NodeResizer, NodeToolbar } from "reactflow";
 import { useWebSocket } from "../../utils/WebSocketContext";
+import React, { memo } from "react";
+import { useNodeResize } from "../utils/utils";
+import "../styles/CustomNode.css";
 
 // Node colors
 const nodeColors = {
@@ -16,90 +17,29 @@ const nodeColors = {
 
 const CustomNode = ({ id, data, selected }) => {
 	const { ydoc } = useWebSocket();
-	const { setNodes } = useReactFlow();
-
-	const handleResizeEnd = useCallback(
-		(event, node) => {
-			const newWidth = node.width;
-			const newHeight = node.height;
-
-			// Update local state
-			setNodes((nodes) =>
-				nodes.map((n) => {
-					if (n.id === id) {
-						return {
-							...n,
-							data: {
-								...n.data,
-								width: newWidth,
-								height: newHeight,
-							},
-						};
-					}
-					return n;
-				})
-			);
-
-			// Update in y-doc if available
-			if (ydoc) {
-				const nodesMap = ydoc.getMap("nodes");
-				const node = nodesMap.get(id);
-				if (node) {
-					const updatedNode = {
-						...node,
-						data: {
-							...node.data,
-							width: newWidth,
-							height: newHeight,
-						},
-					};
-					nodesMap.set(id, updatedNode);
-				}
-			}
-		},
-		[id, setNodes, ydoc]
-	);
+	const handleResizeEnd = useNodeResize(id, ydoc);
 
 	return (
 		<div
-			className="customnode"
+			className={`custom-node ${selected ? "selected" : ""}`}
 			style={{
-				padding: "10px",
 				background: data.color ? nodeColors[data.color] : "#fff",
-				border: "1px solid black",
-				borderRadius: "15px",
-				fontSize: "12px",
-				position: "relative",
-				minWidth: "100px",
-				minHeight: "30px",
 				width: data.width,
 				height: data.height,
 			}}
 		>
-			<div
-				style={{
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-					wordBreak: "break-word",
-					width: "100%",
-					height: "100%",
-				}}
-			>
-				{data.label}
-			</div>
+			<div className="custom-node-content">{data.label}</div>
 
-			<NodeResizer color="#ff0071" isVisible={selected} minWidth={100} minHeight={30} onResizeEnd={handleResizeEnd} />
+			<NodeResizer color="#ff0071" isVisible={selected} minWidth={150} minHeight={50} onResizeEnd={handleResizeEnd} />
 
-			<Handle type="source" id="left" position={Position.Left} />
-			<Handle type="source" id="right" position={Position.Right} />
-			<Handle type="source" id="top" position={Position.Top} />
-			<Handle type="source" id="bottom" position={Position.Bottom} />
+			<Handle type="source" id="left" position={Position.Left} className="handle left" />
+			<Handle type="source" id="right" position={Position.Right} className="handle right" />
+			<Handle type="source" id="top" position={Position.Top} className="handle top" />
+			<Handle type="source" id="bottom" position={Position.Bottom} className="handle bottom" />
 
 			<NodeToolbar isVisible={data.toolbarVisible} position={data.toolbarPosition}>
 				<button>delete</button>
 				<button>copy</button>
-				<button>expand</button>
 			</NodeToolbar>
 		</div>
 	);
