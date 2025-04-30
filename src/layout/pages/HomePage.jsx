@@ -59,8 +59,10 @@ const HomePage = (props) => {
 
 	const handleCreateMindmap = async () => {
 		try {
-			const response = await api.createMindmap();
-			navigate(`/mindmap/${response._id}`);
+			const response = await api.createMindmap({
+				owner: user?._id,
+			});
+			setRefreshKey((prev) => prev + 1);
 			toast.success(`Інтелект-карту успішно створено!`);
 		} catch (error) {
 			toast.error(`Не вдалося створити інтелект-карту: ${error.message}`);
@@ -165,6 +167,11 @@ const HomePage = (props) => {
 							onCancel={() => {
 								setShowEditor(false);
 								setSelectedMindmap(null);
+							}}
+							onDelete={() => {
+								setShowEditor(false);
+								setSelectedMindmap(null);
+								setRefreshKey((prev) => prev + 1);
 							}}
 						/>
 					) : (

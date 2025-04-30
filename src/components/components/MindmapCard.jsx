@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import StaticMindmap from "./StaticMindmap";
 import { useAuth } from "./../../utils/authContext";
 import * as api from "./../../api";
-import PropTypes from "prop-types";
 import { MdOutlineDateRange, MdPublic, MdPublicOff } from "react-icons/md";
 import { RxUpdate } from "react-icons/rx";
 import { GoHeartFill, GoHeart } from "react-icons/go";
@@ -24,14 +23,17 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 				setIsFavorite(false);
 			}
 		};
-		fetchFavorite();
-	}, [user?._id, mindmap._id]);
+		if (user?._id && mindmap?._id) {
+			fetchFavorite();
+		}
+	}, [user?._id, mindmap?._id]);
 
 	const handleClick = () => {
 		navigate(`/mindmap/${mindmap._id}`);
 	};
 
-	const handleUserClick = () => {
+	const handleUserClick = (e) => {
+		e.stopPropagation();
 		navigate(`/profile/${mindmap.owner._id}`);
 	};
 
@@ -76,7 +78,9 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 			</div>
 			<div className="mindmap-card" onClick={onEdit}>
 				<div className="mindmap-preview">
-					<StaticMindmap nodes={mindmap.nodes} edges={mindmap.edges} panOnDrag={false} />
+					{mindmap?.nodes && mindmap?.edges && (
+						<StaticMindmap nodes={mindmap.nodes} edges={mindmap.edges} panOnDrag={false} />
+					)}
 				</div>
 				<div className="mindmap-content">
 					<div className="mindmap-user">
@@ -92,7 +96,7 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 						</span>
 					</div>
 
-					<h3 className="mindmap-title" onClick={handleClick}>
+					<h3 className="mindmap-title">
 						<span onClick={handleClick}>{mindmap.title || "Untitled Mindmap"}</span>
 					</h3>
 

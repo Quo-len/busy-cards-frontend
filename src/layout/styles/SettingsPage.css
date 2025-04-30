@@ -245,10 +245,18 @@
 	font-weight: 600;
 	cursor: pointer;
 	transition: background-color 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.75rem;
 }
 
 .btn-danger:hover {
 	background-color: #c53030;
+}
+
+.danger-icon {
+	font-size: 1.25rem;
 }
 
 .profile-photo-container {

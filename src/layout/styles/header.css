@@ -19,11 +19,16 @@
 	cursor: pointer;
 	display: flex;
 	align-items: center;
+	gap: 0.5rem;
 	transition: transform 0.2s ease;
 }
 
 .logo:hover {
 	transform: scale(1.02);
+}
+
+.logo-icon {
+	font-size: 1.8rem;
 }
 
 .spin {
@@ -68,6 +73,13 @@
 	font-weight: 500;
 	cursor: pointer;
 	transition: all 0.2s ease;
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.button-icon {
+	font-size: 1.1rem;
 }
 
 .settings-button {
@@ -130,7 +142,15 @@
 		font-size: 1.5rem;
 	}
 
+	.logo-icon {
+		font-size: 1.5rem;
+	}
+
 	.welcome-text {
 		display: none;
+	}
+
+	.button-icon {
+		font-size: 1rem;
 	}
 }

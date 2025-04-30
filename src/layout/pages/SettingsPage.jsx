@@ -1,13 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { FiAlertTriangle } from "react-icons/fi";
 
 import NotFoundPage from "../pages/NotFoundPage";
 import Loader from "../../components/components/Loader";
 import { useAuth } from "./../../utils/authContext";
 import "./../styles/SettingsPage.css";
 import * as api from "./../../api";
-//import BioSection from "./../../components/components/BioSection";
+import BioSection from "./../../components/components/BioSection";
 
 const SettingsPage = () => {
 	const navigate = useNavigate();
@@ -21,7 +22,6 @@ const SettingsPage = () => {
 	const [currentPassword, setCurrentPassword] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [email, setEmail] = useState("");
-	const [bio, setBio] = useState("");
 
 	useEffect(() => {
 		document.title = `Налаштування - Busy-cards`;
@@ -99,7 +99,7 @@ const SettingsPage = () => {
 	const handleDeleteAccount = async () => {
 		if (window.confirm("Ви впевнені, що хочете видалити свій обліковий запис? Цю дію не можна скасувати.")) {
 			try {
-				await api.updateUser(user.id);
+				await api.deleteUser(user._id);
 				logoutUser();
 				toast.success(`Профіль успішно видалено.`);
 			} catch (error) {
@@ -141,6 +141,8 @@ const SettingsPage = () => {
 					</button>
 				</form>
 			</section>
+
+			<BioSection user={user} handleFieldSubmit={handleFieldSubmit} />
 
 			<section className="settings-section">
 				<h2>Пароль</h2>
@@ -235,11 +237,11 @@ const SettingsPage = () => {
 					нижче.
 				</p>
 				<button className="btn-danger" onClick={handleDeleteAccount}>
-					Видалити акаунт
+					<FiAlertTriangle className="danger-icon" />
+					<span>Видалити акаунт</span>
+					<FiAlertTriangle className="danger-icon" />
 				</button>
 			</section>
-
-			{/* <BioSection user={user} handleFieldSubmit={handleFieldSubmit} /> */}
 		</div>
 	);
 };

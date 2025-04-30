@@ -8,6 +8,7 @@ import ProfilePage from "./layout/pages/ProfilePage";
 import SignInPage from "./layout/pages/SignInPage";
 import SignUpPage from "./layout/pages/SignUpPage";
 import SettingsPage from "./layout/pages/SettingsPage";
+import InvitationsPage from "./layout/pages/InvitationsPage";
 import { AuthProvider } from "./utils/authContext";
 import { ToastContainer, Slide } from "react-toastify";
 
@@ -29,6 +30,7 @@ function AppContent() {
 					<Route path="/profile/:userId" element={<ProfilePage />} />
 					<Route path="/settings/" element={<SettingsPage />} />
 					<Route path="/mindmap/:mindmapId" element={<CanvasPage />} />
+					<Route path="/invitations/" element={<InvitationsPage />} />
 					<Route path="*" element={<NotFoundPage />} />
 				</Routes>
 				<ToastContainer

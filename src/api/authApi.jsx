@@ -7,10 +7,15 @@ export const registration = async (email, username, password) => {
 			username,
 			password,
 		});
-		return response.data;
+		return {
+			success: true,
+			data: response.data,
+		};
 	} catch (error) {
-		console.error("Помилка реєстрації:", error);
-		throw error;
+		return {
+			success: false,
+			error: error.response?.data?.error || "Невідома помилка під час реєстрації",
+		};
 	}
 };
 

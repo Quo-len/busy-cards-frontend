@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import * as api from "./../../api";
 import "./../styles/SignUpPage.css";
+import { toast } from "react-toastify";
 
 const SignInPage = () => {
 	const navigate = useNavigate();
@@ -22,11 +23,13 @@ const SignInPage = () => {
 
 	const onSubmit = async (data) => {
 		const { email, username, password } = data;
-		try {
-			await api.registration(email, username, password);
+		const result = await api.registration(email, username, password);
+
+		if (result.success) {
 			navigate("/signin?activated=true");
-		} catch (error) {
-			console.error("Registration error:", error);
+			toast.success("Успішна реєстрація!");
+		} else {
+			toast.error(result.error);
 		}
 	};
 

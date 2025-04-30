@@ -22,7 +22,7 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 const SignInPage = () => {
-	const navigator = useNavigate();
+	const navigate = useNavigate();
 	const { login } = useAuth();
 	const [passwordVisible, setPasswordVisible] = useState(false);
 
@@ -51,7 +51,7 @@ const SignInPage = () => {
 				path: "/",
 			});
 			login();
-			navigator("/");
+			navigate("/");
 			toast.success("Успішний вхід!");
 		} else {
 			toast.error(result.error);
@@ -160,7 +160,7 @@ const SignInPage = () => {
 					<Typography variant="body2" display="inline" mr={1}>
 						Ще не маєте облікового запису?
 					</Typography>
-					<Link component="button" variant="body2" color="primary" onClick={() => navigator("/signup")}>
+					<Link component="button" variant="body2" color="primary" onClick={() => navigate("/signup")}>
 						Зареєструйтеся зараз!
 					</Link>
 				</Box>

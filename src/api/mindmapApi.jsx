@@ -21,12 +21,12 @@ export const getPaginatedMindmaps = async (data) => {
 	}
 };
 
-export const createMindmap = async (id, data) => {
+export const createMindmap = async (data) => {
 	try {
-		const response = await axios.post(`/mindmaps/${id}`, data);
+		const response = await axios.post(`/mindmaps/`, data);
 		return response.data;
 	} catch (error) {
-		console.error("Error fetching mindmap", error);
+		console.error("Error creating mindmap", error);
 		throw error;
 	}
 };
@@ -51,9 +51,9 @@ export const updateMindmap = async (id, data) => {
 	}
 };
 
-export const deleteMindmap = async () => {
+export const deleteMindmap = async (id) => {
 	try {
-		const response = await axios.delete("/mindmaps");
+		const response = await axios.delete(`/mindmaps/${id}`);
 		return response.data;
 	} catch (error) {
 		console.error("Error deleting mindmap", error);

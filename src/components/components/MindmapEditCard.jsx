@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import * as api from "./../../api";
 import ParticipantList from "./ParticipantList";
 import "./../styles/MindmapEditCard.css";
 import { useAuth } from "../../utils/authContext";
-const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
+import { toast } from "react-toastify";
+import * as api from "../../api";
+
+const MindmapEditCard = ({ mindmap, onSave, onCancel, onDelete }) => {
 	const { user, isLoggedIn } = useAuth();
 	const [title, setTitle] = useState(mindmap.title);
 	const [description, setDescription] = useState(mindmap.description || "");
@@ -26,13 +28,13 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 		setError(null);
 
 		try {
-			const response = await api.updateMindmap(mindmap.id, {
+			const response = await api.updateMindmap(mindmap._id, {
 				title,
 				description,
 				isPublic,
 			});
 
-			if (onSave) onSave(response.data);
+			if (onDelete) onSave(response.data);
 		} catch (err) {
 			console.error("Update failed:", err);
 			setError("Failed to update mindmap.");
@@ -48,9 +50,22 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 		// Implement export logic
 	};
 
+	const handleDeleteMindmap = async () => {
+		if (window.confirm("Ви впевнені, що хочете видалити інтелект-карту? Цю дію не можна скасувати.")) {
+			try {
+				await api.deleteMindmap(mindmap._id);
+
+				toast.success(`Інтелект-карту успішно видалено.`);
+				if (onDelete) onDelete();
+			} catch (error) {
+				toast.error(`Не вдалося видалити Інтелект-карту: ${error.message}`);
+			}
+		}
+	};
+
 	return (
 		<div className="mindmap-edit-card">
-			<h3>Edit Mindmap</h3>
+			<h3>Редагування інтелект-карти:</h3>
 			<form onSubmit={handleSubmit}>
 				<div className="form-group">
 					{isOwner && (
@@ -61,9 +76,12 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 							<button type="button" onClick={onCancel} className="btn btn-cancel">
 								Відміна
 							</button>
+							<button type="button" onClick={handleDeleteMindmap} className="btn-danger">
+								Видалити
+							</button>
 						</div>
 					)}
-					<label className="form-label">Title</label>
+					<label className="form-label">Назва</label>
 
 					{isOwner ? (
 						<input
@@ -72,7 +90,7 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 							onChange={(e) => setTitle(e.target.value)}
 							required
 							className="form-control"
-							placeholder="Enter mindmap title"
+							placeholder="Введіть назву інтелект-карти"
 						/>
 					) : (
 						<div className="readonly-text">{title}</div>
@@ -80,14 +98,14 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel }) => {
 				</div>
 
 				<div className="form-group">
-					<label className="form-label">Description</label>
+					<label className="form-label">Опис</label>
 					{isOwner ? (
 						<textarea
 							value={description}
 							onChange={(e) => setDescription(e.target.value)}
 							rows={3}
 							className="form-control"
-							placeholder="Enter a brief description"
+							placeholder="Введіть короткий опис"
 						/>
 					) : (
 						<div className="readonly-text">{description}</div>

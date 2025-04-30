@@ -1,7 +1,8 @@
-import React, { useCallback, useEffect, useRef, memo } from "react";
-import ReactFlow, { useNodes, useReactFlow } from "reactflow";
-import "reactflow/dist/style.css";
-import { useWebSocket } from "../../utils/WebSocketContext"; // Import the WebSocket hook
+import React, { useCallback, memo } from "react";
+import { useNodes, useReactFlow } from "reactflow";
+import { useWebSocket } from "../../utils/WebSocketContext";
+import "../styles/Sidebar.css";
+
 // Node shapes
 const nodeShapes = {
 	rectangle: { width: 150, height: 40, borderRadius: 3 },
@@ -87,94 +88,49 @@ function Sidebar() {
 		[updateNodeProperty]
 	);
 
-	// Styling for sidebar
-	const sidebarStyle = {
-		position: "absolute",
-		top: "60px", // Positioned below the 'Add Node' button
-		right: "10px",
-		width: "300px",
-		height: "calc(100% - 100px)", // Adjust height to not cover entire screen
-		backgroundColor: "#f0f0f0",
-		padding: "16px",
-		boxSizing: "border-box",
-		overflowY: "auto",
-		zIndex: 10, // Ensure it's above the canvas
-		transition: "opacity 0.3s ease-in-out, visibility 0.3s",
-		...(selectedNode ? { opacity: 1, visibility: "visible" } : { opacity: 0, visibility: "hidden" }),
-		boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-		borderRadius: "8px",
-	};
-
 	// If no nodes are selected, return null to completely hide the sidebar
 	if (!selectedNode) {
 		return null;
 	}
 
 	return (
-		<div style={sidebarStyle}>
-			<div
-				style={{
-					backgroundColor: "white",
-					borderRadius: "8px",
-					padding: "16px",
-					boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-				}}
-			>
-				<div
-					key={selectedNode.id}
-					style={{
-						marginBottom: "16px",
-						padding: "12px",
-						border: "1px solid #e0e0e0",
-						borderRadius: "6px",
-						backgroundColor: "#f9f9f9",
-					}}
-				>
-					<div style={{ marginBottom: "8px", fontWeight: "bold", color: "#333" }}>
-						Node ID: {selectedNode.id} - x: {selectedNode.position.x.toFixed(2)}, y:{" "}
-						{selectedNode.position.y.toFixed(2)}
+		<div className={`sidebar ${selectedNode ? "sidebar-visible" : ""}`}>
+			<div className="sidebar-container">
+				<div className="sidebar-header">
+					<h3>Node Properties</h3>
+					<div className="node-coordinates">
+						ID: {selectedNode.id} | x: {selectedNode.position.x.toFixed(1)}, y: {selectedNode.position.y.toFixed(1)}
 					</div>
+				</div>
 
-					<div style={{ marginBottom: "8px" }}>
-						<label style={{ display: "block", marginBottom: "4px", fontWeight: "600" }}>Name:</label>
+				<div className="sidebar-form">
+					<div className="form-group">
+						<label htmlFor="node-name">Name:</label>
 						<input
+							id="node-name"
 							value={selectedNode.data.label || ""}
 							onChange={(e) => handleChangeName(selectedNode.id, e.target.value)}
-							style={{
-								width: "100%",
-								padding: "8px",
-								border: "1px solid #ddd",
-								borderRadius: "4px",
-							}}
+							placeholder="Enter node name"
 						/>
 					</div>
 
-					<div style={{ marginBottom: "8px" }}>
-						<label style={{ display: "block", marginBottom: "4px", fontWeight: "600" }}>Description:</label>
+					<div className="form-group">
+						<label htmlFor="node-description">Description:</label>
 						<textarea
+							id="node-description"
 							value={selectedNode.data.description || ""}
 							onChange={(e) => handleChangeDescription(selectedNode.id, e.target.value)}
-							style={{
-								width: "100%",
-								padding: "8px",
-								minHeight: "60px",
-								border: "1px solid #ddd",
-								borderRadius: "4px",
-							}}
+							placeholder="Enter node description"
+							rows="4"
 						/>
 					</div>
 
-					<div style={{ marginBottom: "8px" }}>
-						<label style={{ display: "block", marginBottom: "4px", fontWeight: "600" }}>Shape:</label>
+					<div className="form-group">
+						<label htmlFor="node-shape">Shape:</label>
 						<select
+							id="node-shape"
 							value={selectedNode.data.shape || "rectangle"}
 							onChange={(e) => handleChangeShape(selectedNode.id, e.target.value)}
-							style={{
-								width: "100%",
-								padding: "8px",
-								border: "1px solid #ddd",
-								borderRadius: "4px",
-							}}
 						>
 							{Object.keys(nodeShapes).map((shape) => (
 								<option key={shape} value={shape}>
@@ -184,17 +140,12 @@ function Sidebar() {
 						</select>
 					</div>
 
-					<div style={{ marginBottom: "8px" }}>
-						<label style={{ display: "block", marginBottom: "4px", fontWeight: "600" }}>Color:</label>
+					<div className="form-group">
+						<label htmlFor="node-color">Color:</label>
 						<select
+							id="node-color"
 							value={selectedNode.data.color || "blue"}
 							onChange={(e) => handleChangeColor(selectedNode.id, e.target.value)}
-							style={{
-								width: "100%",
-								padding: "8px",
-								border: "1px solid #ddd",
-								borderRadius: "4px",
-							}}
 						>
 							{Object.keys(nodeColors).map((color) => (
 								<option key={color} value={color}>
@@ -202,6 +153,14 @@ function Sidebar() {
 								</option>
 							))}
 						</select>
+					</div>
+
+					<div className="color-preview">
+						<div
+							className="color-sample"
+							style={{ backgroundColor: nodeColors[selectedNode.data.color || "blue"] }}
+							title={selectedNode.data.color || "blue"}
+						></div>
 					</div>
 				</div>
 			</div>

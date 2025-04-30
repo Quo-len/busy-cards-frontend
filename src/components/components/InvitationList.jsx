@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import * as api from "./../../api";
+import * as api from "../../api";
 import "./../styles/MindmapList.css";
-import MindmapCard from "./MindmapCard";
+import InvitationCard from "./InvitationCard";
 import ReactPaginate from "react-paginate";
 
-import Loader from "../../components/components/Loader";
-import Empty from "../../components/components/Empty";
+import Loader from "./Loader";
+import Empty from "./Empty";
 
 function useQuery() {
 	return new URLSearchParams(useLocation().search);
@@ -17,8 +17,8 @@ const MindmapList = ({ filters, onEditMindmap, refreshTrigger }) => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState(null);
 
-	const [mindmaps, setMindmaps] = useState([]);
-	const [totalMindmaps, setTotalMindmaps] = useState(0);
+	const [invitations, setInvitations] = useState([]);
+	const [totalMindmaps, setTotalInvitations] = useState(0);
 
 	const query = useQuery();
 	const currentPage = parseInt(query.get("page")) || 1;
@@ -26,28 +26,28 @@ const MindmapList = ({ filters, onEditMindmap, refreshTrigger }) => {
 	const [totalPages, setTotalPages] = useState(0);
 
 	useEffect(() => {
-		const fetchMindmaps = async () => {
+		const fetchInvitations = async () => {
 			setIsLoading(true);
 			setError(null);
 			try {
 				let data;
-				data = await api.getPaginatedMindmaps({
+				data = await api.getPaginatedInvitations({
 					currentPage: currentPage,
 					...filters,
 				});
 
-				setMindmaps(data.mindmaps);
+				setInvitations(data.mindmaps);
 
 				setItemsPerPage(data.pagination.itemsPerPage);
 				setTotalPages(data.pagination.totalPages);
-				setTotalMindmaps(data.pagination.totalMindmaps);
+				setTotalInvitations(data.pagination.totalMindmaps);
 			} catch (err) {
 				setError("Failed to fetch mindmaps");
 			}
 			setIsLoading(false);
 		};
 
-		fetchMindmaps();
+		fetchInvitations();
 
 		window.scrollTo({
 			top: 0,
@@ -65,18 +65,18 @@ const MindmapList = ({ filters, onEditMindmap, refreshTrigger }) => {
 	};
 
 	if (isLoading) {
-		return <Loader message="Завантаження інтелект-карт, будь ласка, зачекайте." flexLayout="true" />;
+		return <Loader message="Завантаження запрошень, будь ласка, зачекайте." flexLayout="true" />;
 	}
 
-	if (mindmaps.length === 0 || error) {
-		return <Empty message="Інтелект-карти не знайдено." />;
+	if (invitations.length === 0 || error) {
+		return <Empty message="Запорошення відсутні." />;
 	}
 
 	return (
-		<div className="mindmap-list-container">
-			<div className="mindmap-cards">
-				{mindmaps.map((mindmap) => (
-					<MindmapCard key={mindmap._id} onEdit={() => onEditMindmap(mindmap)} mindmap={mindmap} />
+		<div className="invitation-list-container">
+			<div className="invitation-cards">
+				{invitations.map((invitation) => (
+					<InvitationCard key={invitation._id} onEdit={() => onEditMindmap(invitation)} mindmap={invitation} />
 				))}
 			</div>
 
@@ -92,7 +92,7 @@ const MindmapList = ({ filters, onEditMindmap, refreshTrigger }) => {
 			/>
 
 			<div className="pagination-info">
-				Показано {Math.min(itemsPerPage, mindmaps.length)} із {totalMindmaps} інтелект-карт
+				Показано {Math.min(itemsPerPage, invitations.length)} із {totalMindmaps} запрошень
 			</div>
 		</div>
 	);

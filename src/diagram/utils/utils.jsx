@@ -43,22 +43,23 @@ export function generateRandomColor() {
 
 export const isNodeDescendant = (node, targetNode, nodes, edges) => {
 	const visited = new Set();
+	const queue = [node];
 
-	const checkDescendants = (currentNode) => {
-		if (visited.has(currentNode.id)) return false;
+	while (queue.length > 0) {
+		const currentNode = queue.shift();
+
+		if (visited.has(currentNode.id)) continue;
 		visited.add(currentNode.id);
 
 		const relatives = [...getIncomers(currentNode, nodes, edges), ...getOutgoers(currentNode, nodes, edges)];
 
 		for (const relative of relatives) {
 			if (relative.id === targetNode.id) return true;
-			if (checkDescendants(relative)) return true;
+			queue.push(relative);
 		}
+	}
 
-		return false;
-	};
-
-	return checkDescendants(node);
+	return false;
 };
 
 function getParams(nodeA, nodeB) {

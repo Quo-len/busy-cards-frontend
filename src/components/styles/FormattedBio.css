@@ -1,0 +1,47 @@
+.formatted-bio {
+	line-height: 1.5;
+	margin: 1rem 0;
+	font-size: 1rem;
+	color: #333;
+}
+
+.formatted-bio strong {
+	font-weight: 600;
+}
+
+.formatted-bio em {
+	font-style: italic;
+}
+
+.formatted-bio a {
+	color: #0066cc;
+	text-decoration: none;
+	transition: color 0.2s ease;
+}
+
+.formatted-bio a:hover {
+	text-decoration: underline;
+	color: #004c99;
+}
+
+.formatted-bio h3 {
+	margin: 1rem 0 0.5rem;
+	font-size: 1.2rem;
+	font-weight: 600;
+	color: #222;
+}
+
+.formatted-bio ul {
+	padding-left: 1.5rem;
+	margin: 0.5rem 0;
+}
+
+.formatted-bio li {
+	margin-bottom: 0.25rem;
+}
+
+.formatted-bio br {
+	display: block;
+	margin: 0.5rem 0;
+	content: "";
+}

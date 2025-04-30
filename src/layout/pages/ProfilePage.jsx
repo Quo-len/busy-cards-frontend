@@ -4,6 +4,7 @@ import * as api from "./../../api";
 import MindmapList from "../../components/components/MindmapList";
 import Loader from "../../components/components/Loader";
 import NotFoundPage from "./NotFoundPage";
+import FormattedBio from "../../components/components/FormattedBio";
 import { PiGraphBold } from "react-icons/pi";
 import "../styles/ProfilePage.css";
 
@@ -95,7 +96,7 @@ const ProfilePage = () => {
 						</div>
 					</div>
 
-					{user?.bio && <div className="profile-bio">{user.bio}</div>}
+					{user?.bio && <FormattedBio bioText={user.bio} />}
 
 					<button className="invite-button">Запросити до співпраці</button>
 				</div>

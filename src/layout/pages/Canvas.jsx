@@ -22,7 +22,7 @@ import { createNodesAndEdges, isNodeDescendant } from "../../diagram/utils/utils
 import { useWebSocket, WebSocketProvider } from "../../utils/WebSocketContext";
 import { DnDProvider, useDnD } from "../../diagram/utils/DnDContext";
 import * as api from "../../api";
-
+import BoundingLines from "../../diagram/components/BoundingLines";
 import Sidebar from "../../components/components/Sidebar";
 import SearchBar from "../../diagram/components/SearchBar";
 import DropBar from "../../diagram/components/DropBar";
@@ -34,7 +34,31 @@ import { nodeTypes, edgeTypes } from "../../diagram/components";
 
 const { nodes: initialNodes, edges: initialEdges } = createNodesAndEdges(0, 0);
 
+const userPermissioons = {
+	viewer: {
+		canEdit: false,
+		canComment: false,
+		canManageParticipants: false,
+	},
+	commenter: {
+		canEdit: false,
+		canComment: true,
+		canManageParticipants: false,
+	},
+	editor: {
+		canEdit: false,
+		canComment: true,
+		canManageParticipants: false,
+	},
+	owner: {
+		canEdit: true,
+		canComment: true,
+		canManageParticipants: false,
+	},
+};
+
 const Canvas = () => {
+	const [role, setRole] = useState("owner");
 	const { mindmapId } = useParams();
 	const [mindmap, setMindmap] = useState(null);
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -130,7 +154,6 @@ const Canvas = () => {
 			if (!ydoc) return;
 
 			changes.forEach((change) => {
-				console.log(change);
 				if (change.type === "position") {
 					const node = nodes.find((n) => n.id === change.id);
 					if (node) {
@@ -489,6 +512,16 @@ const Canvas = () => {
 		);
 	}
 
+	const translateExtent = [
+		[-4300, -2000],
+		[4300, 2000],
+	];
+
+	const nodeExtent = [
+		[-4000, -1700],
+		[4000, 1700],
+	];
+
 	return (
 		<div style={{ flex: 1, position: "relative", overflow: "hidden" }} ref={flowRef}>
 			<button onClick={updatePos} style={{ position: "absolute", right: 10, top: 30, zIndex: 4 }}>
@@ -519,10 +552,8 @@ const Canvas = () => {
 			</button>
 			<button style={{ position: "absolute", right: 10, top: 110, zIndex: 4 }}>Re-sync</button>
 			<ReactFlow
-				translateExtent={[
-					[-2000, -2000],
-					[2000, 2000],
-				]}
+				translateExtent={translateExtent}
+				nodeExtent={nodeExtent}
 				nodes={styledNodes}
 				edges={edges}
 				onNodesChange={handleNodesChange}
@@ -535,20 +566,27 @@ const Canvas = () => {
 				onConnectEnd={onConnectEnd}
 				fitView
 				snapToGrid={true}
+				snapGrid={[10, 10]}
 				onReconnect={onReconnect}
 				isValidConnection={isValidConnection}
 				connectionMode={ConnectionMode.Loose}
 				minZoom={0.2}
-				maxZoom={4}
+				maxZoom={1.7}
 				onDrop={onDrop}
 				onDragStart={onDragStart}
 				onDragOver={onDragOver}
 				proOptions={{ hideAttribution: true }}
+				nodesDraggable={userPermissioons[role].canEdit}
+				nodesConnectable={userPermissioons[role].canEdit}
+
 				// onlyRenderVisibleElements={true}
 			>
 				<Background id="1" gap={10} color="#f1f1f1" variant={BackgroundVariant.Lines} />
 
 				<Background id="2" gap={100} color="#ccc" variant={BackgroundVariant.Lines} />
+
+				<BoundingLines translateExtent={nodeExtent} />
+
 				<CanvasControls isOpen={isOpen} onUpdate={updateIsOpen} onCenter={handleToCenter} />
 				{isOpen.minimap && (
 					<CanvasMinimap connectionStartNodeId={connectionStartNodeId} invalidTargetNodes={invalidTargetNodes} />
