@@ -76,7 +76,7 @@ const MindmapList = ({ filters, onEditMindmap, refreshTrigger }) => {
 		<div className="mindmap-list-container">
 			<div className="mindmap-cards">
 				{mindmaps.map((mindmap) => (
-					<MindmapCard key={mindmap._id} onEdit={() => onEditMindmap(mindmap)} mindmap={mindmap} />
+					<MindmapCard key={mindmap.id} onEdit={() => onEditMindmap(mindmap)} mindmap={mindmap} />
 				))}
 			</div>
 

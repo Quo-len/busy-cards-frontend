@@ -8,8 +8,8 @@ export const getPaginatedInvitations = async (data) => {
 				limit: data.itemsPerPage,
 				sortBy: data.sortBy,
 				sortOrder: data.sortOrder,
-				receiver: data.owner,
-				sender: data.participant,
+				receiver: data.receiver,
+				sender: data.sender,
 			},
 		});
 		return response.data;

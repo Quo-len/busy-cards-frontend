@@ -6,14 +6,16 @@ import Loader from "../../components/components/Loader";
 import NotFoundPage from "./NotFoundPage";
 import FormattedBio from "../../components/components/FormattedBio";
 import { PiGraphBold } from "react-icons/pi";
+import { PiTelegramLogo } from "react-icons/pi";
 import "../styles/ProfilePage.css";
+import FiltersPanel from "../../components/components/FiltersPanel";
 
 const ProfilePage = () => {
 	const { userId } = useParams();
 	const [user, setUser] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
 
-	const [sortBy, setSortBy] = useState("lastModified");
+	const [sortBy, setSortBy] = useState("updatedAt");
 	const [sortOrder, setSortOrder] = useState("desc");
 	const [itemsPerPage, setItemsPerPage] = useState(5);
 
@@ -43,7 +45,7 @@ const ProfilePage = () => {
 			sortBy: sortBy,
 			sortOrder: sortOrder,
 			itemsPerPage: itemsPerPage,
-			owner: user?._id,
+			owner: user?.id,
 			isPublic: true,
 		}),
 		[sortBy, sortOrder, itemsPerPage, user]
@@ -98,7 +100,9 @@ const ProfilePage = () => {
 
 					{user?.bio && <FormattedBio bioText={user.bio} />}
 
-					<button className="invite-button">Запросити до співпраці</button>
+					<button className="invite-button">
+						<PiTelegramLogo /> Запросити до співпраці
+					</button>
 				</div>
 			</div>
 
@@ -111,45 +115,15 @@ const ProfilePage = () => {
 					<div className="mindmaps-list-container">
 						<MindmapList filters={filters} />
 					</div>
-					<div className="profile-filters-panel">
-						<h3 className="profile-filters-title">Фільтри</h3>
-						<div className="profile-filters-group">
-							<div className="profile-filter-item">
-								<label htmlFor="sort-filter">Сортування:</label>
-								<select
-									id="sort-filter"
-									value={`${sortBy}-${sortOrder}`}
-									onChange={(e) => {
-										const [newSortBy, newSortOrder] = e.target.value.split("-");
-										setSortBy(newSortBy);
-										setSortOrder(newSortOrder);
-									}}
-								>
-									<option value="lastModified-desc">Останні зміни</option>
-									<option value="lastModified-asc">Найстаріші зміни</option>
-									<option value="createdAt-desc">Нещодавно створені</option>
-									<option value="createdAt-asc">Найстаріші створення</option>
-									<option value="title-asc">Назва (А-Я)</option>
-									<option value="title-desc">Назва (Я-А)</option>
-								</select>
-							</div>
-
-							<div className="profile-filter-item">
-								<label htmlFor="items-per-page">Елементів на сторінці:</label>
-								<select
-									id="items-per-page"
-									value={itemsPerPage}
-									onChange={(e) => {
-										setItemsPerPage(parseInt(e.target.value));
-									}}
-								>
-									<option value={5}>5</option>
-									<option value={10}>10</option>
-									<option value={20}>20</option>
-								</select>
-							</div>
-						</div>
-					</div>
+					<FiltersPanel
+						className="profile-filters-panel"
+						sortBy={sortBy}
+						setSortBy={setSortBy}
+						sortOrder={sortOrder}
+						setSortOrder={setSortOrder}
+						itemsPerPage={itemsPerPage}
+						setItemsPerPage={setItemsPerPage}
+					/>
 				</div>
 			</div>
 		</div>

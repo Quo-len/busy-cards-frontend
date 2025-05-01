@@ -1,0 +1,41 @@
+/* CanvasMinimap.css */
+.react-flow__minimap {
+	transform: translateY(100%);
+	transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+	opacity: 0;
+	z-index: 85; /* Below dropbar and sidebar but above canvas */
+}
+
+.react-flow__minimap.show {
+	transform: translateY(0);
+	opacity: 1;
+	animation: slideUpMinimap 0.3s ease-in-out forwards;
+}
+
+.react-flow__minimap.hide {
+	transform: translateY(100%);
+	opacity: 0;
+	animation: slideDownMinimap 0.3s ease-in-out forwards;
+}
+
+@keyframes slideUpMinimap {
+	from {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slideDownMinimap {
+	from {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateY(100%);
+		opacity: 0;
+	}
+}

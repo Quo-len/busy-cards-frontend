@@ -14,7 +14,7 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel, onDelete }) => {
 	const [error, setError] = useState(null);
 	const [exportType, setExportType] = useState("png");
 
-	const isOwner = mindmap.owner?._id === user?._id;
+	const isOwner = mindmap.owner?.id === user?.id;
 
 	useEffect(() => {
 		setTitle(mindmap.title);
@@ -28,7 +28,7 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel, onDelete }) => {
 		setError(null);
 
 		try {
-			const response = await api.updateMindmap(mindmap._id, {
+			const response = await api.updateMindmap(mindmap.id, {
 				title,
 				description,
 				isPublic,
@@ -53,7 +53,7 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel, onDelete }) => {
 	const handleDeleteMindmap = async () => {
 		if (window.confirm("Ви впевнені, що хочете видалити інтелект-карту? Цю дію не можна скасувати.")) {
 			try {
-				await api.deleteMindmap(mindmap._id);
+				await api.deleteMindmap(mindmap.id);
 
 				toast.success(`Інтелект-карту успішно видалено.`);
 				if (onDelete) onDelete();

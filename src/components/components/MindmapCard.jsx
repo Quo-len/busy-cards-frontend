@@ -17,24 +17,24 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 	useEffect(() => {
 		const fetchFavorite = async () => {
 			try {
-				const response = await api.getFavorite(user._id, mindmap._id);
+				const response = await api.getFavorite(user.id, mindmap.id);
 				setIsFavorite(!!response);
 			} catch {
 				setIsFavorite(false);
 			}
 		};
-		if (user?._id && mindmap?._id) {
+		if (user?.id && mindmap?.id) {
 			fetchFavorite();
 		}
-	}, [user?._id, mindmap?._id]);
+	}, [user?.id, mindmap?.id]);
 
 	const handleClick = () => {
-		navigate(`/mindmap/${mindmap._id}`);
+		navigate(`/mindmap/${mindmap.id}`);
 	};
 
 	const handleUserClick = (e) => {
 		e.stopPropagation();
-		navigate(`/profile/${mindmap.owner._id}`);
+		navigate(`/profile/${mindmap.owner.id}`);
 	};
 
 	const getParticipantWord = (count) => {
@@ -56,9 +56,9 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 
 		try {
 			if (isFavorite) {
-				await api.deleteFavorite(user._id, mindmap._id);
+				await api.deleteFavorite(user.id, mindmap.id);
 			} else {
-				await api.addFavorite(user._id, mindmap._id);
+				await api.addFavorite(user.id, mindmap.id);
 			}
 			setIsFavorite(!isFavorite);
 		} catch (error) {
@@ -86,13 +86,13 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 					<div className="mindmap-user">
 						<div className="mindmap-avatar" onClick={handleUserClick}>
 							{mindmap.owner?.avatar ? (
-								<img src={mindmap.owner.avatar} alt={mindmap.owner?.username || "User"} />
+								<img src={mindmap.owner.avatar} alt={mindmap.owner.username || "User"} />
 							) : (
-								<div className="avatar-placeholder">{(mindmap.owner?.username || "U")[0].toUpperCase()}</div>
+								<div className="avatar-placeholder">{(mindmap.owner.username || "U")[0].toUpperCase()}</div>
 							)}
 						</div>
 						<span className="mindmap-username" onClick={handleUserClick}>
-							{mindmap.owner?.username || "Unknown User"}
+							{mindmap.owner.username || "Unknown User"}
 						</span>
 					</div>
 
@@ -113,10 +113,10 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 							<MdOutlineDateRange className="meta-icon" />
 							<span className="meta-text">{new Date(mindmap.createdAt).toLocaleDateString()}</span>
 						</div>
-						{mindmap.lastModified && (
+						{mindmap.updatedAt && (
 							<div className="meta-item">
 								<RxUpdate className="meta-icon" />
-								<span className="meta-text">{new Date(mindmap.lastModified).toLocaleDateString()}</span>
+								<span className="meta-text">{new Date(mindmap.updatedAt).toLocaleDateString()}</span>
 							</div>
 						)}
 					</div>

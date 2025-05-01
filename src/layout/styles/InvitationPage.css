@@ -1,0 +1,310 @@
+/* InvitationPage.css */
+.invitation-page-container {
+	max-width: 1200px;
+	margin: 2rem auto;
+	padding: 0 1.5rem;
+	font-family: "Roboto", sans-serif;
+}
+
+.invitation-header {
+	margin-bottom: 2rem;
+}
+
+.invitation-title {
+	font-size: 2rem;
+	font-weight: 700;
+	color: #4a5568;
+	margin-bottom: 0.5rem;
+}
+
+.invitation-subtitle {
+	font-size: 1rem;
+	color: #718096;
+}
+
+.tabs-container {
+	display: flex;
+	margin-bottom: 2rem;
+	top: 4.1rem;
+	border: 2px solid #e2e8f0;
+	position: sticky;
+	background-color: white;
+	z-index: 50;
+	transition: box-shadow 0.3s ease;
+}
+
+.category-tab {
+	padding: 1rem 1.5rem;
+	font-size: 1rem;
+	font-weight: 600;
+	color: #718096;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	border-bottom: 3px solid transparent;
+	margin-right: 1rem;
+}
+
+.category-tab:hover {
+	color: #4a5568;
+}
+
+.category-tab.active {
+	color: #5a67d8;
+	border-bottom: 3px solid #5a67d8;
+}
+
+.invitation-content {
+	display: flex;
+	gap: 2rem;
+	align-items: flex-start;
+}
+
+.invitation-filters-panel {
+	width: 280px;
+	background: white;
+	border-radius: 8px;
+	padding: 1.5rem;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+	position: sticky;
+	top: 10rem;
+	align-self: flex-start;
+	border: 1px solid #e2e8f0;
+}
+
+.mindmap-list-column {
+	flex: 1;
+}
+
+.filter-section {
+	margin-bottom: 1.5rem;
+}
+
+.filter-title {
+	font-size: 0.9rem;
+	font-weight: 600;
+	color: #4a5568;
+	margin-bottom: 0.75rem;
+}
+
+.filter-option {
+	display: flex;
+	align-items: center;
+	margin-bottom: 0.5rem;
+}
+
+.filter-option label {
+	margin-left: 0.5rem;
+	font-size: 0.9rem;
+	color: #718096;
+}
+
+.filter-dropdown {
+	width: 100%;
+	padding: 0.5rem;
+	border-radius: 4px;
+	border: 1px solid #e2e8f0;
+	font-size: 0.9rem;
+	background-color: #f7fafc;
+	color: #4a5568;
+}
+
+.invitation-card {
+	background: white;
+	border-radius: 8px;
+	padding: 1.5rem;
+	margin-bottom: 1rem;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+	border: 1px solid #e2e8f0;
+	transition: all 0.3s ease;
+}
+
+.invitation-card:hover {
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	transform: translateY(-2px);
+}
+
+.card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1rem;
+}
+
+.card-title {
+	font-size: 1.2rem;
+	font-weight: 600;
+	color: #4a5568;
+}
+
+.card-date {
+	font-size: 0.85rem;
+	color: #a0aec0;
+}
+
+.card-content {
+	color: #718096;
+	margin-bottom: 1rem;
+}
+
+.card-footer {
+	display: flex;
+	justify-content: flex-end;
+	gap: 1rem;
+}
+
+.card-button {
+	padding: 0.5rem 1rem;
+	border-radius: 4px;
+	font-size: 0.9rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.accept-button {
+	background: linear-gradient(to right, #3182ce, #805ad5);
+	color: white;
+	border: none;
+}
+
+.accept-button:hover {
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	transform: translateY(-1px);
+}
+
+.decline-button {
+	background-color: white;
+	color: #718096;
+	border: 1px solid #e2e8f0;
+}
+
+.decline-button:hover {
+	background-color: #f7fafc;
+}
+
+.empty-state {
+	text-align: center;
+	padding: 3rem;
+	color: #718096;
+}
+
+.empty-state-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+	color: #e2e8f0;
+}
+
+.empty-state-text {
+	font-size: 1.1rem;
+	margin-bottom: 1rem;
+}
+
+.empty-state-subtext {
+	font-size: 0.9rem;
+	color: #a0aec0;
+}
+
+.pagination {
+	display: flex;
+	justify-content: center;
+	margin-top: 2rem;
+	gap: 0.5rem;
+}
+
+.pagination-button {
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 4px;
+	background-color: white;
+	border: 1px solid #e2e8f0;
+	color: #718096;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.pagination-button:hover {
+	background-color: #f7fafc;
+}
+
+.pagination-button.active {
+	background: linear-gradient(to right, #3182ce, #805ad5);
+	color: white;
+	border: none;
+}
+
+/* Loading state */
+.loading-state {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 200px;
+}
+
+.spinner {
+	width: 40px;
+	height: 40px;
+	border: 4px solid rgba(90, 103, 216, 0.1);
+	border-radius: 50%;
+	border-top-color: #5a67d8;
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+	.invitation-content {
+		flex-direction: column;
+	}
+
+	.invitation-filters-panel {
+		width: 100%;
+		position: static;
+		margin-bottom: 2rem;
+	}
+}
+
+@media (max-width: 768px) {
+	.invitation-title {
+		font-size: 1.75rem;
+	}
+
+	.category-tab {
+		padding: 0.75rem 1rem;
+		font-size: 0.9rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.invitation-page-container {
+		padding: 0 1rem;
+		margin: 1rem auto;
+	}
+
+	.invitation-title {
+		font-size: 1.5rem;
+	}
+
+	.tabs-container {
+		margin-bottom: 1.5rem;
+	}
+
+	.card-footer {
+		flex-direction: column;
+	}
+
+	.card-button {
+		width: 100%;
+		text-align: center;
+	}
+}

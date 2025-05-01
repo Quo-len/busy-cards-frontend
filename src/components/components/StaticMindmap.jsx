@@ -3,11 +3,9 @@ import ReactFlow, { ReactFlowProvider, ConnectionMode, useReactFlow } from "reac
 import "reactflow/dist/style.css";
 import { nodeTypes, edgeTypes } from "../../diagram/components";
 
-// Inner component that has access to the ReactFlow instance
 const FlowWithControls = ({ parsedNodes, parsedEdges, panOnDrag }) => {
 	const reactFlowInstance = useReactFlow();
 
-	// Fit view on initial render and when nodes/edges change
 	useEffect(() => {
 		if (reactFlowInstance && parsedNodes.length > 0) {
 			setTimeout(() => {
@@ -16,7 +14,7 @@ const FlowWithControls = ({ parsedNodes, parsedEdges, panOnDrag }) => {
 					minZoom: 0.1,
 					maxZoom: 1,
 				});
-			}, 50); // Small delay to ensure flow is properly initialized
+			}, 50);
 		}
 	}, [reactFlowInstance, parsedNodes, parsedEdges]);
 
@@ -81,7 +79,6 @@ const StaticMindmap = ({ nodes, edges, panOnDrag = false }) => {
 		try {
 			if (!nodes) return [];
 			const obj = JSON.parse(nodes);
-			// Make nodes smaller to fit better in the preview
 			return Object.values(obj).map((node) => ({
 				...node,
 				style: {
@@ -92,7 +89,7 @@ const StaticMindmap = ({ nodes, edges, panOnDrag = false }) => {
 				},
 			}));
 		} catch (e) {
-			console.error("Error parsing nodes:", e);
+			//	console.error("Error parsing nodes:", e);
 			return [];
 		}
 	}, [nodes]);
@@ -103,12 +100,11 @@ const StaticMindmap = ({ nodes, edges, panOnDrag = false }) => {
 			const obj = JSON.parse(edges);
 			return Object.values(obj);
 		} catch (e) {
-			console.error("Error parsing edges:", e);
+			//	console.error("Error parsing edges:", e);
 			return [];
 		}
 	}, [edges]);
 
-	// Set initialization flag after a small delay
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setIsInitialized(true);

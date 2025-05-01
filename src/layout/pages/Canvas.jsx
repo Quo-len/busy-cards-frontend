@@ -23,7 +23,7 @@ import { useWebSocket, WebSocketProvider } from "../../utils/WebSocketContext";
 import { DnDProvider, useDnD } from "../../diagram/utils/DnDContext";
 import * as api from "../../api";
 import BoundingLines from "../../diagram/components/BoundingLines";
-import Sidebar from "../../components/components/Sidebar";
+import Sidebar from "../../diagram/components/Sidebar";
 import SearchBar from "../../diagram/components/SearchBar";
 import DropBar from "../../diagram/components/DropBar";
 import CanvasControls from "../../diagram/components/CanvasControls";
@@ -588,29 +588,28 @@ const Canvas = () => {
 				<BoundingLines translateExtent={nodeExtent} />
 
 				<CanvasControls isOpen={isOpen} onUpdate={updateIsOpen} onCenter={handleToCenter} />
-				{isOpen.minimap && (
-					<CanvasMinimap connectionStartNodeId={connectionStartNodeId} invalidTargetNodes={invalidTargetNodes} />
-				)}
 
-				{isOpen.rightBar && <Sidebar />}
-				{isOpen.searchBar && (
-					<SearchBar
-						onSearch={handleSearch}
-						onClear={clearSearch}
-						onNavigatePrev={() => navigateSearchResults(-1)}
-						onNavigateNext={() => navigateSearchResults(+1)}
-						searchQuery={searchQuery}
-						setSearchQuery={setSearchQuery}
-						currentIndex={currentSearchIndex}
-						totalResults={searchResults.length}
-					/>
-				)}
+				<CanvasMinimap
+					connectionStartNodeId={connectionStartNodeId}
+					invalidTargetNodes={invalidTargetNodes}
+					isVisible={isOpen.minimap}
+				/>
+
+				<Sidebar isVisible={isOpen.rightBar} />
+
+				<SearchBar
+					onSearch={handleSearch}
+					onClear={clearSearch}
+					onNavigatePrev={() => navigateSearchResults(-1)}
+					onNavigateNext={() => navigateSearchResults(+1)}
+					searchQuery={searchQuery}
+					setSearchQuery={setSearchQuery}
+					currentIndex={currentSearchIndex}
+					totalResults={searchResults.length}
+					isVisible={isOpen.searchBar}
+				/>
 			</ReactFlow>
-			{isOpen.leftBar && (
-				<div style={{ position: "absolute", left: 20, top: 150, zIndex: 10 }}>
-					<DropBar />
-				</div>
-			)}
+			<DropBar isVisible={isOpen.leftBar} isVisibleMap={isOpen.minimap} />
 		</div>
 	);
 };

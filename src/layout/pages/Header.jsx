@@ -27,7 +27,7 @@ const Header = () => {
 							<button
 								className="header-button settings-button"
 								onClick={() => {
-									navigate(`/profile/${user._id}`);
+									navigate(`/profile/${user.id}`);
 								}}
 							>
 								<HiOutlineUserCircle className="button-icon" />

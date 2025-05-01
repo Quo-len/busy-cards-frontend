@@ -1,4 +1,4 @@
-/* SearchSidebar.css */
+/* SearchBar.css */
 .search-sidebar-container {
 	position: fixed;
 	top: 4rem;
@@ -8,6 +8,40 @@
 	justify-content: center;
 	z-index: 50;
 	pointer-events: none;
+	transform: translateY(-150%);
+	transition: transform 0.3s ease-in-out;
+}
+
+.search-sidebar-container.show {
+	transform: translateY(0);
+	animation: slideDown 0.3s ease-in-out forwards;
+}
+
+.search-sidebar-container.hide {
+	transform: translateY(-150%);
+	animation: slideUp 0.3s ease-in-out forwards;
+}
+
+@keyframes slideDown {
+	from {
+		transform: translateY(-150%);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slideUp {
+	from {
+		transform: translateY(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateY(-150%);
+		opacity: 0;
+	}
 }
 
 .search-sidebar {

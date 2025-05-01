@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { MdSavedSearch } from "react-icons/md";
 import { IoNuclearSharp } from "react-icons/io5";
 import { TbCircleArrowRight, TbCircleArrowLeft } from "react-icons/tb";
@@ -13,7 +13,18 @@ const SearchBar = ({
 	setSearchQuery,
 	currentIndex,
 	totalResults,
+	isVisible,
 }) => {
+	const [animationClass, setAnimationClass] = useState("");
+
+	useEffect(() => {
+		if (isVisible) {
+			setAnimationClass("show");
+		} else {
+			setAnimationClass("hide");
+		}
+	}, [isVisible]);
+
 	const handleKeyPress = (e) => {
 		if (e.key === "Enter") {
 			onSearch();
@@ -21,7 +32,7 @@ const SearchBar = ({
 	};
 
 	return (
-		<div className="search-sidebar-container">
+		<div className={`search-sidebar-container ${animationClass}`}>
 			<div className="search-sidebar">
 				<div className="search-sidebar-wrapper">
 					<div className="search-sidebar-inner">

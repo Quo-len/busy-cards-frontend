@@ -1,6 +1,18 @@
 import { MiniMap } from "reactflow";
+import { useEffect, useState } from "react";
+import "../styles/CanvasMinimap.css";
 
-const CanvasMinimap = ({ connectionStartNodeId, invalidTargetNodes }) => {
+const CanvasMinimap = ({ connectionStartNodeId, invalidTargetNodes, isVisible }) => {
+	const [animationClass, setAnimationClass] = useState("");
+
+	useEffect(() => {
+		if (isVisible) {
+			setAnimationClass("show");
+		} else {
+			setAnimationClass("hide");
+		}
+	}, [isVisible]);
+
 	return (
 		<MiniMap
 			position="bottom-left"
@@ -19,11 +31,15 @@ const CanvasMinimap = ({ connectionStartNodeId, invalidTargetNodes }) => {
 			}}
 			nodeBorderRadius={2}
 			style={{
+				left: -14.8,
+				bottom: -14.6,
 				width: 300,
 				height: 200,
-				border: "1px solid black",
+				border: "1.5px solid black",
 			}}
 			maskColor="rgb(0,0,0, 0.1)"
+			className={animationClass}
+			ariaLabel="Minimap"
 		/>
 	);
 };

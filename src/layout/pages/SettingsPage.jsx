@@ -44,7 +44,7 @@ const SettingsPage = () => {
 		e.preventDefault();
 		try {
 			const updatedData = { [fieldName]: value };
-			const response = await api.updateUser(user._id, updatedData);
+			const response = await api.updateUser(user.id, updatedData);
 			setUser(response);
 
 			const fieldNamesUa = {
@@ -81,7 +81,7 @@ const SettingsPage = () => {
 	const handleAvatarUpload = async () => {
 		if (!avatarFile) return;
 		try {
-			const updatedUser = await api.uploadUserAvatar(user._id, avatarFile);
+			const updatedUser = await api.uploadUserAvatar(user.id, avatarFile);
 			const localAvatarURL = URL.createObjectURL(avatarFile);
 
 			setUser((prev) => ({
@@ -99,7 +99,7 @@ const SettingsPage = () => {
 	const handleDeleteAccount = async () => {
 		if (window.confirm("Ви впевнені, що хочете видалити свій обліковий запис? Цю дію не можна скасувати.")) {
 			try {
-				await api.deleteUser(user._id);
+				await api.deleteUser(user.id);
 				logoutUser();
 				toast.success(`Профіль успішно видалено.`);
 			} catch (error) {

@@ -1,0 +1,290 @@
+/* InvitationList.css */
+.invitation-list-container {
+	width: 100%;
+	position: relative;
+}
+
+.invitation-cards {
+	margin-bottom: 2rem;
+}
+
+.list-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 1.5rem;
+}
+
+.list-title {
+	font-size: 1.2rem;
+	font-weight: 600;
+	color: #4a5568;
+}
+
+.list-count {
+	background: linear-gradient(to right, #3182ce, #805ad5);
+	color: white;
+	padding: 0.25rem 0.75rem;
+	border-radius: 20px;
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+/* Pagination styles */
+.pagination {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	list-style: none;
+	padding: 0;
+	margin: 2rem 0 1rem;
+	gap: 0.5rem;
+}
+
+.pagination li {
+	display: inline-block;
+}
+
+.pagination a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 8px;
+	border: 1px solid #e2e8f0;
+	color: #4a5568;
+	font-weight: 500;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-decoration: none;
+	font-size: 0.95rem;
+}
+
+.pagination a:hover {
+	background-color: #edf2f7;
+	border-color: #cbd5e0;
+}
+
+.pagination li.active a {
+	background: linear-gradient(to right, #3182ce, #805ad5);
+	color: white;
+	border: none;
+	font-weight: 600;
+}
+
+.pagination li.disabled a {
+	color: #cbd5e0;
+	pointer-events: none;
+	border-color: #edf2f7;
+}
+
+.pagination-info {
+	text-align: center;
+	color: #718096;
+	font-size: 0.9rem;
+	margin-top: 1rem;
+}
+
+/* Loading state animation */
+.loading-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(255, 255, 255, 0.8);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 10;
+	border-radius: 8px;
+}
+
+.loading-spinner {
+	width: 50px;
+	height: 50px;
+	border: 4px solid rgba(90, 103, 216, 0.1);
+	border-radius: 50%;
+	border-top-color: #5a67d8;
+	animation: spin 1s linear infinite;
+	margin-bottom: 1rem;
+}
+
+.loading-message {
+	color: #4a5568;
+	font-weight: 500;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Empty state styling */
+.empty-state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 3rem 1rem;
+	text-align: center;
+	background-color: white;
+	border-radius: 12px;
+	border: 1px dashed #cbd5e0;
+}
+
+.empty-icon {
+	font-size: 3rem;
+	color: #cbd5e0;
+	margin-bottom: 1.5rem;
+}
+
+.empty-message {
+	font-size: 1.2rem;
+	color: #4a5568;
+	font-weight: 500;
+	margin-bottom: 1rem;
+}
+
+.empty-description {
+	color: #718096;
+	max-width: 400px;
+	margin-bottom: 1.5rem;
+}
+
+.create-button {
+	padding: 0.75rem 1.5rem;
+	background: linear-gradient(to right, #3182ce, #805ad5);
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.create-button:hover {
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+	transform: translateY(-2px);
+}
+
+/* Filters tags */
+.active-filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-bottom: 1.5rem;
+}
+
+.filter-tag {
+	display: inline-flex;
+	align-items: center;
+	background-color: #edf2f7;
+	border-radius: 20px;
+	padding: 0.35rem 0.75rem;
+	font-size: 0.85rem;
+	color: #4a5568;
+	gap: 0.5rem;
+}
+
+.filter-tag-label {
+	font-weight: 600;
+	color: #718096;
+}
+
+.remove-filter {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background-color: #cbd5e0;
+	color: white;
+	cursor: pointer;
+	font-size: 0.75rem;
+	transition: all 0.2s ease;
+}
+
+.remove-filter:hover {
+	background-color: #a0aec0;
+}
+
+/* List item hover effect */
+.invitation-card {
+	position: relative;
+	overflow: hidden;
+}
+
+.invitation-card::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(45deg, rgba(49, 130, 206, 0.05) 0%, rgba(128, 90, 213, 0.05) 100%);
+	opacity: 0;
+	transition: opacity 0.3s ease;
+	pointer-events: none;
+}
+
+.invitation-card:hover::after {
+	opacity: 1;
+}
+
+/* Transitions for list changes */
+.invitation-cards {
+	position: relative;
+}
+
+.list-transition-enter {
+	opacity: 0;
+	transform: translateY(20px);
+}
+
+.list-transition-enter-active {
+	opacity: 1;
+	transform: translateY(0);
+	transition: opacity 300ms, transform 300ms;
+}
+
+.list-transition-exit {
+	opacity: 1;
+}
+
+.list-transition-exit-active {
+	opacity: 0;
+	transition: opacity 300ms;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+	.pagination {
+		flex-wrap: wrap;
+	}
+
+	.active-filters {
+		margin-bottom: 1rem;
+	}
+}
+
+@media (max-width: 480px) {
+	.list-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.75rem;
+	}
+
+	.pagination a {
+		width: 36px;
+		height: 36px;
+		font-size: 0.85rem;
+	}
+}

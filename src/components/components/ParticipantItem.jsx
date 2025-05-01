@@ -12,7 +12,7 @@ const ParticipantItem = ({ participant, isEditable, onRemove }) => {
 		setSelectedRole(newLevel);
 
 		try {
-			await api.updateParticipant(participant.mindmap, participant.user._id, newLevel);
+			await api.updateParticipant(participant.mindmap, participant.user.id, newLevel);
 		} catch (error) {
 			console.error("Failed to update access level:", error);
 			setSelectedRole(participant.accessLevel);
@@ -22,8 +22,8 @@ const ParticipantItem = ({ participant, isEditable, onRemove }) => {
 	const handleRemoveParticipant = async () => {
 		try {
 			console.log("remove");
-			await api.deleteParticipant(participant.mindmap, participant.user._id);
-			onRemove(participant._id);
+			await api.deleteParticipant(participant.mindmap, participant.user.id);
+			onRemove(participant.id);
 		} catch (error) {
 			console.error("Failed to remove participant:", error);
 		}

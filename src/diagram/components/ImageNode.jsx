@@ -4,8 +4,9 @@ import "../styles/ImageNode.css";
 
 const ImageNode = ({ id, data, selected }) => {
 	return (
-		<div className="image-node">
-			<div>{data.label}</div>
+		<div className={`image-node ${selected ? "selected" : ""}`}>
+			{data.image && <img src={data.image} alt={data.label || "Node Image"} />}
+			<div className="node-label">{data.label}</div>
 			<Handle type="source" id="left" position={Position.Left} />
 			<Handle type="source" id="right" position={Position.Right} />
 			<Handle type="source" id="top" position={Position.Top} />

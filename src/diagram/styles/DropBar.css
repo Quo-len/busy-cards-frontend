@@ -16,6 +16,49 @@ aside {
 	font-family: "Roboto", sans-serif;
 	z-index: 90;
 	border-right: 1px solid #e2e8f0;
+	transition: transform 0.3s ease-in-out, height 0.3s ease-in-out;
+}
+
+/* Height adjustment when minimap is visible */
+aside.minimap-visible {
+	height: calc(100vh - 64px - 205px); /* Adjust height to make room for minimap */
+}
+
+/* Animation classes */
+.dropbar.slide-in {
+	transform: translateX(0);
+	animation: slideIn 0.3s ease-in-out forwards;
+}
+
+.dropbar.slide-out {
+	transform: translateX(-100%);
+	animation: slideOut 0.3s ease-in-out forwards;
+}
+
+.dropbar.slide-out-complete {
+	display: none;
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateX(-100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slideOut {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(-100%);
+		opacity: 0;
+	}
 }
 
 aside::-webkit-scrollbar {
@@ -46,6 +89,17 @@ aside::-webkit-scrollbar-thumb:hover {
 	text-align: center;
 	color: #4a5568;
 	border-left: 3px solid #3182ce;
+}
+
+/* Button styling */
+.dropbar button:hover {
+	background-color: #edf2f7;
+	transform: translateY(-2px);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.dropbar button:active {
+	transform: translateY(0);
 }
 
 /* Responsive adjustments */
@@ -79,5 +133,9 @@ aside::-webkit-scrollbar-thumb:hover {
 	aside {
 		top: 56px;
 		height: calc(100vh - 56px);
+	}
+
+	aside.minimap-visible {
+		height: calc(100vh - 56px - 205px);
 	}
 }

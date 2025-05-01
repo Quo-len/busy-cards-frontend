@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import MindmapList from "../../components/components/MindmapList";
 import MindmapEditCard from "../../components/components/MindmapEditCard";
+import FiltersPanel from "../../components/components/FiltersPanel";
+
 import "./../styles/HomePage.css";
 import * as api from "../../api/";
 import { useNavigate } from "react-router-dom";
@@ -19,14 +21,18 @@ const categories = [
 const HomePage = (props) => {
 	const { user, isLoggedIn } = useAuth();
 	const navigate = useNavigate();
-	const [activeCategory, setActiveCategory] = useState(isLoggedIn ? "my" : "public");
+	const [activeCategory, setActiveCategory] = useState("public");
 	const [selectedMindmap, setSelectedMindmap] = useState(null);
 	const [showEditor, setShowEditor] = useState(false);
 	const [refreshKey, setRefreshKey] = useState(0);
 
-	const [sortBy, setSortBy] = useState("lastModified");
+	const [sortBy, setSortBy] = useState("updatedAt");
 	const [sortOrder, setSortOrder] = useState("desc");
 	const [itemsPerPage, setItemsPerPage] = useState(5);
+
+	useEffect(() => {
+		setActiveCategory(isLoggedIn ? "my" : "public");
+	}, [isLoggedIn]);
 
 	const filters = useMemo(
 		() => ({
@@ -34,9 +40,9 @@ const HomePage = (props) => {
 			sortBy: sortBy,
 			sortOrder: sortOrder,
 			itemsPerPage: itemsPerPage,
-			owner: activeCategory === "my" && isLoggedIn ? user?._id : undefined,
-			participant: activeCategory === "shared" && isLoggedIn ? user?._id : undefined,
-			favorite: activeCategory === "favorites" && isLoggedIn ? user?._id : undefined,
+			owner: activeCategory === "my" && isLoggedIn ? user?.id : undefined,
+			participant: activeCategory === "shared" && isLoggedIn ? user?.id : undefined,
+			favorite: activeCategory === "favorites" && isLoggedIn ? user?.id : undefined,
 			isPublic: activeCategory === "public" ? true : undefined,
 		}),
 		[activeCategory, sortBy, sortOrder, itemsPerPage, isLoggedIn, user]
@@ -48,7 +54,7 @@ const HomePage = (props) => {
 	}, [activeCategory]);
 
 	const handleMindmapClick = (mindmap) => {
-		if (selectedMindmap?._id !== mindmap._id) {
+		if (selectedMindmap?.id !== mindmap.id) {
 			setSelectedMindmap(mindmap);
 			setShowEditor(true);
 		} else {
@@ -59,8 +65,8 @@ const HomePage = (props) => {
 
 	const handleCreateMindmap = async () => {
 		try {
-			const response = await api.createMindmap({
-				owner: user?._id,
+			await api.createMindmap({
+				owner: user?.id,
 			});
 			setRefreshKey((prev) => prev + 1);
 			toast.success(`Інтелект-карту успішно створено!`);
@@ -110,45 +116,14 @@ const HomePage = (props) => {
 						</div>
 					</div>
 
-					<div className="filters-panel">
-						<h3 className="filters-title">Фільтри</h3>
-						<div className="filters-group">
-							<div className="filter-item">
-								<label htmlFor="sort-filter">Сортування:</label>
-								<select
-									id="sort-filter"
-									value={`${sortBy}-${sortOrder}`}
-									onChange={(e) => {
-										const [newSortBy, newSortOrder] = e.target.value.split("-");
-										setSortBy(newSortBy);
-										setSortOrder(newSortOrder);
-									}}
-								>
-									<option value="lastModified-desc">Останні зміни</option>
-									<option value="lastModified-asc">Найстаріші зміни</option>
-									<option value="createdAt-desc">Нещодавно створені</option>
-									<option value="createdAt-asc">Найстаріші створення</option>
-									<option value="title-asc">Назва (А-Я)</option>
-									<option value="title-desc">Назва (Я-А)</option>
-								</select>
-							</div>
-
-							<div className="filter-item">
-								<label htmlFor="items-per-page">Елементів на сторінці:</label>
-								<select
-									id="items-per-page"
-									value={itemsPerPage}
-									onChange={(e) => {
-										setItemsPerPage(parseInt(e.target.value));
-									}}
-								>
-									<option value={5}>5</option>
-									<option value={10}>10</option>
-									<option value={20}>20</option>
-								</select>
-							</div>
-						</div>
-					</div>
+					<FiltersPanel
+						sortBy={sortBy}
+						setSortBy={setSortBy}
+						sortOrder={sortOrder}
+						setSortOrder={setSortOrder}
+						itemsPerPage={itemsPerPage}
+						setItemsPerPage={setItemsPerPage}
+					/>
 				</div>
 
 				<div className="mindmap-list-column">

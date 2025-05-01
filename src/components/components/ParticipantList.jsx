@@ -11,21 +11,12 @@ const ParticipantList = ({ mindmap, isEditable }) => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
-		const fetchParticipants = async () => {
-			try {
-				//const response = await api.getParticipants(mindmap._id);
-				setParticipants(mindmap.participants || []);
-			} catch (error) {
-				console.error("Error fetching participants:", error);
-			}
-			setIsLoading(false);
-		};
-
-		fetchParticipants();
+		setParticipants(mindmap.participants || []);
+		setIsLoading(false);
 	}, [mindmap]);
 
 	const handleRemove = (idToRemove) => {
-		setParticipants((prev) => prev.filter((p) => p._id !== idToRemove));
+		setParticipants((prev) => prev.filter((p) => p.id !== idToRemove));
 	};
 
 	return (
@@ -41,16 +32,11 @@ const ParticipantList = ({ mindmap, isEditable }) => {
 					}
 
 					if (participants.length === 0) {
-						return <Empty message="Учасники відсутні." />;
+						return <Empty message="Учасники відсутні." description="Спробуйте запросити свого першого учасника!" />;
 					}
 
 					return participants.map((participant) => (
-						<ParticipantItem
-							key={participant._id}
-							participant={participant}
-							isEditable={true}
-							onRemove={handleRemove}
-						/>
+						<ParticipantItem key={participant.id} participant={participant} isEditable={true} onRemove={handleRemove} />
 					));
 				})()}
 			</div>

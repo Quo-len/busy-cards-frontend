@@ -93,17 +93,17 @@
 	transition: all 0.2s ease;
 	display: inline-flex;
 	align-items: center;
+	gap: 0.5rem;
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.invite-button svg {
+	font-size: 1.25rem;
 }
 
 .invite-button:hover {
 	transform: translateY(-2px);
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.invite-button:before {
-	content: "✉️";
-	margin-right: 0.5rem;
 }
 
 .mindmaps-section {
@@ -135,64 +135,9 @@
 }
 
 .profile-filters-panel {
-	width: 250px;
 	position: sticky;
 	top: 5rem;
 	align-self: flex-start;
-	background-color: #f8fafc;
-	border-radius: 0.5rem;
-	padding: 1.5rem;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-	margin-left: 2rem;
-	height: fit-content;
-}
-
-.profile-filters-title {
-	font-size: 1.2rem;
-	font-weight: 600;
-	margin-bottom: 1rem;
-	color: #4a5568;
-	padding-bottom: 0.5rem;
-	border-bottom: 1px solid #e2e8f0;
-}
-
-.profile-filters-group {
-	display: flex;
-	flex-direction: column;
-	gap: 1rem;
-}
-
-.profile-filter-item {
-	display: flex;
-	flex-direction: column;
-	gap: 0.5rem;
-}
-
-.profile-filter-item label {
-	font-size: 0.9rem;
-	font-weight: 500;
-	color: #4a5568;
-}
-
-.profile-filter-item select {
-	padding: 0.5rem;
-	border-radius: 0.25rem;
-	border: 1px solid #e2e8f0;
-	background-color: white;
-	color: #2d3748;
-	font-size: 0.9rem;
-	cursor: pointer;
-	transition: border-color 0.2s ease;
-}
-
-.profile-filter-item select:hover {
-	border-color: #cbd5e0;
-}
-
-.profile-filter-item select:focus {
-	outline: none;
-	border-color: #805ad5;
-	box-shadow: 0 0 0 3px rgba(128, 90, 213, 0.2);
 }
 
 /* Responsive styles */
@@ -249,4 +194,11 @@
 
 .profile-container {
 	animation: fadeIn 0.5s ease forwards;
+}
+
+/* For the section title icon */
+.section-title .logo {
+	margin-right: 0.5rem;
+	font-size: 1.25rem;
+	color: #805ad5;
 }

@@ -2,12 +2,22 @@ import { useWebSocket } from "../../utils/WebSocketContext";
 import { useDnD } from "../utils/DnDContext";
 import { useReactFlow } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
+import { useEffect, useState } from "react";
 import "../styles/DropBar.css";
 
-const DropBar = () => {
+const DropBar = ({ isVisible, isVisibleMap }) => {
 	const reactFlowInstance = useReactFlow();
 	const { ydoc } = useWebSocket();
 	const [_, setType] = useDnD();
+	const [animationClass, setAnimationClass] = useState("");
+
+	useEffect(() => {
+		if (isVisible) {
+			setAnimationClass("slide-in");
+		} else {
+			setAnimationClass("slide-out");
+		}
+	}, [isVisible]);
 
 	const onDragStart = (event, nodeType) => {
 		setType(nodeType);
@@ -34,75 +44,107 @@ const DropBar = () => {
 		ydoc.getMap("nodes").set(newNode.id, newNode);
 	};
 
+	// Don't render if not open (after animation completes)
+	if (!isVisible && animationClass === "slide-out-complete") {
+		return null;
+	}
+
+	// Apply minimap visibility class if minimap is open
+	const minimapClass = isVisibleMap ? "minimap-visible" : "";
+
 	return (
-		<aside>
+		<aside className={`dropbar ${animationClass} ${minimapClass}`}>
 			<div className="description">
 				Ви можете перетягнути ці вузли на панель праворуч або натиснути на них для додавання.
 			</div>
-			<div
-				className="customnode"
+			<button
+				className="custom-node"
 				onClick={() => onAddNodeToCenter("custom")}
 				onDragStart={(event) => onDragStart(event, "custom")}
 				draggable
 			>
 				Вимога
-			</div>
-			<div
-				className="group-node"
+			</button>
+			<button
+				className="mygroup-node"
 				onClick={() => onAddNodeToCenter("mygroup")}
 				onDragStart={(event) => onDragStart(event, "mygroup")}
 				draggable
 			>
 				Моя Група
-			</div>
-			<div
+			</button>
+			<button
 				className="group-node"
 				onClick={() => onAddNodeToCenter("group")}
 				onDragStart={(event) => onDragStart(event, "group")}
 				draggable
 			>
 				Група
-			</div>
-			<div
+			</button>
+			<button
 				className="actor-node"
 				onClick={() => onAddNodeToCenter("actor")}
 				onDragStart={(event) => onDragStart(event, "actor")}
 				draggable
 			>
 				Актор
-			</div>
-			<div
+			</button>
+			<button
 				className="note-node"
 				onClick={() => onAddNodeToCenter("note")}
 				onDragStart={(event) => onDragStart(event, "note")}
 				draggable
 			>
 				Замітка
-			</div>
-			<div
+			</button>
+			<button
 				className="link-node"
 				onClick={() => onAddNodeToCenter("link")}
 				onDragStart={(event) => onDragStart(event, "link")}
 				draggable
 			>
 				Посилання
-			</div>
-			<div
+			</button>
+			<button
 				className="image-node"
 				onClick={() => onAddNodeToCenter("image")}
 				onDragStart={(event) => onDragStart(event, "image")}
 				draggable
 			>
 				Зображення
-			</div>
-			{/* <div
-				className="root-node"
-				onClick={() => onAddNodeToCenter("root")}
-				onDragStart={(event) => onDragStart(event, "root")}
-				draggable
-			>
-				Root
-			</div> */}
+			</button>
+
+			<button className="custom-node" draggable>
+				Тест
+			</button>
+
+			<button className="custom-node" draggable>
+				Тест
+			</button>
+
+			<button className="custom-node" draggable>
+				Тест
+			</button>
+
+			<button className="custom-node" draggable>
+				Тест
+			</button>
+
+			<button className="custom-node" draggable>
+				Тест
+			</button>
+
+			<button className="custom-node" draggable>
+				Тест
+			</button>
+
+			<button className="custom-node" draggable>
+				Тест
+			</button>
+
+			<button className="custom-node" draggable>
+				Тест
+			</button>
 		</aside>
 	);
 };
