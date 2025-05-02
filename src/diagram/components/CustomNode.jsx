@@ -4,7 +4,6 @@ import React, { memo } from "react";
 import { useNodeResize } from "../utils/utils";
 import "../styles/CustomNode.css";
 
-// Node colors
 const nodeColors = {
 	blue: "#3498db",
 	green: "#2ecc71",

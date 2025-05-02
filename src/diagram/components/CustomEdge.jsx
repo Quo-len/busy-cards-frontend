@@ -29,10 +29,8 @@ const CustomEdge = ({ id, source, target, sourcePosition, targetPosition, style 
 
 	const onEdgeClick = () => {
 		if (!ydoc) return;
-		// Remove edge from Yjs shared map
 		const edgesMap = ydoc.getMap("edges");
 		edgesMap.delete(id);
-		// Remove edge from local state
 		setEdges((edges) => edges.filter((edge) => edge.id !== id));
 	};
 

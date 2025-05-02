@@ -71,11 +71,9 @@ function getParams(nodeA, nodeB) {
 
 	let position;
 
-	// when the horizontal difference between the nodes is bigger, we use Position.Left or Position.Right for the handle
 	if (horizontalDiff > verticalDiff) {
 		position = centerA.x > centerB.x ? Position.Left : Position.Right;
 	} else {
-		// here the vertical difference between the nodes is bigger, so we use Position.Top or Position.Bottom for the handle
 		position = centerA.y > centerB.y ? Position.Top : Position.Bottom;
 	}
 
@@ -84,15 +82,11 @@ function getParams(nodeA, nodeB) {
 }
 
 function getHandleCoordsByPosition(node, handlePosition) {
-	// all handles are from type source, that's why we use handleBounds.source here
 	const handle = node[internalsSymbol].handleBounds.source.find((h) => h.position === handlePosition);
 
 	let offsetX = handle.width / 2;
 	let offsetY = handle.height / 2;
 
-	// this is a tiny detail to make the markerEnd of an edge visible.
-	// The handle position that gets calculated has the origin top-left, so depending which side we are using, we add a little offset
-	// when the handlePosition is Position.Right for example, we need to add an offset as big as the handle itself in order to get the correct position
 	switch (handlePosition) {
 		case Position.Left:
 			offsetX = 0;
@@ -121,7 +115,6 @@ function getNodeCenter(node) {
 	};
 }
 
-// returns the parameters (sx, sy, tx, ty, sourcePos, targetPos) you need to create an edge
 export function getEdgeParams(source, target) {
 	const [sx, sy, sourcePos] = getParams(source, target);
 	const [tx, ty, targetPos] = getParams(target, source);
@@ -144,7 +137,6 @@ export const useNodeResize = (id, ydoc) => {
 			const newWidth = node.width;
 			const newHeight = node.height;
 
-			// Update local state
 			setNodes((nodes) =>
 				nodes.map((n) => {
 					if (n.id === id) {
@@ -161,7 +153,6 @@ export const useNodeResize = (id, ydoc) => {
 				})
 			);
 
-			// Update in y-doc if available
 			if (ydoc) {
 				const nodesMap = ydoc.getMap("nodes");
 				const nodeData = nodesMap.get(id);

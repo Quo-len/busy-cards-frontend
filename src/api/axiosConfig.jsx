@@ -1,7 +1,6 @@
 import axios from "axios";
 import { getAuthTokenFromCookies, logout } from "../utils/utils";
 
-// Axios instance with base configuration
 const axiosInstance = axios.create({
 	baseURL: import.meta.env.DEV ? "/api/" : "https://api.example.com/",
 	timeout: 10000,

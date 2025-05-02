@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { FiLink, FiX } from 'react-icons/fi';
-import '../styles/LinkDialog.css';
+import React, { useState, useEffect, useRef } from "react";
+import { FiLink, FiX } from "react-icons/fi";
+import "../styles/LinkDialog.css";
 
 const LinkDialog = ({ isOpen, onClose, onSave, selectedText }) => {
-	const [linkText, setLinkText] = useState(selectedText || '');
-	const [linkUrl, setLinkUrl] = useState('https://');
+	const [linkText, setLinkText] = useState(selectedText || "");
+	const [linkUrl, setLinkUrl] = useState("https://");
 	const textInputRef = useRef(null);
 
 	useEffect(() => {
 		if (isOpen) {
-			setLinkText(selectedText || '');
-			setLinkUrl('https://');
-			// Focus the first input after dialog opens
+			setLinkText(selectedText || "");
+			setLinkUrl("https://");
 			setTimeout(() => {
 				if (textInputRef.current) {
 					textInputRef.current.focus();
@@ -23,9 +22,8 @@ const LinkDialog = ({ isOpen, onClose, onSave, selectedText }) => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 
-		// Ensure URL has protocol
 		let url = linkUrl;
-		if (!url.startsWith('http://') && !url.startsWith('https://')) {
+		if (!url.startsWith("http://") && !url.startsWith("https://")) {
 			url = `https://${url}`;
 		}
 

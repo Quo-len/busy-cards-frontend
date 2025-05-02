@@ -6,7 +6,6 @@ import Cookies from "js-cookie";
 import { useAuth } from "./../../utils/authContext";
 import { toast } from "react-toastify";
 
-// Material UI imports
 import {
 	Box,
 	Typography,

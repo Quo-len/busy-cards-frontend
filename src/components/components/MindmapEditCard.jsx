@@ -45,9 +45,7 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel, onDelete }) => {
 
 	const handleExport = (e) => {
 		e.preventDefault();
-		// Handle export functionality
 		console.log(`Exporting as ${exportType}`);
-		// Implement export logic
 	};
 
 	const handleDeleteMindmap = async () => {

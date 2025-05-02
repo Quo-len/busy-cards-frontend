@@ -1,4 +1,3 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import MindmapCard from "./MindmapCard";
 import { useAuth } from "./../../utils/authContext";

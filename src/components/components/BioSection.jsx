@@ -28,10 +28,9 @@ const BioSection = ({ user, handleFieldSubmit }) => {
 				newCursorPos = end + 2;
 				break;
 			case "link":
-				// Open the link dialog instead of using prompt
 				setSelectedText(selectedText);
 				setIsLinkDialogOpen(true);
-				return; // Exit early since we'll handle this in the dialog
+				return;
 				break;
 			case "list":
 				formattedText = `\n- ${selectedText}`;
@@ -48,7 +47,6 @@ const BioSection = ({ user, handleFieldSubmit }) => {
 		const newBio = bio.substring(0, start) + formattedText + bio.substring(end);
 		setBio(newBio);
 
-		// Set cursor position after formatting is applied
 		setTimeout(() => {
 			textarea.focus();
 			textarea.setSelectionRange(newCursorPos, newCursorPos);
@@ -63,26 +61,19 @@ const BioSection = ({ user, handleFieldSubmit }) => {
 	};
 
 	const formatBioForPreview = (bioText) => {
-		// Format bold text
 		let formattedBio = bioText.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
 
-		// Format italic text
 		formattedBio = formattedBio.replace(/\*(.*?)\*/g, "<em>$1</em>");
 
-		// Format links with proper URL handling
 		formattedBio = formattedBio.replace(/\[(.*?)\]\((.*?)\)/g, (match, text, url) => {
-			// Ensure URL has protocol
 			const validUrl = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
 			return `<a href="${validUrl}" target="_blank" rel="noopener noreferrer">${text}</a>`;
 		});
 
-		// Format lists
 		formattedBio = formattedBio.replace(/^- (.*?)$/gm, "<li>$1</li>").replace(/(<li>.*?<\/li>)/gs, "<ul>$1</ul>");
 
-		// Format headings
 		formattedBio = formattedBio.replace(/^### (.*?)$/gm, "<h3>$1</h3>");
 
-		// Replace new lines with <br>
 		formattedBio = formattedBio.replace(/\n/g, "<br>");
 
 		return formattedBio;
@@ -98,14 +89,11 @@ const BioSection = ({ user, handleFieldSubmit }) => {
 		const start = textarea.selectionStart;
 		const end = textarea.selectionEnd;
 
-		// Create markdown link
 		const linkMarkdown = `[${text}](${url})`;
 
-		// Insert the link at cursor position or replace selected text
 		const newBio = bio.substring(0, start) + linkMarkdown + bio.substring(end);
 		setBio(newBio);
 
-		// Set focus back to textarea
 		setTimeout(() => {
 			textarea.focus();
 			const newPosition = start + linkMarkdown.length;
@@ -186,7 +174,8 @@ const BioSection = ({ user, handleFieldSubmit }) => {
 							</li>
 						</ul>
 						<p className="link-note">
-							<strong>Примітка:</strong> Обов'язково додавайте "https://" на початку URL для коректної роботи посилань.
+							<strong>Примітка:</strong> Обов&apos;язково додавайте &quot;https://&quot; на початку URL для коректної
+							роботи посилань.
 						</p>
 					</div>
 					<button type="submit" className="btn-primary">

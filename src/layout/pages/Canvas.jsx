@@ -11,6 +11,7 @@ import ReactFlow, {
 	ConnectionMode,
 	useReactFlow,
 	useOnSelectionChange,
+	SelectionMode,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
@@ -65,7 +66,6 @@ const Canvas = () => {
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 	const [selectedNodeId, setSelectedNodeId] = useState(null);
 
-	// Track which nodes cannot be connected to when dragging a connection
 	const [invalidTargetNodes, setInvalidTargetNodes] = useState([]);
 	const [connectionStartNodeId, setConnectionStartNodeId] = useState(null);
 
@@ -345,10 +345,8 @@ const Canvas = () => {
 	}, [ydoc, provider, setNodes, setEdges]);
 
 	const handleNodeClick = useCallback((event, node) => {
-		// Prevent default selection behavior
 		event.stopPropagation();
 
-		// Toggle node selection
 		setSelectedNodeId((prevSelectedId) => (prevSelectedId === node.id ? null : node.id));
 	}, []);
 
@@ -364,7 +362,6 @@ const Canvas = () => {
 					y: Math.random() * 1500,
 				};
 
-				// Update the node in the Yjs shared document
 				const updatedNode = {
 					...node,
 					position: newPosition,
@@ -380,21 +377,17 @@ const Canvas = () => {
 		});
 	}, [ydoc]);
 
-	// Apply visual styles to nodes based on connection state
 	const styledNodes = React.useMemo(() => {
 		return nodes.map((node) => ({
 			...node,
 			selected: node.id === selectedNodeId,
-			// Add styles for invalid nodes during connection
 			style: {
 				...node.style,
-				// Highlight invalid target nodes in red when connecting
 				...(connectionStartNodeId &&
 					!invalidTargetNodes.includes(node.id) && {
 						border: "2px solid red",
 						boxShadow: "0 0 10px rgba(255, 0, 0, 0.5)",
 					}),
-				// Make source node slightly highlighted when connecting
 				...(connectionStartNodeId === node.id && {
 					border: "2px solid #0041d0",
 					boxShadow: "0 0 10px rgba(0, 65, 208, 0.5)",
@@ -532,7 +525,6 @@ const Canvas = () => {
 				onClick={() => {
 					console.log("Testing Y.js connection");
 					if (ydoc) {
-						// Print current state
 						console.log("Current nodes in Y.doc:", Array.from(ydoc.getMap("nodes").entries()));
 						console.log("Current edges in Y.doc:", Array.from(ydoc.getMap("edges").entries()));
 
@@ -578,6 +570,10 @@ const Canvas = () => {
 				proOptions={{ hideAttribution: true }}
 				nodesDraggable={userPermissioons[role].canEdit}
 				nodesConnectable={userPermissioons[role].canEdit}
+				elementsSelectable={userPermissioons[role].canEdit}
+				//
+				selectionOnDrag
+				selectionMode={SelectionMode.Full}
 
 				// onlyRenderVisibleElements={true}
 			>

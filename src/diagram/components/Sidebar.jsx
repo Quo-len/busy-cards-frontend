@@ -1,17 +1,15 @@
-import React, { useCallback, memo, useState, useEffect } from "react";
+import { useCallback, memo, useState, useEffect } from "react";
 import { useNodes, useReactFlow } from "reactflow";
 import { useWebSocket } from "../../utils/WebSocketContext";
 import "../styles/Sidebar.css";
 import { GrSelect } from "react-icons/gr";
 
-// Node shapes
 const nodeShapes = {
 	rectangle: { width: 150, height: 40, borderRadius: 3 },
 	circle: { width: 70, height: 70, borderRadius: 50 },
 	hexagon: { width: 100, height: 80, clipPath: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)" },
 };
 
-// Node colors
 const NODE_COLORS = {
 	blue: "#3498db",
 	green: "#2ecc71",
@@ -70,7 +68,6 @@ function Sidebar({ isVisible }) {
 	const nodeType = selectedNode?.type || "custom";
 	const availableFields = NODE_TYPES[nodeType]?.fields || NODE_TYPES.custom.fields;
 
-	// Handle animation state changes
 	useEffect(() => {
 		if (isVisible) {
 			setAnimationClass("slide-in");
@@ -79,7 +76,6 @@ function Sidebar({ isVisible }) {
 		}
 	}, [isVisible]);
 
-	// Update node properties with Yjs synchronization
 	const updateNodeProperty = useCallback(
 		(nodeId, propertyName, value) => {
 			if (!ydoc) return;
@@ -87,7 +83,6 @@ function Sidebar({ isVisible }) {
 			const nodesMap = ydoc.getMap("nodes");
 			const nodeData = nodesMap.get(nodeId) || {};
 
-			// Update node data in Yjs map
 			const updatedNodeData = {
 				...nodeData,
 				data: {
@@ -96,7 +91,6 @@ function Sidebar({ isVisible }) {
 				},
 			};
 
-			// Apply shape and style changes separately
 			if (propertyName === "shape") {
 				updatedNodeData.style = {
 					...(nodeData.style || {}),
@@ -120,7 +114,6 @@ function Sidebar({ isVisible }) {
 			const currentOptions = nodeData.data?.options || [];
 			const updatedOptions = [...currentOptions, { id: Date.now().toString(), text: newOption }];
 
-			// Update node data in Yjs map
 			const updatedNodeData = {
 				...nodeData,
 				data: {
@@ -145,7 +138,6 @@ function Sidebar({ isVisible }) {
 			const currentOptions = nodeData.data?.options || [];
 			const updatedOptions = currentOptions.filter((option) => option.id !== optionId);
 
-			// Update node data in Yjs map
 			const updatedNodeData = {
 				...nodeData,
 				data: {
@@ -159,7 +151,6 @@ function Sidebar({ isVisible }) {
 		[ydoc]
 	);
 
-	// Don't render if sidebar is not open (after animation completes)
 	if (!isVisible && animationClass === "slide-out-complete") {
 		return null;
 	}
@@ -353,7 +344,7 @@ function Sidebar({ isVisible }) {
 							);
 						}
 
-						return null; // fallback
+						return null;
 					})}
 				</div>
 			</div>

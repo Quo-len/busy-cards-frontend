@@ -44,12 +44,10 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 		ydoc.getMap("nodes").set(newNode.id, newNode);
 	};
 
-	// Don't render if not open (after animation completes)
 	if (!isVisible && animationClass === "slide-out-complete") {
 		return null;
 	}
 
-	// Apply minimap visibility class if minimap is open
 	const minimapClass = isVisibleMap ? "minimap-visible" : "";
 
 	return (
@@ -114,8 +112,13 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 				Зображення
 			</button>
 
-			<button className="custom-node" draggable>
-				Тест
+			<button
+				className="default"
+				onClick={() => onAddNodeToCenter("default")}
+				onDragStart={(event) => onDragStart(event, "default")}
+				draggable
+			>
+				Default
 			</button>
 
 			<button className="custom-node" draggable>

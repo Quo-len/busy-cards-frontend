@@ -12,27 +12,22 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 
 		const normalizedSearchText = searchText.toLowerCase().trim();
 		const containsSearchText = (obj) => {
-			// Base case: if value is string, check if it contains search text
 			if (typeof obj === "string") {
 				return obj.toLowerCase().includes(normalizedSearchText);
 			}
 
-			// Base case: if value is number, convert to string and check
 			if (typeof obj === "number") {
 				return obj.toString().includes(normalizedSearchText);
 			}
 
-			// Skip if null or undefined
 			if (obj === null || obj === undefined) {
 				return false;
 			}
 
-			// For arrays, check if any element contains search text
 			if (Array.isArray(obj)) {
 				return obj.some((item) => containsSearchText(item));
 			}
 
-			// For objects, check all property values
 			if (typeof obj === "object") {
 				return Object.values(obj).some((value) => containsSearchText(value));
 			}
@@ -40,9 +35,7 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 			return false;
 		};
 
-		// Find all nodes that match the search text in any field
 		return nodes.filter((node) => {
-			// Check entire node object for search text
 			return containsSearchText(node);
 		});
 	};
@@ -53,7 +46,6 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 		const matchingNodes = searchNodes(searchQuery, nodes);
 		setSearchResults(matchingNodes);
 
-		// Highlight matching nodes (same as before)
 		if (searchQuery.trim() !== "") {
 			const matchingNodeIds = new Set(matchingNodes.map((node) => node.id));
 
@@ -74,7 +66,6 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 				}))
 			);
 		} else {
-			// Reset highlighting
 			setNodes((prevNodes) =>
 				prevNodes.map((node) => ({
 					...node,
@@ -94,7 +85,6 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 		setSearchResults([]);
 		setCurrentSearchIndex(0);
 
-		// Reset all node styles
 		setNodes((prevNodes) =>
 			prevNodes.map((node) => ({
 				...node,

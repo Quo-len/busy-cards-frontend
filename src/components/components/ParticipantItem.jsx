@@ -29,13 +29,11 @@ const ParticipantItem = ({ participant, isEditable, onRemove }) => {
 		}
 	};
 
-	// Get initials for avatar fallback
 	const getInitials = () => {
 		const username = participant.user.username || "";
 		return username.charAt(0).toUpperCase();
 	};
 
-	// Format joined date
 	const formatDate = () => {
 		try {
 			if (!participant.joinedAt) return "";
