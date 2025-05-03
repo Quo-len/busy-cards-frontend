@@ -1,6 +1,5 @@
 import { Handle, Position, NodeResizer, NodeToolbar } from "reactflow";
-import { useWebSocket } from "../../utils/WebSocketContext";
-import React, { memo } from "react";
+import { memo, useCallback } from "react";
 import { useNodeResize } from "../utils/utils";
 import "../styles/CustomNode.css";
 
@@ -15,8 +14,7 @@ const nodeColors = {
 };
 
 const CustomNode = ({ id, data, selected }) => {
-	const { ydoc } = useWebSocket();
-	const handleResizeEnd = useNodeResize(id, ydoc);
+	const handleResize = useNodeResize(id);
 
 	return (
 		<div
@@ -29,7 +27,7 @@ const CustomNode = ({ id, data, selected }) => {
 		>
 			<div className="custom-node-content">{data.label}</div>
 
-			<NodeResizer color="#ff0071" isVisible={selected} minWidth={150} minHeight={50} onResizeEnd={handleResizeEnd} />
+			<NodeResizer color="#ff0071" isVisible={selected} minWidth={150} minHeight={50} onResize={handleResize} />
 
 			<Handle type="source" id="left" position={Position.Left} className="handle left" />
 			<Handle type="source" id="right" position={Position.Right} className="handle right" />

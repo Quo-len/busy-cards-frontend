@@ -51,7 +51,7 @@
 		"valtio-yjs": "^0.6.0",
 		"y-quill": "^1.0.0",
 		"y-webrtc": "^10.3.0",
-		"y-websocket": "^2.0.4",
+		"y-websocket": "^2.1.0",
 		"yjs": "^13.6.24",
 		"zustand": "^5.0.3"
 	},

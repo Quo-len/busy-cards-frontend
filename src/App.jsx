@@ -65,36 +65,6 @@ function App() {
 
 export default App;
 
-// App.js - Example usage
-// import React from "react";
-// import { useParams } from "react-router-dom";
-// import { ReactFlowProvider } from "reactflow";
-// import { WebSocketProvider } from "./2WebSocketContext";
-// import CollaborativeFlow from "./2CollaborativeFlow";
-
-// const initialNodes = [
-// 	{ id: "1", type: "custom", data: { label: "Node 1", description: "First node" }, position: { x: 100, y: 200 } },
-// 	{ id: "2", type: "custom", data: { label: "Node 2", description: "Second node" }, position: { x: 100, y: 400 } },
-// ];
-
-// const initialEdges = [{ id: "e1-2", type: "custom", source: "1", target: "2" }];
-
-// const FlowPage = () => {
-// 	const { roomId } = useParams();
-
-// 	return (
-// 		<div style={{ width: "100vw", height: "100vh" }}>
-// 			<ReactFlowProvider>
-// 				<WebSocketProvider roomId={roomId}>
-// 					<CollaborativeFlow initialNodes={initialNodes} initialEdges={initialEdges} />
-// 				</WebSocketProvider>
-// 			</ReactFlowProvider>
-// 		</div>
-// 	);
-// };
-
-// export default FlowPage;
-
 // import React, { useState, useEffect, useCallback } from "react";
 // import ReactFlow, { Background, Controls, MiniMap, addEdge, applyEdgeChanges, applyNodeChanges } from "reactflow";
 // import "reactflow/dist/style.css";

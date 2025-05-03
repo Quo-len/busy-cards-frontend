@@ -1,0 +1,89 @@
+/* Custom handle styles for React Flow */
+
+/* Handle styles for touch devices */
+.touchdevice-flow .react-flow__handle {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background-color: #718096; /* Gray color */
+	border: 2px solid #fff;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+	transition: all 0.2s ease;
+}
+
+/* Handle position adjustments */
+.touchdevice-flow .react-flow__handle-top {
+	top: -7px;
+}
+
+.touchdevice-flow .react-flow__handle-right {
+	right: -7px;
+}
+
+.touchdevice-flow .react-flow__handle-bottom {
+	bottom: -7px;
+}
+
+.touchdevice-flow .react-flow__handle-left {
+	left: -7px;
+}
+
+/* Specific styles for source and target handles */
+.touchdevice-flow .react-flow__handle-source {
+	background-color: #718096; /* Gray for source */
+}
+
+.touchdevice-flow .react-flow__handle-target {
+	background-color: #718096; /* Gray for target */
+}
+
+/* Bounce animation keyframes */
+@keyframes bounce {
+	0% {
+		transform: translate(0, -50%) scale(1);
+	}
+	50% {
+		transform: translate(0, -50%) scale(1.1);
+	}
+	100% {
+		transform: translate(0, -50%) scale(1);
+	}
+}
+
+/* Handle styles for non-touch devices - more subtle */
+.react-flow__handle {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background-color: #718096; /* Gray color */
+	border: 1px solid #fff;
+	transition: all 0.2s ease;
+}
+
+/* Pulse animation for non-touch devices */
+@keyframes pulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(159, 122, 234, 0.7);
+	}
+	70% {
+		box-shadow: 0 0 0 5px rgba(159, 122, 234, 0);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(159, 122, 234, 0);
+	}
+}
+
+/* Connection line styles */
+.react-flow__connection-path {
+	stroke: #718096; /* Gray to match handles */
+	stroke-width: 2;
+	stroke-dasharray: 5 3;
+	animation: dash 1s linear infinite;
+}
+
+/* Animated dashed line for connection */
+@keyframes dash {
+	to {
+		stroke-dashoffset: -8;
+	}
+}

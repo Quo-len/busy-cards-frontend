@@ -1,13 +1,21 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
-export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
+export const useNodeSearch = (nodes, reactFlowInstance) => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [searchResults, setSearchResults] = useState([]);
 	const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
 
+	const localHighlightsRef = useRef(new Map());
+
+	useEffect(() => {
+		return () => {
+			localHighlightsRef.current.clear();
+		};
+	}, []);
+
 	const searchNodes = (searchText, nodes) => {
 		if (!searchText || searchText.trim() === "") {
-			return []; // Return empty array if search text is empty
+			return [];
 		}
 
 		const normalizedSearchText = searchText.toLowerCase().trim();
@@ -40,44 +48,27 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 		});
 	};
 
-	const handleSearch = (event) => {
+	const handleSearch = () => {
 		if (searchQuery === "") return;
 
 		const matchingNodes = searchNodes(searchQuery, nodes);
 		setSearchResults(matchingNodes);
 
-		if (searchQuery.trim() !== "") {
-			const matchingNodeIds = new Set(matchingNodes.map((node) => node.id));
+		localHighlightsRef.current.clear();
 
-			if (matchingNodeIds.length > 0) setCurrentSearchIndex(-1);
+		if (matchingNodes.length > 0) {
+			setCurrentSearchIndex(0);
 
-			setNodes((prevNodes) =>
-				prevNodes.map((node) => ({
-					...node,
-					style: {
-						...node.style,
-						...(matchingNodeIds.has(node.id)
-							? {
-									boxShadow: "0 0 10px #ff9900",
-									border: "2px solid #ff9900",
-							  }
-							: {}),
-					},
-				}))
-			);
-		} else {
-			setNodes((prevNodes) =>
-				prevNodes.map((node) => ({
-					...node,
-					style: {
-						...node.style,
-						boxShadow: undefined,
-						border: undefined,
-					},
-				}))
-			);
+			matchingNodes.forEach((node) => {
+				localHighlightsRef.current.set(node.id, {
+					type: "search-result",
+					boxShadow: "0 0 10px #ff9900",
+					border: "2px solid #ff9900",
+				});
+			});
+
+			navigateSearchResults(0);
 		}
-		navigateSearchResults(0);
 	};
 
 	const clearSearch = useCallback(() => {
@@ -85,17 +76,8 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 		setSearchResults([]);
 		setCurrentSearchIndex(0);
 
-		setNodes((prevNodes) =>
-			prevNodes.map((node) => ({
-				...node,
-				style: {
-					...node.style,
-					boxShadow: undefined,
-					border: undefined,
-				},
-			}))
-		);
-	}, [setNodes]);
+		localHighlightsRef.current.clear();
+	}, []);
 
 	const navigateToNode = useCallback(
 		(targetNode) => {
@@ -129,30 +111,28 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 			if (targetNode) {
 				navigateToNode(targetNode);
 
-				setNodes((prevNodes) =>
-					prevNodes.map((node) => ({
-						...node,
-						style: {
-							...node.style,
-							...(node.id === targetNode.id
-								? {
-										boxShadow: "0 0 15px #ff5500",
-										border: "3px solid #ff5500",
-										zIndex: 1000,
-								  }
-								: searchResults.some((r) => r.id === node.id)
-								? {
-										boxShadow: "0 0 10px #ff9900",
-										border: "2px solid #ff9900",
-								  }
-								: {}),
-						},
-					}))
-				);
+				searchResults.forEach((node) => {
+					localHighlightsRef.current.set(node.id, {
+						type: "search-result",
+						boxShadow: "0 0 10px #ff9900",
+						border: "2px solid #ff9900",
+					});
+				});
+
+				localHighlightsRef.current.set(targetNode.id, {
+					type: "current-result",
+					boxShadow: "0 0 15px #ff5500",
+					border: "3px solid #ff5500",
+					zIndex: 1000,
+				});
 			}
 		},
-		[searchResults, currentSearchIndex, reactFlowInstance, setNodes]
+		[searchResults, currentSearchIndex, navigateToNode]
 	);
+
+	const getLocalNodeStyle = useCallback((nodeId) => {
+		return localHighlightsRef.current.get(nodeId) || null;
+	}, []);
 
 	return {
 		searchQuery,
@@ -163,5 +143,6 @@ export const useNodeSearch = (nodes, setNodes, reactFlowInstance) => {
 		clearSearch,
 		navigateSearchResults,
 		navigateToNode,
+		getLocalNodeStyle,
 	};
 };

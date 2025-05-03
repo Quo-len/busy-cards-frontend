@@ -3,24 +3,19 @@ import { useParams } from "react-router-dom";
 import ReactFlow, {
 	ReactFlowProvider,
 	Background,
-	useNodesState,
-	useEdgesState,
-	reconnectEdge,
-	addEdge,
 	BackgroundVariant,
 	ConnectionMode,
 	useReactFlow,
-	useOnSelectionChange,
 	SelectionMode,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
+import "../styles/Canvas.css";
 
 import Loader from "../../components/components/Loader";
 import NotFoundPage from "./../pages/NotFoundPage";
 
-import { createNodesAndEdges, isNodeDescendant } from "../../diagram/utils/utils";
-import { useWebSocket, WebSocketProvider } from "../../utils/WebSocketContext";
+import { findInvalidTargetNodes, isValidConnection } from "../../diagram/utils/utils";
 import { DnDProvider, useDnD } from "../../diagram/utils/DnDContext";
 import * as api from "../../api";
 import BoundingLines from "../../diagram/components/BoundingLines";
@@ -29,11 +24,20 @@ import SearchBar from "../../diagram/components/SearchBar";
 import DropBar from "../../diagram/components/DropBar";
 import CanvasControls from "../../diagram/components/CanvasControls";
 import CanvasMinimap from "../../diagram/components/CanvasMinimap";
+import useCanvasStore from "../../store/useCanvasStore";
 
 import { useNodeSearch } from "../../diagram/hooks/useNodeSearch";
 import { nodeTypes, edgeTypes } from "../../diagram/components";
 
-const { nodes: initialNodes, edges: initialEdges } = createNodesAndEdges(0, 0);
+const translateExtent = [
+	[-4300, -2000],
+	[4300, 2000],
+];
+
+const nodeExtent = [
+	[-4000, -1700],
+	[4000, 1700],
+];
 
 const userPermissioons = {
 	viewer: {
@@ -59,24 +63,34 @@ const userPermissioons = {
 };
 
 const Canvas = () => {
-	const [role, setRole] = useState("owner");
+	const [role] = useState("owner");
 	const { mindmapId } = useParams();
 	const [mindmap, setMindmap] = useState(null);
-	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-	const [selectedNodeId, setSelectedNodeId] = useState(null);
+	const [isLoading, setIsLoading] = useState(true);
+	const [type, setType] = useDnD();
+	const flowRef = useRef(null);
+	const { getNodes, getEdges, setViewport } = useReactFlow();
+	const reactFlowInstance = useReactFlow();
+
+	// Use Zustand store
+	const {
+		initializeYjs,
+		cleanupYjs,
+		addNode,
+		updateNode,
+		removeNode,
+		addEdge,
+		removeEdge,
+		getNodesArray,
+		getEdgesArray,
+	} = useCanvasStore();
+
+	// Convert store Maps to arrays for ReactFlow
+	const nodes = getNodesArray();
+	const edges = getEdgesArray();
 
 	const [invalidTargetNodes, setInvalidTargetNodes] = useState([]);
 	const [connectionStartNodeId, setConnectionStartNodeId] = useState(null);
-
-	const [isLoading, setIsLoading] = useState(true);
-	const [type] = useDnD();
-
-	const { ydoc, provider } = useWebSocket();
-	const flowRef = useRef(null);
-	const { getNodes, getEdges, setViewport } = useReactFlow();
-
-	const reactFlowInstance = useReactFlow();
 
 	const [isOpen, setIsOpen] = useState({
 		leftBar: true,
@@ -94,7 +108,8 @@ const Canvas = () => {
 		clearSearch,
 		navigateSearchResults,
 		navigateToNode,
-	} = useNodeSearch(nodes, setNodes, reactFlowInstance);
+		getLocalNodeStyle,
+	} = useNodeSearch(nodes, reactFlowInstance);
 
 	const updateIsOpen = (key, value) => {
 		setIsOpen((prev) => ({
@@ -108,7 +123,7 @@ const Canvas = () => {
 			try {
 				const response = await api.getMindmap(mindmapId);
 				setMindmap(response);
-			} catch (error) {
+			} catch {
 				console.log("Failed to get mindmap");
 			}
 			setIsLoading(false);
@@ -116,26 +131,19 @@ const Canvas = () => {
 
 		if (mindmapId) {
 			fetchMindmap();
+			initializeYjs(mindmapId);
 		}
-	}, []);
+
+		return () => {
+			cleanupYjs();
+		};
+	}, [mindmapId]);
 
 	useEffect(() => {
 		if (mindmap && mindmap.title) {
 			document.title = `${mindmap.title} - Busy-cards`;
 		}
 	}, [mindmap]);
-
-	const [selectedNodes, setSelectedNodes] = useState([]);
-	const [selectedEdges, setSelectedEdges] = useState([]);
-
-	const onChange = useCallback(({ nodes, edges }) => {
-		setSelectedNodes(nodes.map((node) => node.id));
-		setSelectedEdges(edges.map((edge) => edge.id));
-	}, []);
-
-	useOnSelectionChange({
-		onChange,
-	});
 
 	const handleToCenter = useCallback(() => {
 		const flowWidth = flowRef.current?.clientWidth || window.innerWidth;
@@ -147,111 +155,16 @@ const Canvas = () => {
 		setViewport({ x, y, zoom: 1 }, { duration: 800 });
 	}, [setViewport, flowRef]);
 
-	const handleNodesChange = useCallback(
-		(changes) => {
-			onNodesChange(changes);
-
-			if (!ydoc) return;
-
-			changes.forEach((change) => {
-				if (change.type === "position") {
-					const node = nodes.find((n) => n.id === change.id);
-					if (node) {
-						const updatedNode = {
-							...node,
-							position: change.position || node.position,
-						};
-						ydoc.getMap("nodes").set(change.id, JSON.parse(JSON.stringify(updatedNode)));
-					}
-				}
-				if (change.type === "remove") {
-					if (change.id !== "-1") {
-						ydoc.getMap("nodes").delete(change.id);
-					}
-				}
-			});
-		},
-		[nodes, onNodesChange, ydoc]
-	);
-
-	const handleEdgesChange = useCallback(
-		(changes) => {
-			onEdgesChange(changes);
-
-			if (!ydoc) return;
-
-			changes.forEach((change) => {
-				if (change.type === "remove") {
-					ydoc.getMap("edges").delete(change.id);
-				}
-			});
-		},
-		[edges, onEdgesChange, ydoc]
-	);
-
-	const isValidConnection = useCallback(
-		(connection) => {
-			const nodes = getNodes();
-			const edges = getEdges();
-
-			const sourceNode = nodes.find((node) => node.id === connection.source);
-			const targetNode = nodes.find((node) => node.id === connection.target);
-
-			if (connection.source === connection.target) return false;
-
-			const existingEdge = edges.some(
-				(edge) =>
-					(edge.source === connection.source && edge.target === connection.target) ||
-					(edge.source === connection.target && edge.target === connection.source)
-			);
-
-			if (existingEdge) return false;
-
-			if (
-				isNodeDescendant(sourceNode, targetNode, nodes, edges) ||
-				isNodeDescendant(targetNode, sourceNode, nodes, edges)
-			)
-				return false;
-
-			return true;
-		},
-		[getNodes, getEdges]
-	);
-
-	const findInvalidTargetNodes = useCallback(
-		(sourceId) => {
-			if (!sourceId) return [];
-
-			const currentNodes = getNodes();
-			const sourceNode = currentNodes.find((node) => node.id === sourceId);
-
-			if (!sourceNode) return [];
-
-			return currentNodes
-				.filter((node) => {
-					if (node.id === sourceId) return true;
-
-					const testConnection = {
-						source: sourceId,
-						target: node.id,
-					};
-
-					return !isValidConnection(testConnection);
-				})
-				.map((node) => node.id);
-		},
-		[getNodes, isValidConnection]
-	);
-
 	const onConnectStart = useCallback(
 		(_, { nodeId }) => {
 			setConnectionStartNodeId(nodeId);
+
 			if (nodeId) {
-				const invalidNodes = findInvalidTargetNodes(nodeId);
+				const invalidNodes = findInvalidTargetNodes(nodeId, nodes, edges);
 				setInvalidTargetNodes(invalidNodes);
 			}
 		},
-		[findInvalidTargetNodes]
+		[getNodes, isValidConnection]
 	);
 
 	const onConnectEnd = useCallback(() => {
@@ -259,14 +172,9 @@ const Canvas = () => {
 		setInvalidTargetNodes([]);
 	}, []);
 
-	const onReconnect = useCallback(
-		(oldEdge, newConnection) => setEdges((els) => reconnectEdge(oldEdge, newConnection, els)),
-		[]
-	);
-
 	const onConnect = useCallback(
 		(connection) => {
-			if (!connection.source || !connection.target || !ydoc) return;
+			if (!connection.source || !connection.target) return;
 			const id = uuidv4();
 			const newEdge = {
 				id,
@@ -277,124 +185,21 @@ const Canvas = () => {
 				targetHandle: connection.targetHandle || undefined,
 			};
 
-			ydoc.getMap("edges").set(newEdge.id, newEdge);
-			setEdges((eds) => addEdge(connection, eds));
+			addEdge(newEdge);
 		},
-		[ydoc, setEdges]
+		[addEdge]
 	);
 
-	useEffect(() => {
-		if (!ydoc || !provider) return;
-
-		const nodesMap = ydoc.getMap("nodes");
-		const edgesMap = ydoc.getMap("edges");
-
-		if (nodesMap.size === 0) {
-			initialNodes.forEach((node) => nodesMap.set(node.id, JSON.parse(JSON.stringify(node))));
-		}
-
-		if (edgesMap.size === 0) {
-			initialEdges.forEach((edge) => edgesMap.set(edge.id, JSON.parse(JSON.stringify(edge))));
-		}
-
-		if (nodesMap.size === 0) {
-			initialNodes.forEach((node) => {
-				nodesMap.set(node.id, JSON.parse(JSON.stringify(node)));
-			});
-		}
-
-		const nodesObserver = () => {
-			const yNodes = Array.from(nodesMap.values());
-			const validNodes = yNodes.map((node) => ({
-				id: node.id,
-				type: node.type || "default",
-				data: node.data,
-				position: {
-					x: node.position.x,
-					y: node.position.y,
-				},
-			}));
-			setNodes(validNodes);
-		};
-
-		const edgesObserver = () => {
-			const yEdges = Array.from(edgesMap.values());
-			setEdges(yEdges);
-		};
-
-		nodesMap.observe(nodesObserver);
-		edgesMap.observe(edgesObserver);
-
-		const initialYNodes = Array.from(nodesMap.values());
-		const validNodes = initialYNodes.map((node) => ({
-			id: node.id,
-			type: node.type || "default",
-			data: node.data,
-			position: {
-				x: node.position.x,
-				y: node.position.y,
-			},
-		}));
-		setNodes(validNodes);
-		setEdges(Array.from(edgesMap.values()));
-
-		return () => {
-			nodesMap.unobserve(nodesObserver);
-			edgesMap.unobserve(edgesObserver);
-		};
-	}, [ydoc, provider, setNodes, setEdges]);
+	const [selectedNodeId, setSelectedNodeId] = useState(null);
 
 	const handleNodeClick = useCallback((event, node) => {
 		event.stopPropagation();
-
 		setSelectedNodeId((prevSelectedId) => (prevSelectedId === node.id ? null : node.id));
 	}, []);
 
-	const updatePos = useCallback(() => {
-		if (!ydoc) return;
-
-		const nodesMap = ydoc.getMap("nodes");
-
-		setNodes((nds) => {
-			return nds.map((node) => {
-				const newPosition = {
-					x: Math.random() * 1500,
-					y: Math.random() * 1500,
-				};
-
-				const updatedNode = {
-					...node,
-					position: newPosition,
-				};
-
-				nodesMap.set(node.id, updatedNode);
-
-				return {
-					...node,
-					position: newPosition,
-				};
-			});
-		});
-	}, [ydoc]);
-
-	const styledNodes = React.useMemo(() => {
-		return nodes.map((node) => ({
-			...node,
-			selected: node.id === selectedNodeId,
-			style: {
-				...node.style,
-				...(connectionStartNodeId &&
-					!invalidTargetNodes.includes(node.id) && {
-						border: "2px solid red",
-						boxShadow: "0 0 10px rgba(255, 0, 0, 0.5)",
-					}),
-				...(connectionStartNodeId === node.id && {
-					border: "2px solid #0041d0",
-					boxShadow: "0 0 10px rgba(0, 65, 208, 0.5)",
-				}),
-			},
-		}));
-	}, [nodes, selectedNodeId, connectionStartNodeId, invalidTargetNodes]);
+	const onPaneClick = useCallback(() => {
+		setSelectedNodeId(null);
+	}, []);
 
 	const onDragOver = useCallback((event) => {
 		event.preventDefault();
@@ -422,10 +227,9 @@ const Canvas = () => {
 				data: { label: `${type} node` },
 			};
 
-			ydoc.getMap("nodes").set(newNode.id, newNode);
-			setNodes((nds) => nds.concat(newNode));
+			addNode(newNode);
 		},
-		[ydoc, reactFlowInstance, setNodes, type]
+		[reactFlowInstance, type, addNode]
 	);
 
 	const onDragStart = (event, nodeType) => {
@@ -433,6 +237,43 @@ const Canvas = () => {
 		event.dataTransfer.setData("text/plain", nodeType);
 		event.dataTransfer.effectAllowed = "move";
 	};
+
+	const styledNodes = React.useMemo(() => {
+		return nodes.map((node) => {
+			// Get local highlight style if it exists
+			const localHighlight = getLocalNodeStyle(node.id);
+
+			return {
+				...node,
+				selected: node.id === selectedNodeId,
+				style: {
+					...node.style,
+					// Connection highlighting (existing logic)
+					...(connectionStartNodeId &&
+						connectionStartNodeId !== node.id &&
+						!invalidTargetNodes.includes(node.id) && {
+							border: "2px solid #4CAF50", // Green for valid targets
+							boxShadow: "0 0 10px rgba(76, 175, 80, 0.5)",
+						}),
+					...(connectionStartNodeId &&
+						invalidTargetNodes.includes(node.id) && {
+							border: "2px solid #FF5252", // Red for invalid targets
+							boxShadow: "0 0 10px rgba(255, 82, 82, 0.5)",
+						}),
+					...(connectionStartNodeId === node.id && {
+						border: "2px solid #0041d0", // Blue for source node
+						boxShadow: "0 0 10px rgba(0, 65, 208, 0.5)",
+					}),
+					// Apply local highlight style if it exists (takes precedence)
+					...(localHighlight && {
+						border: localHighlight.border,
+						boxShadow: localHighlight.boxShadow,
+						...(localHighlight.zIndex && { zIndex: localHighlight.zIndex }),
+					}),
+				},
+			};
+		});
+	}, [nodes, selectedNodeId, connectionStartNodeId, invalidTargetNodes, getLocalNodeStyle]);
 
 	const [buffer, setBuffer] = useState(null);
 
@@ -463,9 +304,8 @@ const Canvas = () => {
 
 			console.log("Pasted new node:", newNode);
 
-			ydoc.getMap("nodes").set(newNode.id, newNode);
-			setNodes((nds) => nds.concat(newNode));
 			setSelectedNodeId(id);
+			addNode(newNode);
 			navigateToNode(newNode);
 		}
 	};
@@ -493,11 +333,15 @@ const Canvas = () => {
 		return () => {
 			window.removeEventListener("keydown", handleKeyDown);
 		};
-	}, [ydoc, reactFlowInstance, setNodes, selectedNodeId, nodes, buffer]);
+	}, [reactFlowInstance, selectedNodeId, nodes, buffer]);
 
 	if (isLoading) {
 		return <Loader message="Завантаження інтелект-карти, будь ласка, зачекайте." flexLayout="false" />;
 	}
+
+	// if (hasAccess) {
+	// 	<NotFoundPage title="Доступ забронено" message="У вас недостатньо прав для перегляду інтелект-карти." code="403" />;
+	// }
 
 	if (!mindmap) {
 		return (
@@ -505,61 +349,42 @@ const Canvas = () => {
 		);
 	}
 
-	const translateExtent = [
-		[-4300, -2000],
-		[4300, 2000],
-	];
-
-	const nodeExtent = [
-		[-4000, -1700],
-		[4000, 1700],
-	];
-
 	return (
 		<div style={{ flex: 1, position: "relative", overflow: "hidden" }} ref={flowRef}>
-			<button onClick={updatePos} style={{ position: "absolute", right: 10, top: 30, zIndex: 4 }}>
-				change pos
-			</button>
-			<button
-				style={{ position: "absolute", right: 10, top: 70, zIndex: 4 }}
-				onClick={() => {
-					console.log("Testing Y.js connection");
-					if (ydoc) {
-						console.log("Current nodes in Y.doc:", Array.from(ydoc.getMap("nodes").entries()));
-						console.log("Current edges in Y.doc:", Array.from(ydoc.getMap("edges").entries()));
-
-						if (provider) {
-							console.log("WebSocket connected:", provider.wsconnected);
-
-							if (provider.wsconnected) {
-								provider.ws.send(JSON.stringify({ type: "print_state" }));
-							}
-						}
-					} else {
-						console.log("Y.doc not initialized");
-					}
-				}}
-			>
-				Debug Connection
-			</button>
-			<button style={{ position: "absolute", right: 10, top: 110, zIndex: 4 }}>Re-sync</button>
 			<ReactFlow
 				translateExtent={translateExtent}
 				nodeExtent={nodeExtent}
 				nodes={styledNodes}
 				edges={edges}
-				onNodesChange={handleNodesChange}
-				onEdgesChange={handleEdgesChange}
+				onNodesChange={(changes) => {
+					//////////////////
+					changes.forEach((change) => {
+						//////////////////////
+						if (change.type === "position") {
+							////////////
+							updateNode(change.id, { position: change.position });
+						} else if (change.type === "remove") {
+							removeNode(change.id);
+						}
+					});
+				}}
+				onEdgesChange={(changes) => {
+					changes.forEach((change) => {
+						if (change.type === "remove") {
+							removeEdge(change.id);
+						}
+					});
+				}}
 				onConnect={onConnect}
 				nodeTypes={nodeTypes}
 				edgeTypes={edgeTypes}
 				onNodeClick={handleNodeClick}
+				onPaneClick={onPaneClick}
 				onConnectStart={onConnectStart}
 				onConnectEnd={onConnectEnd}
 				fitView
 				snapToGrid={true}
 				snapGrid={[10, 10]}
-				onReconnect={onReconnect}
 				isValidConnection={isValidConnection}
 				connectionMode={ConnectionMode.Loose}
 				minZoom={0.2}
@@ -571,28 +396,21 @@ const Canvas = () => {
 				nodesDraggable={userPermissioons[role].canEdit}
 				nodesConnectable={userPermissioons[role].canEdit}
 				elementsSelectable={userPermissioons[role].canEdit}
-				//
 				selectionOnDrag
+				connectOnClick={true}
 				selectionMode={SelectionMode.Full}
-
-				// onlyRenderVisibleElements={true}
+				className="touchdevice-flow"
 			>
 				<Background id="1" gap={10} color="#f1f1f1" variant={BackgroundVariant.Lines} />
-
 				<Background id="2" gap={100} color="#ccc" variant={BackgroundVariant.Lines} />
-
 				<BoundingLines translateExtent={nodeExtent} />
-
 				<CanvasControls isOpen={isOpen} onUpdate={updateIsOpen} onCenter={handleToCenter} />
-
 				<CanvasMinimap
 					connectionStartNodeId={connectionStartNodeId}
 					invalidTargetNodes={invalidTargetNodes}
 					isVisible={isOpen.minimap}
 				/>
-
-				<Sidebar isVisible={isOpen.rightBar} />
-
+				<Sidebar isVisible={isOpen.rightBar} selectedNodeId={selectedNodeId} />
 				<SearchBar
 					onSearch={handleSearch}
 					onClear={clearSearch}
@@ -600,7 +418,7 @@ const Canvas = () => {
 					onNavigateNext={() => navigateSearchResults(+1)}
 					searchQuery={searchQuery}
 					setSearchQuery={setSearchQuery}
-					currentIndex={currentSearchIndex}
+					currentIndex={currentSearchIndex + 1}
 					totalResults={searchResults.length}
 					isVisible={isOpen.searchBar}
 				/>
@@ -611,8 +429,6 @@ const Canvas = () => {
 };
 
 const CanvasPage = () => {
-	const { mindmapId } = useParams();
-
 	return (
 		<div
 			style={{
@@ -622,13 +438,11 @@ const CanvasPage = () => {
 				width: "100vw",
 			}}
 		>
-			<WebSocketProvider mindmapId={mindmapId}>
-				<ReactFlowProvider>
-					<DnDProvider>
-						<Canvas />
-					</DnDProvider>
-				</ReactFlowProvider>
-			</WebSocketProvider>
+			<ReactFlowProvider>
+				<DnDProvider>
+					<Canvas />
+				</DnDProvider>
+			</ReactFlowProvider>
 		</div>
 	);
 };

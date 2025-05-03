@@ -20,7 +20,7 @@ const CanvasMinimap = ({ connectionStartNodeId, invalidTargetNodes, isVisible })
 			pannable
 			zoomable
 			nodeStrokeColor={(n) => {
-				if (connectionStartNodeId && invalidTargetNodes.includes(n.id)) return "red";
+				if (connectionStartNodeId && invalidTargetNodes.includes(n.id)) return "purple";
 				if (n.style?.background) return `${n.style.background}`;
 				if (n.type === "custom") return "#0041d0";
 				return "#eee";

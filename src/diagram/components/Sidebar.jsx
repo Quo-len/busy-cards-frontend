@@ -1,8 +1,7 @@
 import { useCallback, memo, useState, useEffect } from "react";
-import { useNodes, useReactFlow } from "reactflow";
-import { useWebSocket } from "../../utils/WebSocketContext";
 import "../styles/Sidebar.css";
 import { GrSelect } from "react-icons/gr";
+import useCanvasStore from "../../store/useCanvasStore";
 
 const nodeShapes = {
 	rectangle: { width: 150, height: 40, borderRadius: 3 },
@@ -27,10 +26,10 @@ const NODE_TYPES = {
 		fields: ["label", "description", "shape", "color"],
 	},
 	actor: {
-		fields: ["label", "description", "status", "priority", "dueDate", "assignee", "shape", "color"],
+		fields: ["label", "description", "status", "priority", "shape", "color"],
 	},
 	link: {
-		fields: ["label", "description", "status", "priority", "dueDate", "assignee", "shape", "color"],
+		fields: ["label", "description", "status", "priority", "shape", "color"],
 	},
 	image: {
 		fields: ["label", "description", "image"],
@@ -56,15 +55,15 @@ const PRIORITY_OPTIONS = [
 	{ value: "high", label: "High", color: "#e74c3c" },
 ];
 
-function Sidebar({ isVisible }) {
-	const { setNodes } = useReactFlow();
-	const nodes = useNodes();
+function Sidebar({ isVisible, selectedNodeId }) {
+	const { updateNode, getNodesArray } = useCanvasStore();
+	const nodes = getNodesArray();
+
+	const selectedNode = nodes.find((node) => node.id === selectedNodeId);
+
 	const [newOption, setNewOption] = useState("");
 	const [animationClass, setAnimationClass] = useState("");
 
-	const { ydoc } = useWebSocket();
-
-	const selectedNode = nodes.find((node) => node.selected);
 	const nodeType = selectedNode?.type || "custom";
 	const availableFields = NODE_TYPES[nodeType]?.fields || NODE_TYPES.custom.fields;
 
@@ -76,40 +75,30 @@ function Sidebar({ isVisible }) {
 		}
 	}, [isVisible]);
 
-	const updateNodeProperty = useCallback(
-		(nodeId, propertyName, value) => {
-			if (!ydoc) return;
+	const updateNodeProperty = useCallback((nodeId, propertyName, value) => {
+		const nodeData = useCanvasStore.getState().nodes.get(nodeId) || {};
 
-			const nodesMap = ydoc.getMap("nodes");
-			const nodeData = nodesMap.get(nodeId) || {};
+		const updatedNodeData = {
+			...nodeData,
+			data: {
+				...nodeData.data,
+				[propertyName]: value,
+			},
+		};
 
-			const updatedNodeData = {
-				...nodeData,
-				data: {
-					...nodeData.data,
-					[propertyName]: value,
-				},
+		if (propertyName === "shape") {
+			updatedNodeData.style = {
+				...(nodeData.style || {}),
 			};
-
-			if (propertyName === "shape") {
-				updatedNodeData.style = {
-					...(nodeData.style || {}),
-				};
-			}
-
-			nodesMap.set(nodeId, updatedNodeData);
-		},
-		[ydoc]
-	);
+		}
+		updateNode(nodeId, updatedNodeData);
+	}, []);
 
 	const addOption = useCallback(
 		(nodeId) => {
 			if (!newOption.trim()) return;
 
-			if (!ydoc) return;
-
-			const nodesMap = ydoc.getMap("nodes");
-			const nodeData = nodesMap.get(nodeId) || {};
+			const nodeData = useCanvasStore.getState().nodes.get(nodeId) || {};
 
 			const currentOptions = nodeData.data?.options || [];
 			const updatedOptions = [...currentOptions, { id: Date.now().toString(), text: newOption }];
@@ -122,34 +111,28 @@ function Sidebar({ isVisible }) {
 				},
 			};
 
-			nodesMap.set(nodeId, updatedNodeData);
+			updateNode(nodeId, updatedNodeData);
 			setNewOption("");
 		},
-		[ydoc, newOption]
+		[newOption]
 	);
 
-	const removeOption = useCallback(
-		(nodeId, optionId) => {
-			if (!ydoc) return;
+	const removeOption = useCallback((nodeId, optionId) => {
+		const nodeData = useCanvasStore.getState().nodes.get(nodeId) || {};
 
-			const nodesMap = ydoc.getMap("nodes");
-			const nodeData = nodesMap.get(nodeId) || {};
+		const currentOptions = nodeData.data?.options || [];
+		const updatedOptions = currentOptions.filter((option) => option.id !== optionId);
 
-			const currentOptions = nodeData.data?.options || [];
-			const updatedOptions = currentOptions.filter((option) => option.id !== optionId);
+		const updatedNodeData = {
+			...nodeData,
+			data: {
+				...nodeData.data,
+				options: updatedOptions,
+			},
+		};
 
-			const updatedNodeData = {
-				...nodeData,
-				data: {
-					...nodeData.data,
-					options: updatedOptions,
-				},
-			};
-
-			nodesMap.set(nodeId, updatedNodeData);
-		},
-		[ydoc]
-	);
+		updateNode(nodeId, updatedNodeData);
+	}, []);
 
 	if (!isVisible && animationClass === "slide-out-complete") {
 		return null;
@@ -280,7 +263,7 @@ function Sidebar({ isVisible }) {
 							);
 						}
 
-						if (field === "description" || field === "assignee" || field === "label") {
+						if (field === "description" || field === "label") {
 							return (
 								<div key={field} className="form-group">
 									<label>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
@@ -289,20 +272,6 @@ function Sidebar({ isVisible }) {
 										value={value}
 										onChange={(e) => updateNodeProperty(selectedNode.id, field, e.target.value)}
 										placeholder={`Enter ${field}`}
-									/>
-								</div>
-							);
-						}
-
-						if (field === "dueDate") {
-							return (
-								<div key={field} className="form-group">
-									<label>Due Date:</label>
-									<input
-										type="date"
-										name="dueDate"
-										value={value}
-										onChange={(e) => updateNodeProperty(selectedNode.id, field, e.target.value)}
 									/>
 								</div>
 							);

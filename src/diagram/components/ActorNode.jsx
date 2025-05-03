@@ -1,12 +1,10 @@
-import { useWebSocket } from "../../utils/WebSocketContext";
 import { Handle, Position, NodeResizer } from "reactflow";
 import { useNodeResize } from "../utils/utils";
 import { memo } from "react";
 import "../styles/ActorNode.css";
 
 const ActorNode = ({ id, data, selected }) => {
-	const { ydoc } = useWebSocket();
-	const handleResizeEnd = useNodeResize(id, ydoc);
+	const handleResizeEnd = useNodeResize(id, null);
 
 	return (
 		<div

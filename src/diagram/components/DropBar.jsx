@@ -1,15 +1,16 @@
-import { useWebSocket } from "../../utils/WebSocketContext";
 import { useDnD } from "../utils/DnDContext";
 import { useReactFlow } from "reactflow";
 import { v4 as uuidv4 } from "uuid";
 import { useEffect, useState } from "react";
 import "../styles/DropBar.css";
+import useCanvasStore from "../../store/useCanvasStore";
 
 const DropBar = ({ isVisible, isVisibleMap }) => {
 	const reactFlowInstance = useReactFlow();
-	const { ydoc } = useWebSocket();
 	const [_, setType] = useDnD();
 	const [animationClass, setAnimationClass] = useState("");
+
+	const { addNode } = useCanvasStore();
 
 	useEffect(() => {
 		if (isVisible) {
@@ -39,9 +40,7 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 			data: { label: `${nodeType} node` },
 			type: nodeType,
 		};
-
-		reactFlowInstance.addNodes(newNode);
-		ydoc.getMap("nodes").set(newNode.id, newNode);
+		addNode(newNode);
 	};
 
 	if (!isVisible && animationClass === "slide-out-complete") {

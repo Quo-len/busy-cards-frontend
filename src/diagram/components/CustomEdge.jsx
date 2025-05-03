@@ -1,13 +1,12 @@
-import React, { memo, useCallback } from "react";
+import { memo, useCallback } from "react";
 import { useStore, BaseEdge, EdgeLabelRenderer, getBezierPath, useReactFlow } from "reactflow";
-import { useWebSocket } from "../../utils/WebSocketContext";
 import "../styles/CustomEdge.css";
+import useCanvasStore from "../../store/useCanvasStore";
 
 import { getEdgeParams } from "../utils/utils";
 
 const CustomEdge = ({ id, source, target, sourcePosition, targetPosition, style = {}, markerEnd }) => {
-	const { setEdges } = useReactFlow();
-	const { ydoc } = useWebSocket();
+	const { removeEdge } = useCanvasStore();
 
 	const sourceNode = useStore(useCallback((store) => store.nodeInternals.get(source), [source]));
 	const targetNode = useStore(useCallback((store) => store.nodeInternals.get(target), [target]));
@@ -28,10 +27,7 @@ const CustomEdge = ({ id, source, target, sourcePosition, targetPosition, style 
 	});
 
 	const onEdgeClick = () => {
-		if (!ydoc) return;
-		const edgesMap = ydoc.getMap("edges");
-		edgesMap.delete(id);
-		setEdges((edges) => edges.filter((edge) => edge.id !== id));
+		removeEdge(id);
 	};
 
 	return (
