@@ -119,6 +119,8 @@ const Canvas = () => {
 	};
 
 	useEffect(() => {
+		let timeoutId;
+
 		const fetchMindmap = async () => {
 			try {
 				const response = await api.getMindmap(mindmapId);
@@ -126,18 +128,34 @@ const Canvas = () => {
 			} catch {
 				console.log("Failed to get mindmap");
 			}
+		};
+
+		const run = async () => {
+			if (!mindmapId) return;
+
+			await Promise.all([
+				(async () => {
+					await fetchMindmap();
+					initializeYjs(mindmapId);
+				})(),
+				new Promise((resolve) => {
+					timeoutId = setTimeout(() => {
+						initializeYjs(mindmapId);
+						resolve();
+					}, 1000);
+				}),
+			]);
+
 			setIsLoading(false);
 		};
 
-		if (mindmapId) {
-			fetchMindmap();
-			initializeYjs(mindmapId);
-		}
+		run();
 
 		return () => {
+			clearTimeout(timeoutId);
 			cleanupYjs();
 		};
-	}, [mindmapId]);
+	}, [mindmapId, initializeYjs, cleanupYjs]);
 
 	useEffect(() => {
 		if (mindmap && mindmap.title) {
@@ -335,6 +353,29 @@ const Canvas = () => {
 		};
 	}, [reactFlowInstance, selectedNodeId, nodes, buffer]);
 
+	const { getIntersectingNodes } = useReactFlow();
+
+	// make button to mount to group node if theres interesction with node and type is group
+
+	const handleAttachment = (node) => {
+		const intersections = getIntersectingNodes(node).map((n) => n.id);
+
+		intersections.forEach((inter) => {
+			if (inter.type == "group") {
+				updateNode(node.id, { parentId: inter.id });
+			}
+		});
+	};
+
+	const onNodeDrag = useCallback(
+		(_, node) => {
+			const intersections = getIntersectingNodes(node).map((n) => n.id);
+		},
+		[getIntersectingNodes]
+	);
+
+	const printYDocState = useCanvasStore((state) => state.printYDocState);
+
 	if (isLoading) {
 		return <Loader message="Завантаження інтелект-карти, будь ласка, зачекайте." flexLayout="false" />;
 	}
@@ -351,6 +392,17 @@ const Canvas = () => {
 
 	return (
 		<div style={{ flex: 1, position: "relative", overflow: "hidden" }} ref={flowRef}>
+			<button style={{ position: "absolute", right: 10, top: 110, zIndex: 4 }} onClick={printYDocState}>
+				Print Y.Doc State (Server)
+			</button>
+			<button
+				style={{ position: "absolute", right: 10, top: 150, zIndex: 4 }}
+				onClick={() => {
+					initializeYjs(mindmapId);
+				}}
+			>
+				INIT Y.Doc State (Server)
+			</button>
 			<ReactFlow
 				translateExtent={translateExtent}
 				nodeExtent={nodeExtent}

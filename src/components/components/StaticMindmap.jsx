@@ -78,18 +78,9 @@ const StaticMindmap = ({ nodes, edges, panOnDrag = false }) => {
 	const parsedNodes = useMemo(() => {
 		try {
 			if (!nodes) return [];
-			const obj = JSON.parse(nodes);
-			return Object.values(obj).map((node) => ({
-				...node,
-				style: {
-					...node.style,
-					width: node.style?.width ? node.style.width * 0.8 : undefined,
-					height: node.style?.height ? node.style.height * 0.8 : undefined,
-					fontSize: "10px",
-				},
-			}));
+			const arrNodes = Object.values(nodes);
+			return arrNodes;
 		} catch (e) {
-			//	console.error("Error parsing nodes:", e);
 			return [];
 		}
 	}, [nodes]);
@@ -97,10 +88,9 @@ const StaticMindmap = ({ nodes, edges, panOnDrag = false }) => {
 	const parsedEdges = useMemo(() => {
 		try {
 			if (!edges) return [];
-			const obj = JSON.parse(edges);
-			return Object.values(obj);
+			const arrEdges = Object.values(edges);
+			return arrEdges;
 		} catch (e) {
-			//	console.error("Error parsing edges:", e);
 			return [];
 		}
 	}, [edges]);

@@ -78,9 +78,7 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 			</div>
 			<div className="mindmap-card" onClick={onEdit}>
 				<div className="mindmap-preview">
-					{mindmap?.nodes && mindmap?.edges && (
-						<StaticMindmap nodes={mindmap.nodes} edges={mindmap.edges} panOnDrag={false} />
-					)}
+					<StaticMindmap nodes={mindmap.nodes} edges={mindmap.edges} panOnDrag={false} />
 				</div>
 				<div className="mindmap-content">
 					<div className="mindmap-user">

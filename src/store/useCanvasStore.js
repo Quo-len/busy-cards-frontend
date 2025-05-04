@@ -95,6 +95,64 @@ const useCanvasStore = create((set, get) => ({
 		});
 	},
 
+	printYDocState: () => {
+		const { provider } = get();
+
+		if (provider && provider.ws) {
+			provider.ws.addEventListener('message', (event) => {
+				try {
+					const data = JSON.parse(event.data);
+					if (data.type === 'state_info') {
+						console.log('[CLIENT] Server response:');
+						console.log('→', data.message);
+						console.log('→ Nodes count:', data.nodeCount);
+						console.log('→ Edges count:', data.edgeCount);
+					}
+				} catch (e) {
+					// Ignore binary Yjs updates
+				}
+			});
+
+			// Надсилання запиту
+			provider.ws.send(
+				JSON.stringify({
+					type: 'print_state',
+				})
+			);
+			console.log('[CLIENT] Sent print_state request to server');
+		}
+	},
+
+	// Manual refresh of store data from YDoc maps
+	refreshFromYDoc: () => {
+		const { ydoc } = get();
+		if (ydoc) {
+			const nodesMap = ydoc.getMap('nodes');
+			const edgesMap = ydoc.getMap('edges');
+
+			nodesMap.observe((event, transaction) => {
+				console.log('1Nodes map changed:', event.changes.keys);
+				const nodes = new Map(nodesMap.entries());
+				set({ nodes });
+			});
+
+			edgesMap.observe((event, transaction) => {
+				console.log('Edges map changed:', event.changes.keys);
+				const edges = new Map(edgesMap.entries());
+				set({ edges });
+			});
+
+			set({
+				nodes: new Map(nodesMap.entries()),
+				edges: new Map(edgesMap.entries()),
+			});
+
+			console.log('Store manually refreshed from YDoc');
+			console.log('Nodes count:', nodesMap.size);
+			console.log('Edges count:', edgesMap.size);
+		}
+	},
+
 	// Cleanup Yjs resources
 	cleanupYjs: () => {
 		const { provider, ydoc } = get();
@@ -116,20 +174,13 @@ const useCanvasStore = create((set, get) => ({
 			const { nodes } = get();
 			nodes.set(node.id, {
 				...node,
-				id: node.id,
-				type: node.type || 'default',
-				position: node.position || { x: 0, y: 0 },
-				data: node.data || { label: 'Node' },
 			});
 			set({ nodes: new Map(nodes) });
 			return;
 		}
 		const nodesMap = ydoc.getMap('nodes');
 		nodesMap.set(node.id, {
-			id: node.id,
-			type: node.type || 'default',
-			position: node.position || { x: 0, y: 0 },
-			data: node.data || { label: 'Node' },
+			...node,
 		});
 	},
 
