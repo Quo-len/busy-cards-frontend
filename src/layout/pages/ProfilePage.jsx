@@ -88,7 +88,7 @@ const ProfilePage = () => {
 
 						<div className="profile-label">Остання активність:</div>
 						<div className="profile-value">
-							{new Date(user?.lastLogin).toLocaleDateString("uk-UA", {
+							{new Date(user?.updatedAt).toLocaleDateString("uk-UA", {
 								day: "numeric",
 								month: "long",
 								year: "numeric",

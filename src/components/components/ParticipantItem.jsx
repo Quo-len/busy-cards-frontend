@@ -20,12 +20,14 @@ const ParticipantItem = ({ participant, isEditable, onRemove }) => {
 	};
 
 	const handleRemoveParticipant = async () => {
-		try {
-			console.log("remove");
-			await api.deleteParticipant(participant.mindmap, participant.user.id);
-			onRemove(participant.id);
-		} catch (error) {
-			console.error("Failed to remove participant:", error);
+		if (window.confirm("Ви впевнені, що хочете видалити учасника? Цю дію не можна скасувати.")) {
+			try {
+				console.log("remove");
+				await api.deleteParticipant(participant.mindmap, participant.user.id);
+				onRemove(participant.id);
+			} catch (error) {
+				console.error("Failed to remove participant:", error);
+			}
 		}
 	};
 

@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
 			if (userId) {
 				const fetchUser = async () => {
 					try {
-						const response = await api.getUser(userId);
+						const response = await api.getUser(userId, true);
 						setUser(response);
 						setIsLoggedIn(true);
 					} catch (error) {

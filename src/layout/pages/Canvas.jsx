@@ -178,11 +178,14 @@ const Canvas = () => {
 			setConnectionStartNodeId(nodeId);
 
 			if (nodeId) {
-				const invalidNodes = findInvalidTargetNodes(nodeId, nodes, edges);
+				const currentNodes = getNodesArray();
+				const currentEdges = getEdgesArray();
+
+				const invalidNodes = findInvalidTargetNodes(nodeId, currentNodes, currentEdges);
 				setInvalidTargetNodes(invalidNodes);
 			}
 		},
-		[getNodes, isValidConnection]
+		[getNodesArray, isValidConnection]
 	);
 
 	const onConnectEnd = useCallback(() => {
@@ -409,12 +412,9 @@ const Canvas = () => {
 				nodes={styledNodes}
 				edges={edges}
 				onNodesChange={(changes) => {
-					//////////////////
 					changes.forEach((change) => {
-						//////////////////////
 						if (change.type === "position") {
-							////////////
-							updateNode(change.id, { position: change.position });
+							updateNode(change.id, { position: change.position, dragging: change.dragging });
 						} else if (change.type === "remove") {
 							removeNode(change.id);
 						}

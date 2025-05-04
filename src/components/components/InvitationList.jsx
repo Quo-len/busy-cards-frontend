@@ -20,6 +20,8 @@ const InvitationsList = ({ filters }) => {
 	const [invitations, setInvitations] = useState([]);
 	const [totalInvitations, setTotalInvitations] = useState(0);
 
+	const [refreshKey, setRefreshKey] = useState(0);
+
 	const query = useQuery();
 	const currentPage = parseInt(query.get("page")) || 1;
 	const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -54,7 +56,7 @@ const InvitationsList = ({ filters }) => {
 			top: 0,
 			behavior: "smooth",
 		});
-	}, [filters, currentPage]);
+	}, [refreshKey, filters, currentPage]);
 
 	useEffect(() => {
 		navigate(`?page=${1}`);
@@ -82,7 +84,11 @@ const InvitationsList = ({ filters }) => {
 
 			<div className="invitation-cards">
 				{invitations.map((invitation) => (
-					<InvitationCard key={invitation.id} onEdit={() => {}} invitation={invitation} />
+					<InvitationCard
+						key={invitation.id}
+						invitation={invitation}
+						onEdit={() => setRefreshKey((prev) => prev + 1)}
+					/>
 				))}
 			</div>
 

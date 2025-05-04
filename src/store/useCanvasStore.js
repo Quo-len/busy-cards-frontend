@@ -131,7 +131,7 @@ const useCanvasStore = create((set, get) => ({
 			const edgesMap = ydoc.getMap('edges');
 
 			nodesMap.observe((event, transaction) => {
-				console.log('1Nodes map changed:', event.changes.keys);
+				console.log('Nodes map changed:', event.changes.keys);
 				const nodes = new Map(nodesMap.entries());
 				set({ nodes });
 			});

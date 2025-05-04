@@ -1,8 +1,8 @@
-import axios from './axiosConfig';
+import axios from "./axiosConfig";
 
 export const getUsers = async (currentPage, itemsPerPage, sortBy, sortOrder) => {
 	try {
-		const response = await axios.get('/users', {
+		const response = await axios.get("/users", {
 			params: {
 				page: currentPage,
 				limit: itemsPerPage,
@@ -12,32 +12,36 @@ export const getUsers = async (currentPage, itemsPerPage, sortBy, sortOrder) => 
 		});
 		return response.data;
 	} catch (error) {
-		console.error('Error fetching users: ', error);
+		console.error("Error fetching users: ", error);
 		throw error;
 	}
 };
 
-export const getUser = async (id) => {
+export const getUser = async (id, log = false) => {
 	try {
-		const response = await axios.get(`/users/${id}`);
+		const response = await axios.get(`/users/${id}`, {
+			params: {
+				log: log,
+			},
+		});
 		return response.data;
 	} catch (error) {
-		console.error('Error fetching user: ', error);
+		console.error("Error fetching user: ", error);
 		throw error;
 	}
 };
 
 export const uploadUserAvatar = async (id, file) => {
 	const formData = new FormData();
-	formData.append('avatar', file);
+	formData.append("avatar", file);
 
 	try {
 		const response = await axios.patch(`/users/avatar/${id}`, formData, {
-			headers: { 'Content-Type': 'multipart/form-data' },
+			headers: { "Content-Type": "multipart/form-data" },
 		});
 		return response.data;
 	} catch (error) {
-		console.error('Error uploading avatar:', error);
+		console.error("Error uploading avatar:", error);
 		throw error;
 	}
 };
@@ -47,7 +51,7 @@ export const updateUser = async (id, data) => {
 		const response = await axios.patch(`/users/${id}`, data);
 		return response.data;
 	} catch (error) {
-		console.error('Error updating user: ', error);
+		console.error("Error updating user: ", error);
 		throw error;
 	}
 };
@@ -57,7 +61,7 @@ export const deleteUser = async (id) => {
 		const response = await axios.delete(`/users/${id}`);
 		return response.data;
 	} catch (error) {
-		console.error('Error deleting user: ', error);
+		console.error("Error deleting user: ", error);
 		throw error;
 	}
 };

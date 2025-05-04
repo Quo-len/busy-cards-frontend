@@ -8,8 +8,6 @@ const InvitationsPage = () => {
 	document.title = `Запрошення - Busy-cards`;
 	const { user } = useAuth();
 
-	const [refreshKey, setRefreshKey] = useState(0);
-
 	const [sortBy, setSortBy] = useState("updatedAt");
 	const [sortOrder, setSortOrder] = useState("desc");
 	const [itemsPerPage, setItemsPerPage] = useState(5);
@@ -23,6 +21,7 @@ const InvitationsPage = () => {
 			itemsPerPage: itemsPerPage,
 			receiver: activeCategory === "to-me" ? user?.id : undefined,
 			sender: activeCategory === "my" ? user?.id : undefined,
+			status: activeCategory === "to-me" ? "Очікує" : undefined,
 		}),
 		[activeCategory, sortBy, sortOrder, itemsPerPage, user]
 	);

@@ -10,6 +10,7 @@ export const getPaginatedInvitations = async (data) => {
 				sortOrder: data.sortOrder,
 				receiver: data.receiver,
 				sender: data.sender,
+				status: data.status,
 			},
 		});
 		return response.data;
@@ -49,9 +50,9 @@ export const updateInvitation = async (id, data) => {
 	}
 };
 
-export const deleteInvitation = async () => {
+export const deleteInvitation = async (id) => {
 	try {
-		const response = await axios.delete("/invitations");
+		const response = await axios.delete(`/invitations/${id}`);
 		return response.data;
 	} catch (error) {
 		console.error("Error deleting invitation", error);
