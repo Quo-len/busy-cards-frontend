@@ -31,6 +31,16 @@ export const getUser = async (id, log = false) => {
 	}
 };
 
+export const getUserEmail = async (id) => {
+	try {
+		const response = await axios.get(`/users/${id}`);
+		return response.data;
+	} catch (error) {
+		console.error("Error fetching user: ", error);
+		throw error;
+	}
+};
+
 export const uploadUserAvatar = async (id, file) => {
 	const formData = new FormData();
 	formData.append("avatar", file);

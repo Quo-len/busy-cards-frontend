@@ -17,12 +17,16 @@ import { BiHide } from "react-icons/bi";
 
 import { LuShrink } from "react-icons/lu";
 
+import { PiExportFill } from "react-icons/pi";
+import { PiExport } from "react-icons/pi";
+
 const CanvasControls = ({ isOpen, onUpdate, onCenter }) => {
 	const setAllFields = (value) => {
 		onUpdate("leftBar", value);
 		onUpdate("rightBar", value);
 		onUpdate("searchBar", value);
 		onUpdate("minimap", value);
+		onUpdate("serializer", value);
 	};
 
 	return (
@@ -62,6 +66,13 @@ const CanvasControls = ({ isOpen, onUpdate, onCenter }) => {
 				}}
 			>
 				{isOpen.searchBar ? <VscSearch /> : <VscSearchStop />}
+			</ControlButton>
+			<ControlButton
+				onClick={() => {
+					onUpdate("serializer", !isOpen.serializer);
+				}}
+			>
+				{isOpen.serializer ? <PiExportFill /> : <PiExport />}
 			</ControlButton>
 			<ControlButton
 				onClick={() => {

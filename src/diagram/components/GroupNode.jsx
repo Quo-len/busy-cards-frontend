@@ -1,3 +1,5 @@
+import "../styles/GroupNode.css";
+
 const GroupNode = ({ data, isConnectable, selected }) => {
 	const { label, childNodeIds = [] } = data;
 

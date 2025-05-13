@@ -6,7 +6,6 @@
 	min-width: 200px;
 	min-height: 100px;
 	transition: border 0.2s ease;
-	z-index: 100;
 }
 
 .group-node.selected {

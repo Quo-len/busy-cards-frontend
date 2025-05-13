@@ -23,6 +23,7 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 	const onDragStart = (event, nodeType) => {
 		setType(nodeType);
 		event.dataTransfer.effectAllowed = "move";
+		console.log(nodeType);
 	};
 
 	const onAddNodeToCenter = (nodeType) => {
@@ -37,9 +38,11 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 		const newNode = {
 			id,
 			position: { x: centerX, y: centerY },
-			data: { label: `${nodeType} node` },
+			data: { label: `${nodeType} node111` },
 			type: nodeType,
+			...(nodeType === "mygroup" ? { zIndex: -999 } : {}),
 		};
+
 		addNode(newNode);
 	};
 
@@ -63,7 +66,7 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 				Вимога
 			</button>
 			<button
-				className="mygroup-node"
+				className="group-node"
 				onClick={() => onAddNodeToCenter("mygroup")}
 				onDragStart={(event) => onDragStart(event, "mygroup")}
 				draggable

@@ -82,7 +82,7 @@ const InvitationCard = ({ invitation, onEdit }) => {
 				<MindmapCard mindmap={invitation?.mindmap} onEdit={() => {}} />
 			</div>
 
-			{invitation.receiver.id === user.id && invitation?.status === "В очікуванні" && (
+			{invitation.receiver.id === user.id && invitation?.status === "Очікує" && (
 				<div className="invitation-actions">
 					<button
 						className="invitation-button accept-button"

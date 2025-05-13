@@ -10,24 +10,24 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { v4 as uuidv4 } from "uuid";
-import "../styles/Canvas.css";
 
+import CanvasControls from "../../diagram/components/CanvasControls";
+import MindmapSerializer from "../../diagram/components/MindmapSerializer";
+import BoundingLines from "../../diagram/components/BoundingLines";
+import CanvasMinimap from "../../diagram/components/CanvasMinimap";
+import SearchBar from "../../diagram/components/SearchBar";
 import Loader from "../../components/components/Loader";
+import Sidebar from "../../diagram/components/Sidebar";
+import DropBar from "../../diagram/components/DropBar";
 import NotFoundPage from "./../pages/NotFoundPage";
+import "../styles/Canvas.css";
 
 import { findInvalidTargetNodes, isValidConnection } from "../../diagram/utils/utils";
 import { DnDProvider, useDnD } from "../../diagram/utils/DnDContext";
-import * as api from "../../api";
-import BoundingLines from "../../diagram/components/BoundingLines";
-import Sidebar from "../../diagram/components/Sidebar";
-import SearchBar from "../../diagram/components/SearchBar";
-import DropBar from "../../diagram/components/DropBar";
-import CanvasControls from "../../diagram/components/CanvasControls";
-import CanvasMinimap from "../../diagram/components/CanvasMinimap";
-import useCanvasStore from "../../store/useCanvasStore";
-
 import { useNodeSearch } from "../../diagram/hooks/useNodeSearch";
 import { nodeTypes, edgeTypes } from "../../diagram/components";
+import useCanvasStore from "../../store/useCanvasStore";
+import * as api from "../../api";
 
 const translateExtent = [
 	[-4300, -2000],
@@ -51,14 +51,14 @@ const userPermissioons = {
 		canManageParticipants: false,
 	},
 	editor: {
-		canEdit: false,
+		canEdit: true,
 		canComment: true,
 		canManageParticipants: false,
 	},
 	owner: {
 		canEdit: true,
 		canComment: true,
-		canManageParticipants: false,
+		canManageParticipants: true,
 	},
 };
 
@@ -69,10 +69,9 @@ const Canvas = () => {
 	const [isLoading, setIsLoading] = useState(true);
 	const [type, setType] = useDnD();
 	const flowRef = useRef(null);
-	const { getNodes, getEdges, setViewport } = useReactFlow();
+	const { setViewport } = useReactFlow();
 	const reactFlowInstance = useReactFlow();
 
-	// Use Zustand store
 	const {
 		initializeYjs,
 		cleanupYjs,
@@ -85,7 +84,6 @@ const Canvas = () => {
 		getEdgesArray,
 	} = useCanvasStore();
 
-	// Convert store Maps to arrays for ReactFlow
 	const nodes = getNodesArray();
 	const edges = getEdgesArray();
 
@@ -97,6 +95,7 @@ const Canvas = () => {
 		rightBar: true,
 		searchBar: true,
 		minimap: true,
+		serializer: false,
 	});
 
 	const {
@@ -135,7 +134,6 @@ const Canvas = () => {
 
 			await Promise.all([
 				(async () => {
-					await fetchMindmap();
 					initializeYjs(mindmapId);
 				})(),
 				new Promise((resolve) => {
@@ -149,6 +147,7 @@ const Canvas = () => {
 			setIsLoading(false);
 		};
 
+		fetchMindmap();
 		run();
 
 		return () => {
@@ -160,6 +159,9 @@ const Canvas = () => {
 	useEffect(() => {
 		if (mindmap && mindmap.title) {
 			document.title = `${mindmap.title} - Busy-cards`;
+		} else if (mindmap) {
+			// Fixed: Ensure title is updated even if mindmap exists but title is empty
+			document.title = "Untitled - Busy-cards";
 		}
 	}, [mindmap]);
 
@@ -246,8 +248,8 @@ const Canvas = () => {
 				type,
 				position,
 				data: { label: `${type} node` },
+				...(type === "mygroup" ? { zIndex: -999 } : {}),
 			};
-
 			addNode(newNode);
 		},
 		[reactFlowInstance, type, addNode]
@@ -360,22 +362,50 @@ const Canvas = () => {
 
 	// make button to mount to group node if theres interesction with node and type is group
 
-	const handleAttachment = (node) => {
-		const intersections = getIntersectingNodes(node).map((n) => n.id);
+	const handleAttachment = () => {
+		const node = nodes.find((n) => n.id === selectedNodeId);
 
-		intersections.forEach((inter) => {
-			if (inter.type == "group") {
-				updateNode(node.id, { parentId: inter.id });
-			}
-		});
-	};
+		if (node.parentId) {
+			// Detaching from parent
+			// When detaching, we need to convert relative position to absolute position
+			const parentNode = nodes.find((n) => n.id === node.parentId);
 
-	const onNodeDrag = useCallback(
-		(_, node) => {
+			// Calculate absolute position based on parent's position and node's relative position
+			const absolutePosition = {
+				x: parentNode.position.x + node.position.x,
+				y: parentNode.position.y + node.position.y,
+			};
+
+			// Update node with no parent and absolute position
+			updateNode(node.id, {
+				parentId: "",
+				extent: "",
+				position: absolutePosition,
+			});
+		} else {
+			// Attaching to parent
 			const intersections = getIntersectingNodes(node).map((n) => n.id);
-		},
-		[getIntersectingNodes]
-	);
+
+			if (intersections.length > 0) {
+				// Get the first intersecting node as the parent
+				const parentId = intersections[0];
+				const parentNode = nodes.find((n) => n.id === parentId);
+
+				// Calculate relative position based on parent's position
+				const relativePosition = {
+					x: node.position.x - parentNode.position.x,
+					y: node.position.y - parentNode.position.y,
+				};
+
+				// Update node with parent info and relative position
+				updateNode(node.id, {
+					parentId: parentId,
+					extent: "parent",
+					position: relativePosition,
+				});
+			}
+		}
+	};
 
 	const printYDocState = useCanvasStore((state) => state.printYDocState);
 
@@ -383,7 +413,7 @@ const Canvas = () => {
 		return <Loader message="Завантаження інтелект-карти, будь ласка, зачекайте." flexLayout="false" />;
 	}
 
-	// if (hasAccess) {
+	// if (role || mindmap.isPublic) {
 	// 	<NotFoundPage title="Доступ забронено" message="У вас недостатньо прав для перегляду інтелект-карти." code="403" />;
 	// }
 
@@ -395,17 +425,21 @@ const Canvas = () => {
 
 	return (
 		<div style={{ flex: 1, position: "relative", overflow: "hidden" }} ref={flowRef}>
-			<button style={{ position: "absolute", right: 10, top: 110, zIndex: 4 }} onClick={printYDocState}>
+			<button style={{ position: "absolute", right: 10, top: 740, zIndex: 4 }} onClick={printYDocState}>
 				Print Y.Doc State (Server)
 			</button>
 			<button
-				style={{ position: "absolute", right: 10, top: 150, zIndex: 4 }}
+				style={{ position: "absolute", right: 10, top: 760, zIndex: 4 }}
 				onClick={() => {
 					initializeYjs(mindmapId);
 				}}
 			>
 				INIT Y.Doc State (Server)
 			</button>
+			<button style={{ position: "absolute", right: 10, top: 780, zIndex: 4 }} onClick={handleAttachment}>
+				Parent set {selectedNodeId}
+			</button>
+
 			<ReactFlow
 				translateExtent={translateExtent}
 				nodeExtent={nodeExtent}
@@ -474,6 +508,7 @@ const Canvas = () => {
 					totalResults={searchResults.length}
 					isVisible={isOpen.searchBar}
 				/>
+				<MindmapSerializer mindmap={mindmap} isVisible={isOpen.serializer} />
 			</ReactFlow>
 			<DropBar isVisible={isOpen.leftBar} isVisibleMap={isOpen.minimap} />
 		</div>

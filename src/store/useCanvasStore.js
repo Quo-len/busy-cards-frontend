@@ -233,31 +233,11 @@ const useCanvasStore = create((set, get) => ({
 			// Carefully merge updates with existing node data for Yjs as well
 			const updatedNode = {
 				...node,
-				// If updates contains position, merge it with existing position
-				position: updates.position
-					? {
-							...node.position,
-							...updates.position,
-					  }
-					: node.position,
-				// If updates contains style, merge it with existing style
-				style: updates.style
-					? {
-							...node.style,
-							...updates.style,
-					  }
-					: node.style,
-				// If updates contains data, merge it with existing data
-				data: updates.data
-					? {
-							...node.data,
-							...updates.data,
-					  }
-					: node.data,
-				// Add any other direct properties
-				...Object.entries(updates)
-					.filter(([key]) => !['position', 'style', 'data'].includes(key))
-					.reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
+				...updates,
+				// Re-merge nested objects to avoid complete replacement
+				position: updates.position ? { ...node.position, ...updates.position } : node.position,
+				style: updates.style ? { ...node.style, ...updates.style } : node.style,
+				data: updates.data ? { ...node.data, ...updates.data } : node.data,
 			};
 
 			nodesMap.set(nodeId, updatedNode);
