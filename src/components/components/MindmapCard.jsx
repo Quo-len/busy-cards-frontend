@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import StaticMindmap from "./StaticMindmap";
 import { useAuth } from "./../../utils/authContext";
 import * as api from "./../../api";
@@ -12,7 +12,6 @@ import "../styles/MindmapCard.css";
 const MindmapCard = ({ mindmap, onEdit }) => {
 	const { user } = useAuth();
 	const [isFavorite, setIsFavorite] = useState(false);
-	const navigate = useNavigate();
 
 	useEffect(() => {
 		const fetchFavorite = async () => {
@@ -28,15 +27,6 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 		}
 	}, [user?.id, mindmap?.id]);
 
-	const handleClick = () => {
-		navigate(`/mindmap/${mindmap.id}`);
-	};
-
-	const handleUserClick = (e) => {
-		e.stopPropagation();
-		navigate(`/profile/${mindmap.owner.id}`);
-	};
-
 	const getParticipantWord = (count) => {
 		const lastDigit = count % 10;
 		const lastTwoDigits = count % 100;
@@ -48,6 +38,7 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 	};
 
 	const toggleFavorite = async (e) => {
+		e.preventDefault();
 		e.stopPropagation();
 
 		if (!user) {
@@ -82,20 +73,22 @@ const MindmapCard = ({ mindmap, onEdit }) => {
 				</div>
 				<div className="mindmap-content">
 					<div className="mindmap-user">
-						<div className="mindmap-avatar" onClick={handleUserClick}>
+						<Link to={`/profile/${mindmap.owner.id}`} className="mindmap-avatar" onClick={(e) => e.stopPropagation()}>
 							{mindmap.owner?.avatar ? (
 								<img src={mindmap.owner.avatar} alt={mindmap.owner.username || "User"} />
 							) : (
 								<div className="avatar-placeholder">{(mindmap.owner.username || "U")[0].toUpperCase()}</div>
 							)}
-						</div>
-						<span className="mindmap-username" onClick={handleUserClick}>
+						</Link>
+						<Link to={`/profile/${mindmap.owner.id}`} className="mindmap-username" onClick={(e) => e.stopPropagation()}>
 							{mindmap.owner.username || "Unknown User"}
-						</span>
+						</Link>
 					</div>
 
 					<h3 className="mindmap-title">
-						<span onClick={handleClick}>{mindmap.title || "Untitled Mindmap"}</span>
+						<Link className="mindmap-link" to={`/mindmap/${mindmap.id}`} onClick={(e) => e.stopPropagation()}>
+							{mindmap.title || "Untitled Mindmap"}
+						</Link>
 					</h3>
 
 					<p className="mindmap-description">{mindmap.description || "No description"}</p>

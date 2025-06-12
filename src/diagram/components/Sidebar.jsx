@@ -4,9 +4,9 @@ import { GrSelect } from "react-icons/gr";
 import useCanvasStore from "../../store/useCanvasStore";
 
 const nodeShapes = {
-	rectangle: { width: 150, height: 40, borderRadius: 3 },
-	circle: { width: 70, height: 70, borderRadius: 50 },
-	hexagon: { width: 100, height: 80, clipPath: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)" },
+	rectangle: {},
+	circle: {},
+	hexagon: {},
 };
 
 const NODE_COLORS = {
@@ -23,7 +23,7 @@ const NODE_COLORS = {
 
 const NODE_TYPES = {
 	custom: {
-		fields: ["label", "description", "shape", "color"],
+		fields: ["label", "description", "status", "priority", "shape", "color"],
 	},
 	actor: {
 		fields: ["label", "description", "status", "priority", "shape", "color"],
@@ -43,16 +43,17 @@ const NODE_TYPES = {
 };
 
 const STATUS_OPTIONS = [
-	{ value: "not-started", label: "Not Started", color: "#95a5a6" },
-	{ value: "in-progress", label: "In Progress", color: "#3498db" },
-	{ value: "completed", label: "Completed", color: "#2ecc71" },
-	{ value: "blocked", label: "Blocked", color: "#e74c3c" },
+	{ value: "proposed", label: "Запропоновано", color: "#3498db" },
+	{ value: "approved", label: "Узгоджено", color: "#2ecc71" },
+	{ value: "rejected", label: "Відхилено", color: "#e74c3c" },
+	{ value: "discussing", label: "В обговоренні", color: "#9b59b6" },
 ];
 
 const PRIORITY_OPTIONS = [
-	{ value: "low", label: "Low", color: "#95a5a6" },
-	{ value: "medium", label: "Medium", color: "#f1c40f" },
-	{ value: "high", label: "High", color: "#e74c3c" },
+	{ value: "p1", label: "P1 (критичний)", color: "#e74c3c" },
+	{ value: "p2", label: "P2 (високий)", color: "#e67e22" },
+	{ value: "p3", label: "P3 (середній)", color: "#f1c40f" },
+	{ value: "p4", label: "P4 (низький)", color: "#2ecc71" },
 ];
 
 function Sidebar({ isVisible, selectedNodeId }) {

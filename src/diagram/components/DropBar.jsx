@@ -38,7 +38,7 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 		const newNode = {
 			id,
 			position: { x: centerX, y: centerY },
-			data: { label: `${nodeType} node111` },
+			data: { label: `${nodeType} node` },
 			type: nodeType,
 			...(nodeType === "mygroup" ? { zIndex: -999 } : {}),
 		};
@@ -73,14 +73,7 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 			>
 				Моя Група
 			</button>
-			<button
-				className="group-node"
-				onClick={() => onAddNodeToCenter("group")}
-				onDragStart={(event) => onDragStart(event, "group")}
-				draggable
-			>
-				Група
-			</button>
+
 			<button
 				className="actor-node"
 				onClick={() => onAddNodeToCenter("actor")}
@@ -121,34 +114,6 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 				draggable
 			>
 				Default
-			</button>
-
-			<button className="custom-node" draggable>
-				Тест
-			</button>
-
-			<button className="custom-node" draggable>
-				Тест
-			</button>
-
-			<button className="custom-node" draggable>
-				Тест
-			</button>
-
-			<button className="custom-node" draggable>
-				Тест
-			</button>
-
-			<button className="custom-node" draggable>
-				Тест
-			</button>
-
-			<button className="custom-node" draggable>
-				Тест
-			</button>
-
-			<button className="custom-node" draggable>
-				Тест
 			</button>
 		</aside>
 	);

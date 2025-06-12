@@ -1,12 +1,54 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useStore, BaseEdge, EdgeLabelRenderer, getBezierPath } from "reactflow";
 import "../styles/CustomEdge.css";
 import useCanvasStore from "../../store/useCanvasStore";
+import { MdNavigateNext, MdNavigateBefore } from "react-icons/md";
 
 import { getEdgeParams } from "../utils/utils";
 
+const EDGE_TYPES = {
+	"not-defined": {
+		label: "Не визначено",
+		stroke: "#95a5a6",
+		strokeDasharray: undefined,
+	},
+	dependency: {
+		label: "Залежність",
+		stroke: "#000000",
+		strokeDasharray: undefined,
+	},
+	inclusion: {
+		label: "Включення",
+		stroke: "#2ecc71",
+		strokeDasharray: undefined,
+	},
+	sequence: {
+		label: "Послідовність",
+		stroke: "#3498db",
+		strokeDasharray: "5,5",
+	},
+	alternative: {
+		label: "Альтернатива",
+		stroke: "#e67e22",
+		strokeDasharray: undefined,
+		bidirectional: true,
+	},
+	conflict: {
+		label: "Конфлікт",
+		stroke: "#e74c3c",
+		strokeDasharray: "10,5,5,5",
+		zigzag: true,
+	},
+	supplement: {
+		label: "Доповнення",
+		stroke: "#9b59b6",
+		strokeDasharray: "2,2",
+	},
+};
+
 const CustomEdge = ({ id, source, target, sourcePosition, targetPosition, style = {}, markerEnd, data = {} }) => {
-	const { removeEdge } = useCanvasStore();
+	const { removeEdge, updateEdge } = useCanvasStore();
+	const [edgeType, setEdgeType] = useState(data.edgeType || "not-defined");
 
 	const sourceNode = useStore(useCallback((store) => store.nodeInternals.get(source), [source]));
 	const targetNode = useStore(useCallback((store) => store.nodeInternals.get(target), [target]));
@@ -30,84 +72,66 @@ const CustomEdge = ({ id, source, target, sourcePosition, targetPosition, style 
 		removeEdge(id);
 	};
 
-	// Define edge styling based on data.type
+	const onEdgeTypeNext = (e) => {
+		e.stopPropagation();
+
+		const edgeTypes = Object.keys(EDGE_TYPES);
+
+		let currentIndex = edgeTypes.indexOf(edgeType);
+
+		let nextIndex = (currentIndex + 1) % edgeTypes.length;
+		let nextType = edgeTypes[nextIndex];
+
+		setEdgeType(nextType);
+
+		const edgeData = useCanvasStore.getState().edges.get(id) || {};
+		updateEdge(id, {
+			...edgeData,
+			data: {
+				...edgeData.data,
+				edgeType: nextType,
+			},
+		});
+	};
+
+	const onEdgeTypePrev = (e) => {
+		e.stopPropagation();
+
+		const edgeTypes = Object.keys(EDGE_TYPES);
+
+		let currentIndex = edgeTypes.indexOf(edgeType);
+
+		let prevIndex = currentIndex <= 0 ? edgeTypes.length - 1 : currentIndex - 1;
+		let prevType = edgeTypes[prevIndex];
+
+		setEdgeType(prevType);
+
+		const edgeData = useCanvasStore.getState().edges.get(id) || {};
+		updateEdge(id, {
+			...edgeData,
+			data: {
+				...edgeData.data,
+				edgeType: prevType,
+			},
+		});
+	};
+
 	const edgeStyles = useMemo(() => {
+		const edgeTypeConfig = EDGE_TYPES[edgeType] || EDGE_TYPES["not-defined"];
+
 		const baseStyle = {
 			strokeWidth: data.strokeWidth || 2,
+			stroke: edgeTypeConfig.stroke,
+			strokeDasharray: edgeTypeConfig.strokeDasharray,
 			...style,
 		};
 
-		// Apply different styles based on edge type
-		switch (data.type) {
-			case "success":
-				return {
-					...baseStyle,
-					stroke: "#22c55e", // green
-					strokeDasharray: data.animated ? "5,5" : undefined,
-				};
-			case "error":
-				return {
-					...baseStyle,
-					stroke: "#ef4444", // red
-					strokeDasharray: data.animated ? "5,5" : undefined,
-				};
-			case "warning":
-				return {
-					...baseStyle,
-					stroke: "#f59e0b", // amber
-					strokeDasharray: data.animated ? "5,5" : undefined,
-				};
-			case "highlight":
-				return {
-					...baseStyle,
-					stroke: "#3b82f6", // blue
-					strokeWidth: 3,
-					strokeDasharray: data.animated ? "5,5" : undefined,
-				};
-			case "dashed":
-				return {
-					...baseStyle,
-					strokeDasharray: "5,5",
-				};
-			case "dotted":
-				return {
-					...baseStyle,
-					strokeDasharray: "2,2",
-				};
-			default:
-				return {
-					...baseStyle,
-					stroke: data.color || "#64748b", // slate if no color specified
-					strokeDasharray: data.animated ? "5,5" : undefined,
-				};
-		}
-	}, [data, style]);
-
-	// Define marker end based on data.arrow type
-	const customMarkerEnd = useMemo(() => {
-		if (data.arrow === "none") return undefined;
-
-		const arrowColor = edgeStyles.stroke || "#64748b";
-		const arrowType = data.arrow || "normal";
-
-		switch (arrowType) {
-			case "large":
-				return `url(#edge-arrow-large-${arrowColor.replace("#", "")})`;
-			case "fancy":
-				return `url(#edge-arrow-fancy-${arrowColor.replace("#", "")})`;
-			default:
-				return markerEnd || `url(#edge-arrow-${arrowColor.replace("#", "")})`;
-		}
-	}, [data, edgeStyles.stroke, markerEnd]);
+		return baseStyle;
+	}, [edgeType, data, style]);
 
 	return (
 		<>
-			<BaseEdge
-				path={edgePath}
-				markerEnd={customMarkerEnd}
-				style={edgeStyles}
-				className={data.animated ? "animated-edge" : ""}
-			/>
+			<BaseEdge path={edgePath} style={edgeStyles} className={`${edgeType === "conflict" ? "zigzag-edge" : ""}`} />
 			<EdgeLabelRenderer>
 				<div
 					style={{
@@ -134,9 +158,20 @@ const CustomEdge = ({ id, source, target, sourcePosition, targetPosition, style 
 							{data.label}
 						</div>
 					)}
-					<button className="edgebutton" onClick={onEdgeClick}>
-						×
-					</button>
+					<div className="edge-controls">
+						<button className="edgebutton edgetype-button" onClick={onEdgeTypePrev}>
+							<MdNavigateBefore />
+						</button>
+						<button className="edgebutton" onClick={onEdgeClick}>
+							×
+						</button>
+						<button className="edgebutton edgetype-button" onClick={onEdgeTypeNext}>
+							<MdNavigateNext />
+						</button>
+					</div>
+					{/* <div className="edge-type-label" style={{ color: edgeStyles.stroke }}>
+						{EDGE_TYPES[edgeType]?.label || "Не визначено"}
+					</div> */}
 				</div>
 			</EdgeLabelRenderer>
 		</>

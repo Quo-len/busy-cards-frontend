@@ -28,6 +28,43 @@
 	transition: opacity 0.2s ease;
 }
 
+/* Edge type buttons and controls */
+.edge-controls {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 3px;
+}
+
+.edgetype-button {
+	width: 18px;
+	height: 18px;
+	background: #f5f5f5;
+}
+
+.edge-type-label {
+	font-size: 10px;
+	text-align: center;
+	margin-top: 3px;
+	font-weight: bold;
+	pointer-events: none;
+	white-space: nowrap;
+}
+
+/* Zigzag edge style for conflict edges */
+@keyframes zigzagOffset {
+	from {
+		stroke-dashoffset: 25;
+	}
+	to {
+		stroke-dashoffset: 0;
+	}
+}
+
+.zigzag-edge path {
+	animation: zigzagOffset 1s linear infinite;
+}
+
 /* Animated edge styles */
 @keyframes dashOffset {
 	from {

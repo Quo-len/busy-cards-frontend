@@ -3,7 +3,12 @@ import { Link } from "react-router-dom";
 import { IoHome } from "react-icons/io5";
 import "../styles/NotFoundPage.css";
 
-function NotFoundPage({ title = "Сторінка не знайдена", message = "Сторінку не знайдено.", code = "404" }) {
+function NotFoundPage({
+	title = "Сторінка не знайдена",
+	message = "Сторінку не знайдено.",
+	content = "Схоже, що ви намагаєтесь знайти сторінку, яка не існує або була переміщена. Перевірте URL або поверніться на головну сторінку, щоб продовжити роботу з інтелект-картами.",
+	code = "404",
+}) {
 	document.title = `${title} - Busy-cards`;
 
 	return (
@@ -12,10 +17,7 @@ function NotFoundPage({ title = "Сторінка не знайдена", messag
 				<h1 className="not-found-code">{code}</h1>
 				<h2 className="not-found-title">{message}</h2>
 
-				<p className="not-found-message">
-					Схоже, що ви намагаєтесь знайти сторінку, яка не існує або була переміщена. Перевірте URL або поверніться на
-					головну сторінку, щоб продовжити роботу з інтелект-картами.
-				</p>
+				<p className="not-found-message">{content}</p>
 
 				<Link to="/" className="home-button">
 					<IoHome />

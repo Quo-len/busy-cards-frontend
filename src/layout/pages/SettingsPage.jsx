@@ -194,7 +194,7 @@ const SettingsPage = () => {
 				</form>
 			</section>
 
-			<section className="settings-section">
+			{/* <section className="settings-section">
 				<h2>Електронна пошта</h2>
 				<p className="settings-description">
 					Змінити адресу електронної пошти - <strong>{user?.email}</strong>.
@@ -213,7 +213,7 @@ const SettingsPage = () => {
 						Оновити пошту
 					</button>
 				</form>
-			</section>
+			</section> */}
 
 			<section className="settings-section">
 				<h2>Фото профілю</h2>

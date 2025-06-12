@@ -5,7 +5,6 @@ import useCanvasStore from "../../store/useCanvasStore";
 import { v4 as uuidv4 } from "uuid";
 import { useRef } from "react";
 import jsPDF from "jspdf";
-
 import "../styles/MindmapSerializer.css";
 
 const MindmapSerializer = ({ mindmap, isVisible }) => {
@@ -14,7 +13,7 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 	const { addNode, addEdge, getNodesArray, getEdgesArray } = useCanvasStore();
 	const reactFlowInstance = useReactFlow();
 
-	const exportToPng = (fileName = "mindmap") => {
+	const exportToPng = () => {
 		const nodes = getNodesArray();
 
 		if (nodes.length === 0) {
@@ -71,8 +70,9 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 
 	function downloadImage(dataUrl, fileName) {
 		const a = document.createElement("a");
-		const formattedName = fileName ? `${fileName.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.png` : "mindmap.png";
-
+		const formattedName = fileName
+			? `${fileName.replace(/[^\u0400-\u04FFa-zA-Z0-9\s\-_]/g, " ").replace(/\s+/g, " ")}.png`
+			: "mindmap.png";
 		a.setAttribute("download", formattedName);
 		a.setAttribute("href", dataUrl);
 		a.click();
@@ -115,95 +115,58 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 
 	const exportToPdf = async (fileName = "mindmap") => {
 		const nodes = getNodesArray();
-
 		if (nodes.length === 0) {
 			toast.error("Відсутні вузли для експорту.");
 			return;
 		}
-
 		try {
-			// Generate the PNG first
 			const dataUrl = await exportToPng(fileName);
-
-			// Create a new PDF document - first page is landscape for the image
 			const pdf = new jsPDF({
 				orientation: "landscape",
 				unit: "mm",
 				format: "a4",
 			});
-
-			// Load a Unicode font with Cyrillic support
-			// We'll add font first to ensure Ukrainian characters display correctly
 			pdf.addFont("/fonts/NotoSans-Regular.ttf", "NotoSans", "normal");
 			pdf.addFont("/fonts/NotoSans-Bold.ttf", "NotoSans", "bold");
-
-			// Set default font to one that supports Cyrillic/Ukrainian
 			pdf.setFont("NotoSans");
-
 			const pdfWidth = pdf.internal.pageSize.getWidth();
 			const pdfHeight = pdf.internal.pageSize.getHeight();
-
-			// Calculate image dimensions to fit on the page
 			const imgProps = pdf.getImageProperties(dataUrl);
 			const imgWidth = pdfWidth - 20; // 10mm margin on each side
 			const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-
-			// Add the mindmap visualization as the first page, centered vertically
 			const yOffset = Math.max(10, (pdfHeight - imgHeight) / 2);
 			pdf.addImage(dataUrl, "PNG", 10, yOffset, imgWidth, imgHeight);
-
-			// Add title to the mindmap page
 			const title = mindmap?.title || "Untitled Mindmap";
 			pdf.setFontSize(16);
 			pdf.setTextColor(0, 0, 0);
 			pdf.text(title, pdfWidth / 2, 10, { align: "center" });
-
-			// Add portrait-oriented page for the node content
 			pdf.addPage("a4", "portrait");
-
-			// Reset page variables for content pages
 			const contentPageWidth = pdf.internal.pageSize.getWidth();
 			const contentPageHeight = pdf.internal.pageSize.getHeight();
-
-			// Add title
 			pdf.setFontSize(18);
 			pdf.text(title, contentPageWidth / 2, 15, { align: "center" });
-
-			// Add subtitle for the content section
 			pdf.setFontSize(14);
 			pdf.text("Вміст вузлів", contentPageWidth / 2, 25, { align: "center" });
-
-			// Add nodes content in text format
 			pdf.setFontSize(12);
 			let yPosition = 35;
-
-			// Function to check if we need a new page
 			const checkAndAddPage = (height) => {
 				if (yPosition + height > contentPageHeight - 15) {
 					pdf.addPage("a4", "portrait");
 					yPosition = 20;
 				}
 			};
-
-			// Process all nodes as a flat list without hierarchical grouping
 			nodes.forEach((node, index) => {
 				checkAndAddPage(15);
-
-				// Add node label/title with numbering
 				pdf.setFont("NotoSans", "bold");
 				pdf.text(`${index + 1}. ${node.data.label || "Unnamed Node"}`, 10, yPosition);
 				yPosition += 8;
-
-				// Add node ID and type info
 				pdf.setFont("NotoSans", "normal");
 				pdf.setFontSize(8);
 				pdf.setTextColor(100, 100, 100);
-				pdf.text(`ID: ${node.id} | Type: ${node.type || "default"}`, 15, yPosition);
+				pdf.text(`Ідентифікатор: ${node.id} | Тип: ${node.type || "default"}`, 15, yPosition);
 				yPosition += 5;
 				pdf.setFontSize(12);
 				pdf.setTextColor(0, 0, 0);
-
-				// Add node object keys (properties)
 				const nodeKeys = Object.keys(node).filter(
 					(key) =>
 						key !== "children" &&
@@ -213,12 +176,10 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 						key !== "height" &&
 						typeof node[key] !== "function"
 				);
-
 				if (nodeKeys.length > 0) {
 					checkAndAddPage(10);
 					pdf.setFontSize(9);
 					pdf.setTextColor(80, 80, 80);
-
 					const keysStr = nodeKeys
 						.map((key) => {
 							const value = node[key];
@@ -229,38 +190,28 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 							}
 						})
 						.join(", ");
-
-					const keyLines = pdf.splitTextToSize(`Properties: ${keysStr}`, contentPageWidth - 30);
+					const keyLines = pdf.splitTextToSize(`Властивості: ${keysStr}`, contentPageWidth - 30);
 					pdf.text(keyLines, 15, yPosition);
 					yPosition += keyLines.length * 4 + 2;
-
 					pdf.setFontSize(12);
 					pdf.setTextColor(0, 0, 0);
 				}
-
-				// Add position information
 				if (node.position) {
 					checkAndAddPage(5);
 					pdf.setFontSize(9);
 					pdf.setTextColor(80, 80, 80);
-					pdf.text(`Position: x=${Math.round(node.position.x)}, y=${Math.round(node.position.y)}`, 15, yPosition);
+					pdf.text(`Позиція: x=${Math.round(node.position.x)}, y=${Math.round(node.position.y)}`, 15, yPosition);
 					pdf.setFontSize(12);
 					pdf.setTextColor(0, 0, 0);
 					yPosition += 5;
 				}
-
-				// Add node content if available
 				if (node.data.content) {
 					checkAndAddPage(10);
 					pdf.setFont("NotoSans", "normal");
-
-					// Add content label
 					pdf.setFontSize(10);
 					pdf.setFont("NotoSans", "bold");
 					pdf.text("Вміст:", 15, yPosition);
 					yPosition += 5;
-
-					// Split long text into multiple lines
 					pdf.setFont("NotoSans", "normal");
 					pdf.setFontSize(12);
 					const contentLines = pdf.splitTextToSize(node.data.content, contentPageWidth - 20);
@@ -269,29 +220,23 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 				} else {
 					yPosition += 5;
 				}
-
-				// Display additional data properties if they exist
 				if (node.data) {
 					const dataKeys = Object.keys(node.data).filter(
 						(key) => key !== "label" && key !== "content" && typeof node.data[key] !== "function"
 					);
-
 					if (dataKeys.length > 0) {
 						checkAndAddPage(10);
 						pdf.setFontSize(9);
 						pdf.setTextColor(80, 80, 80);
-
 						dataKeys.forEach((key) => {
 							const value = node.data[key];
 							let displayValue;
-
 							if (typeof value === "object" && value !== null) {
 								displayValue = JSON.stringify(value).substring(0, 50);
 								if (JSON.stringify(value).length > 50) displayValue += "...";
 							} else {
 								displayValue = String(value);
 							}
-
 							const keyLine = `${key}: ${displayValue}`;
 							const keyLineWrapped = pdf.splitTextToSize(keyLine, contentPageWidth - 30);
 							pdf.text(keyLineWrapped, 15, yPosition);
@@ -303,8 +248,6 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 						yPosition += 2;
 					}
 				}
-
-				// Add separator between nodes
 				pdf.setDrawColor(200, 200, 200);
 				checkAndAddPage(5);
 				if (index < nodes.length - 1) {
@@ -312,8 +255,6 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 					yPosition += 8;
 				}
 			});
-
-			// Add metadata footer on all pages
 			const totalPages = pdf.internal.getNumberOfPages();
 			for (let i = 1; i <= totalPages; i++) {
 				pdf.setPage(i);
@@ -329,11 +270,10 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 					{ align: "center" }
 				);
 			}
-
-			// Save the PDF
-			const formattedName = fileName ? `${fileName.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf` : "mindmap.pdf";
+			const formattedName = fileName
+				? `${fileName.replace(/[^\u0400-\u04FFa-zA-Z0-9\s\-_]/g, " ").replace(/\s+/g, " ")}.pdf`
+				: "mindmap.pdf";
 			pdf.save(formattedName);
-
 			toast.success("Успішний експорт в PDF.");
 		} catch (error) {
 			console.error("Error generating PDF:", error);
@@ -446,7 +386,7 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 
 						<button
 							className="mindmap-serializer-button"
-							onClick={() => exportToPng(mindmap?.title).then((dataUrl) => downloadImage(dataUrl, mindmap?.title))}
+							onClick={() => exportToPng().then((dataUrl) => downloadImage(dataUrl, mindmap?.title))}
 						>
 							Експорт в PNG
 						</button>

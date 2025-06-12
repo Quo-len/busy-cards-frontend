@@ -14,7 +14,7 @@ const ParticipantItem = ({ participant, isEditable, onRemove }) => {
 		try {
 			await api.updateParticipant(participant.mindmap, participant.user.id, newLevel);
 		} catch (error) {
-			console.error("Failed to update access level:", error);
+			console.error("Помилка оновлення рівню доступу учасника:", error);
 			setSelectedRole(participant.accessLevel);
 		}
 	};
@@ -22,11 +22,10 @@ const ParticipantItem = ({ participant, isEditable, onRemove }) => {
 	const handleRemoveParticipant = async () => {
 		if (window.confirm("Ви впевнені, що хочете видалити учасника? Цю дію не можна скасувати.")) {
 			try {
-				console.log("remove");
 				await api.deleteParticipant(participant.mindmap, participant.user.id);
 				onRemove(participant.id);
 			} catch (error) {
-				console.error("Failed to remove participant:", error);
+				console.error("Помилка видалення учасника:", error);
 			}
 		}
 	};

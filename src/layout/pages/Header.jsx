@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth } from "./../../utils/authContext";
 import { PiGraphFill } from "react-icons/pi";
 import { GiDeathSkull } from "react-icons/gi";
@@ -15,10 +16,10 @@ const Header = () => {
 
 	return (
 		<header className="header">
-			<div className="logo" onClick={() => navigate("/")}>
+			<Link to={`/`} className="logo">
 				<PiGraphFill className="logo-icon spin" />
 				<span className="logo-text">Busy-Cards</span>
-			</div>
+			</Link>
 			<nav className="nav">
 				{isLoggedIn ? (
 					<div className="user-controls">

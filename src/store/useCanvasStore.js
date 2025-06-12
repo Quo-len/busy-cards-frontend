@@ -31,6 +31,7 @@ const useCanvasStore = create((set, get) => ({
 	ydoc: null,
 	provider: null,
 	connectionStatus: 'disconnected',
+	role: 'Глядач',
 
 	// Initialize Yjs document and provider
 	initializeYjs: (mindmapId) => {
@@ -95,34 +96,6 @@ const useCanvasStore = create((set, get) => ({
 		});
 	},
 
-	printYDocState: () => {
-		const { provider } = get();
-
-		if (provider && provider.ws) {
-			provider.ws.addEventListener('message', (event) => {
-				try {
-					const data = JSON.parse(event.data);
-					if (data.type === 'state_info') {
-						console.log('[CLIENT] Server response:');
-						console.log('→', data.message);
-						console.log('→ Nodes count:', data.nodeCount);
-						console.log('→ Edges count:', data.edgeCount);
-					}
-				} catch (e) {
-					// Ignore binary Yjs updates
-				}
-			});
-
-			// Надсилання запиту
-			provider.ws.send(
-				JSON.stringify({
-					type: 'print_state',
-				})
-			);
-			console.log('[CLIENT] Sent print_state request to server');
-		}
-	},
-
 	// Manual refresh of store data from YDoc maps
 	refreshFromYDoc: () => {
 		const { ydoc } = get();
@@ -164,6 +137,7 @@ const useCanvasStore = create((set, get) => ({
 			ydoc.destroy();
 		}
 		set({ ydoc: null, provider: null, connectionStatus: 'disconnected' });
+		console.log('disconnectyusg');
 	},
 
 	// Node operations
@@ -264,20 +238,14 @@ const useCanvasStore = create((set, get) => ({
 			// If Yjs is not initialized, update local state
 			const { edges } = get();
 			edges.set(edge.id, {
-				id: edge.id,
-				source: edge.source,
-				target: edge.target,
-				type: edge.type || 'default',
+				...edge,
 			});
 			set({ edges: new Map(edges) });
 			return;
 		}
 		const edgesMap = ydoc.getMap('edges');
 		edgesMap.set(edge.id, {
-			id: edge.id,
-			source: edge.source,
-			target: edge.target,
-			type: edge.type || 'default',
+			...edge,
 		});
 	},
 

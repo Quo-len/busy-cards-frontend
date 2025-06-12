@@ -37,6 +37,7 @@ const CanvasControls = ({ isOpen, onUpdate, onCenter }) => {
 				flexDirection: "row",
 				transform: "scale(1.5)",
 				transformOrigin: "center",
+				left: "710px",
 			}}
 		>
 			<ControlButton

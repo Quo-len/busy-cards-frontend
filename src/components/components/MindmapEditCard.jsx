@@ -12,7 +12,6 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel, onDelete }) => {
 	const [isPublic, setIsPublic] = useState(mindmap.isPublic || false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState(null);
-	const [exportType, setExportType] = useState("png");
 
 	const isOwner = mindmap.owner?.id === user?.id;
 
@@ -36,16 +35,10 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel, onDelete }) => {
 
 			if (onDelete) onSave(response.data);
 		} catch (err) {
-			console.error("Update failed:", err);
-			setError("Failed to update mindmap.");
+			setError("Помилка оновлення налаштувань інтелект-карти: " + err.response.data.message);
 		} finally {
 			setLoading(false);
 		}
-	};
-
-	const handleExport = (e) => {
-		e.preventDefault();
-		console.log(`Exporting as ${exportType}`);
 	};
 
 	const handleDeleteMindmap = async () => {
@@ -116,21 +109,6 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel, onDelete }) => {
 						<label htmlFor="isPublic">Загальнодоступна?</label>
 					</div>
 				)}
-
-				<div className="export-container">
-					<select
-						className="export-select"
-						value={exportType}
-						onChange={(e) => setExportType(e.target.value)}
-						disabled={!isOwner}
-					>
-						<option value="png">PNG</option>
-						<option value="pdf">PDF</option>
-					</select>
-					<button type="button" className="export-button" onClick={handleExport} disabled={!isOwner}>
-						Експорт
-					</button>
-				</div>
 
 				{error && <div className="error-message">{error}</div>}
 

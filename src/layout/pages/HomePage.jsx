@@ -20,7 +20,6 @@ const categories = [
 
 const HomePage = (props) => {
 	const { user, isLoggedIn } = useAuth();
-	const navigate = useNavigate();
 	const [activeCategory, setActiveCategory] = useState("public");
 	const [selectedMindmap, setSelectedMindmap] = useState(null);
 	const [showEditor, setShowEditor] = useState(false);

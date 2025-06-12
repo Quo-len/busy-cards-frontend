@@ -40,22 +40,22 @@ const nodeExtent = [
 ];
 
 const userPermissioons = {
-	viewer: {
+	Глядач: {
 		canEdit: false,
 		canComment: false,
 		canManageParticipants: false,
 	},
-	commenter: {
+	Коментатор: {
 		canEdit: false,
 		canComment: true,
 		canManageParticipants: false,
 	},
-	editor: {
+	Редактор: {
 		canEdit: true,
 		canComment: true,
 		canManageParticipants: false,
 	},
-	owner: {
+	Власник: {
 		canEdit: true,
 		canComment: true,
 		canManageParticipants: true,
@@ -63,10 +63,12 @@ const userPermissioons = {
 };
 
 const Canvas = () => {
-	const [role] = useState("owner");
 	const { mindmapId } = useParams();
+	const [role, setRole] = useState("Власник");
 	const [mindmap, setMindmap] = useState(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState(null);
+
 	const [type, setType] = useDnD();
 	const flowRef = useRef(null);
 	const { setViewport } = useReactFlow();
@@ -123,32 +125,64 @@ const Canvas = () => {
 		const fetchMindmap = async () => {
 			try {
 				const response = await api.getMindmap(mindmapId);
-				setMindmap(response);
-			} catch {
-				console.log("Failed to get mindmap");
+				setMindmap(response.mindmap);
+				setRole(response.role);
+				await Promise.all([
+					(async () => {
+						initializeYjs(mindmapId);
+					})(),
+					new Promise((resolve) => {
+						timeoutId = setTimeout(() => {
+							initializeYjs(mindmapId);
+							resolve();
+						}, 1000);
+					}),
+				]);
+
+				setIsLoading(false);
+			} catch (err) {
+				if (err.response) {
+					const statusCode = err.response.status;
+
+					if (statusCode === 403) {
+						setError({
+							title: "Доступ заборонено",
+							message: "У вас недостатньо прав для перегляду інтелект-карти.",
+							code: "403",
+						});
+					} else if (statusCode === 404) {
+						setError({
+							title: "Інтелект-карта не знайдена",
+							message: "Інтелект-карту не знайдено, перевірте посилання.",
+							code: "404",
+						});
+					} else if (statusCode === 500) {
+						setError({
+							title: "Помилка сервера",
+							message: "Виникла помилка на сервері. Спробуйте пізніше.",
+							code: "500",
+						});
+					} else {
+						setError({
+							title: "Помилка",
+							message: "Виникла невідома помилка. Спробуйте пізніше.",
+							code: statusCode.toString(),
+						});
+					}
+				} else {
+					setError({
+						title: "Помилка з'єднання",
+						message: "Не вдалося встановити з'єднання з сервером. Перевірте ваше підключення до інтернету.",
+						code: "Network Error",
+					});
+				}
+				setIsLoading(false);
 			}
 		};
 
-		const run = async () => {
-			if (!mindmapId) return;
-
-			await Promise.all([
-				(async () => {
-					initializeYjs(mindmapId);
-				})(),
-				new Promise((resolve) => {
-					timeoutId = setTimeout(() => {
-						initializeYjs(mindmapId);
-						resolve();
-					}, 1000);
-				}),
-			]);
-
-			setIsLoading(false);
-		};
-
-		fetchMindmap();
-		run();
+		if (mindmapId) {
+			fetchMindmap();
+		}
 
 		return () => {
 			clearTimeout(timeoutId);
@@ -160,7 +194,6 @@ const Canvas = () => {
 		if (mindmap && mindmap.title) {
 			document.title = `${mindmap.title} - Busy-cards`;
 		} else if (mindmap) {
-			// Fixed: Ensure title is updated even if mindmap exists but title is empty
 			document.title = "Untitled - Busy-cards";
 		}
 	}, [mindmap]);
@@ -336,7 +369,7 @@ const Canvas = () => {
 	useEffect(() => {
 		const handleKeyDown = (event) => {
 			if (
-				(event.ctrlKey && event.key.toLowerCase() === "c") ||
+				(event.ctrlKey && event.altKey && event.key.toLowerCase() === "c") ||
 				event.key.toLowerCase() === "с" ||
 				event.key.toLowerCase() === "с"
 			) {
@@ -344,7 +377,7 @@ const Canvas = () => {
 			}
 
 			if (
-				(event.ctrlKey && event.key.toLowerCase() === "v") ||
+				(event.ctrlKey && event.altKey && event.key.toLowerCase() === "v") ||
 				event.key.toLowerCase() === "м" ||
 				event.key.toLowerCase() === "м"
 			) {
@@ -407,35 +440,16 @@ const Canvas = () => {
 		}
 	};
 
-	const printYDocState = useCanvasStore((state) => state.printYDocState);
-
 	if (isLoading) {
 		return <Loader message="Завантаження інтелект-карти, будь ласка, зачекайте." flexLayout="false" />;
 	}
 
-	// if (role || mindmap.isPublic) {
-	// 	<NotFoundPage title="Доступ забронено" message="У вас недостатньо прав для перегляду інтелект-карти." code="403" />;
-	// }
-
-	if (!mindmap) {
-		return (
-			<NotFoundPage title="Інтелект-карта не знайдена" message="Інтелект-карту не знайдено, перевірте посилання." />
-		);
+	if (error) {
+		return <NotFoundPage title={error.title} message={error.message} code={error.code} />;
 	}
 
 	return (
 		<div style={{ flex: 1, position: "relative", overflow: "hidden" }} ref={flowRef}>
-			<button style={{ position: "absolute", right: 10, top: 740, zIndex: 4 }} onClick={printYDocState}>
-				Print Y.Doc State (Server)
-			</button>
-			<button
-				style={{ position: "absolute", right: 10, top: 760, zIndex: 4 }}
-				onClick={() => {
-					initializeYjs(mindmapId);
-				}}
-			>
-				INIT Y.Doc State (Server)
-			</button>
 			<button style={{ position: "absolute", right: 10, top: 780, zIndex: 4 }} onClick={handleAttachment}>
 				Parent set {selectedNodeId}
 			</button>
