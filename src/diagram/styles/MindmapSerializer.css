@@ -56,6 +56,12 @@
 	justify-content: space-between;
 }
 
+.mindmap-serializer-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
+}
+
 .mindmap-serializer-button {
 	flex: 1;
 	padding: 0.5rem;

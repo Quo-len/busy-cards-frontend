@@ -7,7 +7,7 @@ import { useRef } from "react";
 import jsPDF from "jspdf";
 import "../styles/MindmapSerializer.css";
 
-const MindmapSerializer = ({ mindmap, isVisible }) => {
+const MindmapSerializer = ({ mindmap, isVisible, isEditable }) => {
 	const fileInputRef = useRef(null);
 
 	const { addNode, addEdge, getNodesArray, getEdgesArray } = useCanvasStore();
@@ -376,7 +376,7 @@ const MindmapSerializer = ({ mindmap, isVisible }) => {
 					<input type="file" ref={fileInputRef} accept=".json" onChange={handleFileImport} />
 
 					<div className="mindmap-serializer-buttons">
-						<button className="mindmap-serializer-button" onClick={triggerImportFile}>
+						<button className="mindmap-serializer-button" onClick={triggerImportFile} disabled={!isEditable}>
 							Імпорт із JSON
 						</button>
 

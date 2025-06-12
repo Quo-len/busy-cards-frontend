@@ -39,7 +39,7 @@ const nodeExtent = [
 	[4000, 1700],
 ];
 
-const userPermissioons = {
+const userPermissions = {
 	Глядач: {
 		canEdit: false,
 		canComment: false,
@@ -129,11 +129,11 @@ const Canvas = () => {
 				setRole(response.role);
 				await Promise.all([
 					(async () => {
-						initializeYjs(mindmapId);
+						initializeYjs(mindmapId, response.role);
 					})(),
 					new Promise((resolve) => {
 						timeoutId = setTimeout(() => {
-							initializeYjs(mindmapId);
+							initializeYjs(mindmapId, response.role);
 							resolve();
 						}, 1000);
 					}),
@@ -493,12 +493,12 @@ const Canvas = () => {
 				onDragStart={onDragStart}
 				onDragOver={onDragOver}
 				proOptions={{ hideAttribution: true }}
-				nodesDraggable={userPermissioons[role].canEdit}
-				nodesConnectable={userPermissioons[role].canEdit}
-				elementsSelectable={userPermissioons[role].canEdit}
+				nodesDraggable={userPermissions[role].canEdit}
+				nodesConnectable={userPermissions[role].canEdit}
+				elementsSelectable={userPermissions[role].canEdit}
 				selectionOnDrag
 				connectOnClick={true}
-				selectionMode={SelectionMode.Full}
+				selectionMode={SelectionMode.Partial}
 				className="touchdevice-flow"
 			>
 				<Background id="1" gap={10} color="#f1f1f1" variant={BackgroundVariant.Lines} />
@@ -510,7 +510,12 @@ const Canvas = () => {
 					invalidTargetNodes={invalidTargetNodes}
 					isVisible={isOpen.minimap}
 				/>
-				<Sidebar isVisible={isOpen.rightBar} selectedNodeId={selectedNodeId} />
+				<Sidebar
+					isVisible={isOpen.rightBar}
+					selectedNodeId={selectedNodeId}
+					isEditable={userPermissions[role].canEdit}
+					isCommentable={userPermissions[role].canComment}
+				/>
 				<SearchBar
 					onSearch={handleSearch}
 					onClear={clearSearch}
@@ -522,9 +527,9 @@ const Canvas = () => {
 					totalResults={searchResults.length}
 					isVisible={isOpen.searchBar}
 				/>
-				<MindmapSerializer mindmap={mindmap} isVisible={isOpen.serializer} />
+				<MindmapSerializer mindmap={mindmap} isVisible={isOpen.serializer} isEditable={userPermissions[role].canEdit} />
 			</ReactFlow>
-			<DropBar isVisible={isOpen.leftBar} isVisibleMap={isOpen.minimap} />
+			<DropBar isVisible={isOpen.leftBar} isVisibleMap={isOpen.minimap} isEditable={userPermissions[role].canEdit} />
 		</div>
 	);
 };

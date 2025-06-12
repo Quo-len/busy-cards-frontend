@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import "../styles/DropBar.css";
 import useCanvasStore from "../../store/useCanvasStore";
 
-const DropBar = ({ isVisible, isVisibleMap }) => {
+const DropBar = ({ isVisible, isVisibleMap, isEditable }) => {
 	const reactFlowInstance = useReactFlow();
 	const [_, setType] = useDnD();
 	const [animationClass, setAnimationClass] = useState("");
@@ -21,12 +21,18 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 	}, [isVisible]);
 
 	const onDragStart = (event, nodeType) => {
+		if (!isEditable) {
+			event.preventDefault();
+			return;
+		}
 		setType(nodeType);
 		event.dataTransfer.effectAllowed = "move";
 		console.log(nodeType);
 	};
 
 	const onAddNodeToCenter = (nodeType) => {
+		if (!isEditable) return;
+
 		const { x, y, zoom } = reactFlowInstance.getViewport();
 		const width = window.innerWidth;
 		const height = window.innerHeight;
@@ -51,17 +57,21 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 	}
 
 	const minimapClass = isVisibleMap ? "minimap-visible" : "";
+	const disabledClass = !isEditable ? "disabled" : "";
 
 	return (
-		<aside className={`dropbar ${animationClass} ${minimapClass}`}>
+		<aside className={`dropbar ${animationClass} ${minimapClass} ${disabledClass}`}>
 			<div className="description">
-				Ви можете перетягнути ці вузли на панель праворуч або натиснути на них для додавання.
+				{isEditable
+					? "Ви можете перетягнути ці вузли на панель праворуч або натиснути на них для додавання."
+					: "Режим перегляду - додавання вузлів недоступне"}
 			</div>
 			<button
 				className="custom-node"
 				onClick={() => onAddNodeToCenter("custom")}
 				onDragStart={(event) => onDragStart(event, "custom")}
-				draggable
+				draggable={isEditable}
+				disabled={!isEditable}
 			>
 				Вимога
 			</button>
@@ -69,7 +79,8 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 				className="group-node"
 				onClick={() => onAddNodeToCenter("mygroup")}
 				onDragStart={(event) => onDragStart(event, "mygroup")}
-				draggable
+				draggable={isEditable}
+				disabled={!isEditable}
 			>
 				Моя Група
 			</button>
@@ -78,7 +89,8 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 				className="actor-node"
 				onClick={() => onAddNodeToCenter("actor")}
 				onDragStart={(event) => onDragStart(event, "actor")}
-				draggable
+				draggable={isEditable}
+				disabled={!isEditable}
 			>
 				Актор
 			</button>
@@ -86,7 +98,8 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 				className="note-node"
 				onClick={() => onAddNodeToCenter("note")}
 				onDragStart={(event) => onDragStart(event, "note")}
-				draggable
+				draggable={isEditable}
+				disabled={!isEditable}
 			>
 				Замітка
 			</button>
@@ -94,7 +107,8 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 				className="link-node"
 				onClick={() => onAddNodeToCenter("link")}
 				onDragStart={(event) => onDragStart(event, "link")}
-				draggable
+				draggable={isEditable}
+				disabled={!isEditable}
 			>
 				Посилання
 			</button>
@@ -102,7 +116,8 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 				className="image-node"
 				onClick={() => onAddNodeToCenter("image")}
 				onDragStart={(event) => onDragStart(event, "image")}
-				draggable
+				draggable={isEditable}
+				disabled={!isEditable}
 			>
 				Зображення
 			</button>
@@ -111,7 +126,8 @@ const DropBar = ({ isVisible, isVisibleMap }) => {
 				className="default"
 				onClick={() => onAddNodeToCenter("default")}
 				onDragStart={(event) => onDragStart(event, "default")}
-				draggable
+				draggable={isEditable}
+				disabled={!isEditable}
 			>
 				Default
 			</button>

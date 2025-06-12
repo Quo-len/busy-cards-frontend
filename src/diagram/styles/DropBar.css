@@ -21,7 +21,7 @@ aside {
 
 /* Height adjustment when minimap is visible */
 aside.minimap-visible {
-	height: calc(100vh - 64px - 205px); /* Adjust height to make room for minimap */
+	height: calc(100vh - 64px - 200px); /* Adjust height to make room for minimap */
 }
 
 /* Animation classes */

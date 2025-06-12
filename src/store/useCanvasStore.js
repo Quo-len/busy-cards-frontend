@@ -5,6 +5,29 @@ import { createNodesAndEdges } from '../diagram/utils/utils';
 
 const { nodes: initialNodes, edges: initialEdges } = createNodesAndEdges(0, 0);
 
+const userPermissions = {
+	Глядач: {
+		canEdit: false,
+		canComment: false,
+		canManageParticipants: false,
+	},
+	Коментатор: {
+		canEdit: false,
+		canComment: true,
+		canManageParticipants: false,
+	},
+	Редактор: {
+		canEdit: true,
+		canComment: true,
+		canManageParticipants: false,
+	},
+	Власник: {
+		canEdit: true,
+		canComment: true,
+		canManageParticipants: true,
+	},
+};
+
 const useCanvasStore = create((set, get) => ({
 	nodes: new Map(
 		initialNodes.map((node) => [
@@ -34,7 +57,7 @@ const useCanvasStore = create((set, get) => ({
 	role: 'Глядач',
 
 	// Initialize Yjs document and provider
-	initializeYjs: (mindmapId) => {
+	initializeYjs: (mindmapId, role) => {
 		const doc = new Y.Doc();
 		const isDev = import.meta.env.VITE_NODE_ENV === 'development';
 		const wsProtocol = isDev ? 'ws' : 'wss';
@@ -93,6 +116,7 @@ const useCanvasStore = create((set, get) => ({
 			provider,
 			nodes: new Map(nodesMap.entries()),
 			edges: new Map(edgesMap.entries()),
+			role: role,
 		});
 	},
 
@@ -142,6 +166,9 @@ const useCanvasStore = create((set, get) => ({
 
 	// Node operations
 	addNode: (node) => {
+		const { role } = get();
+		if (!userPermissions[role].canEdit) return;
+
 		const { ydoc } = get();
 		if (!ydoc) {
 			// If Yjs is not initialized, update local state
@@ -159,42 +186,54 @@ const useCanvasStore = create((set, get) => ({
 	},
 
 	updateNode: (nodeId, updates) => {
+		const { role } = get();
+		if (!userPermissions[role].canEdit && !userPermissions[role].canComment) return;
+
 		const { ydoc } = get();
 		if (!ydoc) {
 			// If Yjs is not initialized, update local state
 			const { nodes } = get();
 			const node = nodes.get(nodeId);
 			if (node) {
-				// Carefully merge updates with existing node data
-				const updatedNode = {
-					...node,
-					// If updates contains position, merge it with existing position
-					position: updates.position
-						? {
-								...node.position,
-								...updates.position,
-						  }
-						: node.position,
-					// If updates contains style, merge it with existing style
-					style: updates.style
-						? {
-								...node.style,
-								...updates.style,
-						  }
-						: node.style,
-					// If updates contains data, merge it with existing data
-					data: updates.data
-						? {
-								...node.data,
-								...updates.data,
-						  }
-						: node.data,
-					// Add any other direct properties
-					...Object.entries(updates)
-						.filter(([key]) => !['position', 'style', 'data'].includes(key))
-						.reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
-				};
-
+				let updatedNode;
+				if (userPermissions[role].canComment) {
+					updatedNode = {
+						...node,
+						data: {
+							...node.data,
+							comments: updates.data.comments,
+						},
+					};
+				} else {
+					updatedNode = {
+						...node,
+						// If updates contains position, merge it with existing position
+						position: updates.position
+							? {
+									...node.position,
+									...updates.position,
+							  }
+							: node.position,
+						// If updates contains style, merge it with existing style
+						style: updates.style
+							? {
+									...node.style,
+									...updates.style,
+							  }
+							: node.style,
+						// If updates contains data, merge it with existing data
+						data: updates.data
+							? {
+									...node.data,
+									...updates.data,
+							  }
+							: node.data,
+						// Add any other direct properties
+						...Object.entries(updates)
+							.filter(([key]) => !['position', 'style', 'data'].includes(key))
+							.reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {}),
+					};
+				}
 				nodes.set(nodeId, updatedNode);
 				set({ nodes: new Map(nodes) });
 			}
@@ -219,6 +258,9 @@ const useCanvasStore = create((set, get) => ({
 	},
 
 	removeNode: (nodeId) => {
+		const { role } = get();
+		if (!userPermissions[role].canEdit) return;
+
 		const { ydoc } = get();
 		if (!ydoc) {
 			// If Yjs is not initialized, update local state
@@ -233,6 +275,9 @@ const useCanvasStore = create((set, get) => ({
 
 	// Edge operations
 	addEdge: (edge) => {
+		const { role } = get();
+		if (!userPermissions[role].canEdit) return;
+
 		const { ydoc } = get();
 		if (!ydoc) {
 			// If Yjs is not initialized, update local state
@@ -250,6 +295,9 @@ const useCanvasStore = create((set, get) => ({
 	},
 
 	updateEdge: (edgeId, updates) => {
+		const { role } = get();
+		if (!userPermissions[role].canEdit) return;
+
 		const { ydoc } = get();
 		if (!ydoc) {
 			// If Yjs is not initialized, update local state
@@ -269,6 +317,9 @@ const useCanvasStore = create((set, get) => ({
 	},
 
 	removeEdge: (edgeId) => {
+		const { role } = get();
+		if (!userPermissions[role].canEdit) return;
+
 		const { ydoc } = get();
 		if (!ydoc) {
 			// If Yjs is not initialized, update local state
