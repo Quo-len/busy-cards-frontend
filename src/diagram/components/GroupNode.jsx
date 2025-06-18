@@ -2,8 +2,8 @@ import "../styles/GroupNode.css";
 import { NodeResizer } from "reactflow";
 import { useNodeResize } from "../utils/utils";
 
-const GroupNode = ({ id, data, isConnectable, selected }) => {
-	const { label, childNodeIds = [] } = data;
+const GroupNode = ({ id, data, selected }) => {
+	const { label } = data;
 	const handleResize = useNodeResize(id);
 
 	return (
@@ -15,12 +15,8 @@ const GroupNode = ({ id, data, isConnectable, selected }) => {
 			}}
 		>
 			<div className="group-header">
-				{label || "Group Node"}
+				{data.label || "Група"}
 				<NodeResizer color="#ff0071" isVisible={selected} minWidth={150} minHeight={50} onResize={handleResize} />
-
-				<div className="group-subheader">
-					{childNodeIds.length} item{childNodeIds.length !== 1 ? "s" : ""}
-				</div>
 			</div>
 		</div>
 	);

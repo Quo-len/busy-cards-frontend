@@ -25,42 +25,16 @@ import "../styles/Canvas.css";
 import { findInvalidTargetNodes, isValidConnection } from "../../diagram/utils/utils";
 import { DnDProvider, useDnD } from "../../diagram/utils/DnDContext";
 import { useNodeSearch } from "../../diagram/hooks/useNodeSearch";
-import { nodeTypes, edgeTypes } from "../../diagram/components";
+import {
+	nodeTypes,
+	edgeTypes,
+	nodeTypeNamesUa,
+	userPermissions,
+	translateExtent,
+	nodeExtent,
+} from "../../diagram/components";
 import useCanvasStore from "../../store/useCanvasStore";
 import * as api from "../../api";
-
-const translateExtent = [
-	[-4300, -2000],
-	[4300, 2000],
-];
-
-const nodeExtent = [
-	[-4000, -1700],
-	[4000, 1700],
-];
-
-const userPermissions = {
-	Глядач: {
-		canEdit: false,
-		canComment: false,
-		canManageParticipants: false,
-	},
-	Коментатор: {
-		canEdit: false,
-		canComment: true,
-		canManageParticipants: false,
-	},
-	Редактор: {
-		canEdit: true,
-		canComment: true,
-		canManageParticipants: false,
-	},
-	Власник: {
-		canEdit: true,
-		canComment: true,
-		canManageParticipants: true,
-	},
-};
 
 const Canvas = () => {
 	const { mindmapId } = useParams();
@@ -280,7 +254,7 @@ const Canvas = () => {
 				id: id,
 				type,
 				position,
-				data: { label: `${type} node` },
+				data: { label: `${nodeTypeNamesUa[type]}` },
 				...(type === "mygroup" ? { zIndex: -999 } : {}),
 			};
 			addNode(newNode);
@@ -307,20 +281,20 @@ const Canvas = () => {
 					// Connection highlighting (existing logic)
 					...(connectionStartNodeId &&
 						connectionStartNodeId !== node.id &&
-						!invalidTargetNodes.includes(node.id) && {
+						!invalidTargetNodes.includes(node.id) &&
+						!["mygroup", "note"].includes(node.type) && {
 							border: "2px solid #4CAF50", // Green for valid targets
 							boxShadow: "0 0 10px rgba(76, 175, 80, 0.5)",
 						}),
 					...(connectionStartNodeId &&
-						invalidTargetNodes.includes(node.id) && {
+						(invalidTargetNodes.includes(node.id) || ["mygroup", "note"].includes(node.type)) && {
 							border: "2px solid #FF5252", // Red for invalid targets
 							boxShadow: "0 0 10px rgba(255, 82, 82, 0.5)",
 						}),
 					...(connectionStartNodeId === node.id && {
-						border: "2px solid #0041d0", // Blue for source node
+						border: "2px solid #0041d0",
 						boxShadow: "0 0 10px rgba(0, 65, 208, 0.5)",
 					}),
-					// Apply local highlight style if it exists (takes precedence)
 					...(localHighlight && {
 						border: localHighlight.border,
 						boxShadow: localHighlight.boxShadow,
@@ -330,115 +304,6 @@ const Canvas = () => {
 			};
 		});
 	}, [nodes, selectedNodeId, connectionStartNodeId, invalidTargetNodes, getLocalNodeStyle]);
-
-	const [buffer, setBuffer] = useState(null);
-
-	const copyToBuffer = (selectedNodeId) => {
-		const node = nodes.find((node) => node.id === selectedNodeId);
-
-		if (node) {
-			console.log("Copied node:", node);
-			setBuffer(node);
-		}
-	};
-
-	const pasteFromBuffer = () => {
-		if (buffer) {
-			const id = uuidv4();
-			const newNode = {
-				...buffer,
-				id: id,
-				position: {
-					x: buffer.position.x + 15,
-					y: buffer.position.y + 15,
-				},
-				data: {
-					...buffer.data,
-					label: buffer.data.label + "(копія)",
-				},
-			};
-
-			console.log("Pasted new node:", newNode);
-
-			setSelectedNodeId(id);
-			addNode(newNode);
-			navigateToNode(newNode);
-		}
-	};
-
-	useEffect(() => {
-		const handleKeyDown = (event) => {
-			if (
-				(event.ctrlKey && event.altKey && event.key.toLowerCase() === "c") ||
-				event.key.toLowerCase() === "с" ||
-				event.key.toLowerCase() === "с"
-			) {
-				copyToBuffer(selectedNodeId);
-			}
-
-			if (
-				(event.ctrlKey && event.altKey && event.key.toLowerCase() === "v") ||
-				event.key.toLowerCase() === "м" ||
-				event.key.toLowerCase() === "м"
-			) {
-				pasteFromBuffer();
-			}
-		};
-
-		window.addEventListener("keydown", handleKeyDown);
-		return () => {
-			window.removeEventListener("keydown", handleKeyDown);
-		};
-	}, [reactFlowInstance, selectedNodeId, nodes, buffer]);
-
-	const { getIntersectingNodes } = useReactFlow();
-
-	// make button to mount to group node if theres interesction with node and type is group
-
-	const handleAttachment = () => {
-		const node = nodes.find((n) => n.id === selectedNodeId);
-
-		if (node.parentId) {
-			// Detaching from parent
-			// When detaching, we need to convert relative position to absolute position
-			const parentNode = nodes.find((n) => n.id === node.parentId);
-
-			// Calculate absolute position based on parent's position and node's relative position
-			const absolutePosition = {
-				x: parentNode.position.x + node.position.x,
-				y: parentNode.position.y + node.position.y,
-			};
-
-			// Update node with no parent and absolute position
-			updateNode(node.id, {
-				parentId: "",
-				extent: "",
-				position: absolutePosition,
-			});
-		} else {
-			// Attaching to parent
-			const intersections = getIntersectingNodes(node).map((n) => n.id);
-
-			if (intersections.length > 0) {
-				// Get the first intersecting node as the parent
-				const parentId = intersections[0];
-				const parentNode = nodes.find((n) => n.id === parentId);
-
-				// Calculate relative position based on parent's position
-				const relativePosition = {
-					x: node.position.x - parentNode.position.x,
-					y: node.position.y - parentNode.position.y,
-				};
-
-				// Update node with parent info and relative position
-				updateNode(node.id, {
-					parentId: parentId,
-					extent: "parent",
-					position: relativePosition,
-				});
-			}
-		}
-	};
 
 	if (isLoading) {
 		return <Loader message="Завантаження інтелект-карти, будь ласка, зачекайте." flexLayout="false" />;
@@ -450,10 +315,6 @@ const Canvas = () => {
 
 	return (
 		<div style={{ flex: 1, position: "relative", overflow: "hidden" }} ref={flowRef}>
-			<button style={{ position: "absolute", right: 10, top: 780, zIndex: 4 }} onClick={handleAttachment}>
-				Parent set {selectedNodeId}
-			</button>
-
 			<ReactFlow
 				translateExtent={translateExtent}
 				nodeExtent={nodeExtent}

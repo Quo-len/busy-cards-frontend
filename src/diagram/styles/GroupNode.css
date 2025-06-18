@@ -8,10 +8,6 @@
 	transition: border 0.2s ease;
 }
 
-.group-node.selected {
-	border: 2px solid #0041d0;
-}
-
 .group-header {
 	margin-bottom: 10px;
 	font-weight: bold;

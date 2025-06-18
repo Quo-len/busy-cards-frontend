@@ -44,6 +44,7 @@ function AppContent() {
 					pauseOnHover
 					theme="light"
 					transition={Slide}
+					style={{ zIndex: 999999 }}
 				/>
 				{shouldShowFooter && <Footer />}
 			</div>

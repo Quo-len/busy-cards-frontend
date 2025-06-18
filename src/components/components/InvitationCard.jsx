@@ -35,7 +35,6 @@ const InvitationCard = ({ invitation, onEdit }) => {
 		}
 	};
 
-	// Helper function to determine status class
 	const getStatusClass = (status) => {
 		if (status === "Принято") return "accepted";
 		if (status === "Відхилено") return "declined";
@@ -70,6 +69,11 @@ const InvitationCard = ({ invitation, onEdit }) => {
 					<span className="user-name" onClick={() => navigate(`/profile/${invitation?.receiver.id}`)}>
 						{invitation?.receiver.username}
 					</span>
+				</div>
+
+				<div className="invitation-user role">
+					<span className="user-label">Роль:</span>
+					<span className="user-name">{invitation?.accessLevel}</span>
 				</div>
 
 				<div className="invitation-user">

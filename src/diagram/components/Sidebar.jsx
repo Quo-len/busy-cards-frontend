@@ -4,64 +4,12 @@ import { GrSelect } from "react-icons/gr";
 import useCanvasStore from "../../store/useCanvasStore";
 import { useAuth } from "../../utils/authContext";
 import { v4 as uuidv4 } from "uuid";
-
-const nodeShapes = {
-	rectangle: {},
-	circle: {},
-	hexagon: {},
-};
-
-const NODE_COLORS = {
-	blue: "#3498db",
-	green: "#2ecc71",
-	red: "#e74c3c",
-	purple: "#9b59b6",
-	orange: "#e67e22",
-	yellow: "#f1c40f",
-	gray: "#95a5a6",
-	teal: "#1abc9c",
-	navy: "#34495e",
-};
-
-const NODE_TYPES = {
-	custom: {
-		fields: ["label", "description", "status", "priority", "shape", "color"],
-	},
-	actor: {
-		fields: ["label", "description", "status", "priority", "shape", "color"],
-	},
-	link: {
-		fields: ["label", "description", "status", "priority", "shape", "color"],
-	},
-	image: {
-		fields: ["label", "description", "image"],
-	},
-	note: {
-		fields: ["label", "color"],
-	},
-	group: {
-		fields: ["label", "description", "options", "color"],
-	},
-};
-
-const STATUS_OPTIONS = [
-	{ value: "proposed", label: "Запропоновано", color: "#3498db" },
-	{ value: "approved", label: "Узгоджено", color: "#2ecc71" },
-	{ value: "rejected", label: "Відхилено", color: "#e74c3c" },
-	{ value: "discussing", label: "В обговоренні", color: "#9b59b6" },
-];
-
-const PRIORITY_OPTIONS = [
-	{ value: "p1", label: "P1 (критичний)", color: "#e74c3c" },
-	{ value: "p2", label: "P2 (високий)", color: "#e67e22" },
-	{ value: "p3", label: "P3 (середній)", color: "#f1c40f" },
-	{ value: "p4", label: "P4 (низький)", color: "#2ecc71" },
-];
+import { nodeColors, nodeShapes, nodeFields, statusOptions, priorityOptions } from "../../diagram/components";
 
 function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
-	const { user, isLoggedIn } = useAuth();
+	const { user } = useAuth();
 
-	const { updateNode, getNodesArray } = useCanvasStore();
+	const { updateNode, getNodesArray, removeNode, addNode } = useCanvasStore();
 	const nodes = getNodesArray();
 
 	const selectedNode = nodes.find((node) => node.id === selectedNodeId);
@@ -74,7 +22,7 @@ function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
 	const [editingCommentText, setEditingCommentText] = useState("");
 
 	const nodeType = selectedNode?.type || "custom";
-	const availableFields = NODE_TYPES[nodeType]?.fields || NODE_TYPES.custom.fields;
+	const availableFields = nodeFields[nodeType]?.fields || nodeFields.custom.fields;
 
 	useEffect(() => {
 		if (isVisible) {
@@ -83,6 +31,27 @@ function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
 			setAnimationClass("slide-out");
 		}
 	}, [isVisible]);
+
+	const copyNode = () => {
+		const node = nodes.find((node) => node.id === selectedNodeId);
+		if (node) {
+			const id = uuidv4();
+			const newNode = {
+				...node,
+				id: id,
+				position: {
+					x: node.position.x + 15,
+					y: node.position.y + 15,
+				},
+				data: {
+					...node.data,
+					label: node.data.label + "(копія)",
+				},
+			};
+
+			addNode(newNode);
+		}
+	};
 
 	const updateNodeProperty = useCallback((nodeId, propertyName, value) => {
 		const nodeData = useCanvasStore.getState().nodes.get(nodeId) || {};
@@ -258,14 +227,14 @@ function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
 				if (field === "status") {
 					return (
 						<div key={field} className="form-group">
-							<label>Status:</label>
+							<label>Статус:</label>
 							<select
 								name="status"
 								value={value}
 								onChange={(e) => updateNodeProperty(selectedNode.id, field, e.target.value)}
 								disabled={!isEditable}
 							>
-								{STATUS_OPTIONS.map((option) => (
+								{statusOptions.map((option) => (
 									<option key={option.value} value={option.value}>
 										{option.label}
 									</option>
@@ -274,18 +243,17 @@ function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
 						</div>
 					);
 				}
-
 				if (field === "priority") {
 					return (
 						<div key={field} className="form-group">
-							<label>Priority:</label>
+							<label>Пріоритет:</label>
 							<select
 								name="priority"
 								value={value}
 								onChange={(e) => updateNodeProperty(selectedNode.id, field, e.target.value)}
 								disabled={!isEditable}
 							>
-								{PRIORITY_OPTIONS.map((option) => (
+								{priorityOptions.map((option) => (
 									<option key={option.value} value={option.value}>
 										{option.label}
 									</option>
@@ -294,18 +262,17 @@ function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
 						</div>
 					);
 				}
-
 				if (field === "color") {
 					return (
 						<div key={field} className="form-group">
-							<label>Color:</label>
+							<label>Колір:</label>
 							<select
 								name="color"
 								value={value}
 								onChange={(e) => updateNodeProperty(selectedNode.id, field, e.target.value)}
 								disabled={!isEditable}
 							>
-								{Object.entries(NODE_COLORS).map(([name, hex]) => (
+								{Object.entries(nodeColors).map(([name, hex]) => (
 									<option key={name} value={hex}>
 										{name}
 									</option>
@@ -314,11 +281,10 @@ function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
 						</div>
 					);
 				}
-
 				if (field === "shape") {
 					return (
 						<div key={field} className="form-group">
-							<label>Shape:</label>
+							<label>Форма:</label>
 							<select
 								name="shape"
 								value={value}
@@ -334,77 +300,63 @@ function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
 						</div>
 					);
 				}
-
 				if (field === "options") {
 					const options = selectedNode.data?.options || [];
 					return (
 						<div key={field} className="form-group">
-							<label>Options:</label>
+							<label>Обмеження/ризики:</label>
 							<ul className="options-list">
 								{options.map((option) => (
 									<li key={option.id}>
 										{option.text}
-										<button onClick={() => removeOption(selectedNode.id, option.id)}>Remove</button>
+										{isEditable && <button onClick={() => removeOption(selectedNode.id, option.id)}>Видалити</button>}
 									</li>
 								))}
 							</ul>
-							<input
-								type="text"
-								value={newOption}
-								onChange={(e) => setNewOption(e.target.value)}
-								placeholder="New option"
-								disabled={!isEditable}
-							/>
-							<button onClick={() => addOption(selectedNode.id)}>Add</button>
+							{isEditable && (
+								<div>
+									{" "}
+									<input
+										type="text"
+										value={newOption}
+										onChange={(e) => setNewOption(e.target.value)}
+										placeholder="..."
+										disabled={!isEditable}
+									/>
+									<button className="add-button" onClick={() => addOption(selectedNode.id)}>
+										+
+									</button>{" "}
+								</div>
+							)}
 						</div>
 					);
 				}
-
 				if (field === "description" || field === "label") {
 					return (
 						<div key={field} className="form-group">
-							<label>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
+							<label>{field === "description" ? "Опис" : "Назва"}</label>
 							<textarea
 								name={field}
 								value={value}
 								onChange={(e) => updateNodeProperty(selectedNode.id, field, e.target.value)}
-								placeholder={`Enter ${field}`}
+								placeholder={`Введіть текст`}
 								disabled={!isEditable}
 								className="property-input"
 							/>
 						</div>
 					);
 				}
-
 				if (field === "image") {
 					return (
 						<div key={field} className="form-group">
-							<label>Image (Upload or URL):</label>
-
+							<label>Фото (Завантаження або URL):</label>
 							<input
 								type="url"
-								placeholder="Enter image URL"
+								placeholder="Введіть URL фото"
 								value={value.startsWith("data:") ? "" : value}
 								onChange={(e) => updateNodeProperty(selectedNode.id, "image", e.target.value)}
 								disabled={!isEditable}
 							/>
-
-							<input
-								type="file"
-								accept="image/*"
-								onChange={(e) => {
-									const file = e.target.files[0];
-									if (file) {
-										const reader = new FileReader();
-										reader.onloadend = () => {
-											updateNodeProperty(selectedNode.id, "image", reader.result);
-										};
-										reader.readAsDataURL(file);
-									}
-								}}
-								disabled={!isEditable}
-							/>
-
 							{value && (
 								<div className="image-preview">
 									<img src={value} alt="Node preview" style={{ maxWidth: "100%", marginTop: "0.5rem" }} />
@@ -413,7 +365,6 @@ function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
 						</div>
 					);
 				}
-
 				return null;
 			})}
 		</div>
@@ -435,10 +386,7 @@ function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
 									<span className="comment-timestamp">
 										{formatTimestamp(comment.timestamp)}
 										{comment.edited && (
-											<span className="edited-indicator">
-												{" "}
-												(відредаговано {formatTimestamp(comment.editTimestamp)})
-											</span>
+											<span className="edited-indicator">(відредаговано {formatTimestamp(comment.editTimestamp)})</span>
 										)}
 									</span>
 								</div>
@@ -515,7 +463,16 @@ function Sidebar({ isVisible, selectedNodeId, isEditable, isCommentable }) {
 						ID: {selectedNode.id} | x: {selectedNode.position.x.toFixed(1)}, y: {selectedNode.position.y.toFixed(1)}
 					</div>
 				</div>
-
+				{isEditable && (
+					<div className="sidebar-tabs">
+						<button className={`remove-button`} onClick={() => removeNode(selectedNodeId)}>
+							Видалити
+						</button>
+						<button className={`copy-button`} onClick={() => copyNode()}>
+							Скопіювати
+						</button>
+					</div>
+				)}
 				<div className="sidebar-tabs">
 					<button
 						className={`tab-button ${activeTab === "properties" ? "active" : ""}`}

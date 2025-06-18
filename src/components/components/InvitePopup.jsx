@@ -60,27 +60,6 @@ const InvitePopup = ({ onClose, profileUser }) => {
 			setShowSearchResults(false);
 			return;
 		}
-
-		try {
-			// This would be replaced with real user search API
-			setTimeout(() => {
-				const mockResults = [
-					{ id: "user1", username: "Олександр", email: "oleksandr@example.com" },
-					{ id: "user2", username: "Марія", email: "maria@example.com" },
-				].filter((u) => u.email.includes(email) || u.username.toLowerCase().includes(email.toLowerCase()));
-
-				setSearchResults(mockResults);
-				setShowSearchResults(mockResults.length > 0);
-			}, 300);
-		} catch (error) {
-			console.error("Error searching users:", error);
-		}
-	};
-
-	const selectUser = (user) => {
-		setReceiverEmail(user.email);
-		setReceiverUsername(user.username);
-		setShowSearchResults(false);
 	};
 
 	const handleSendInvitation = async () => {
@@ -110,7 +89,7 @@ const InvitePopup = ({ onClose, profileUser }) => {
 			toast.success("Запрошення успішно надіслано.");
 			onClose();
 		} catch (error) {
-			toast.error("Помилка надсилання запрошення." + error);
+			toast.error("Помилка надсилання запрошення: " + error.response.data.message);
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -145,26 +124,6 @@ const InvitePopup = ({ onClose, profileUser }) => {
 									className="invite-input"
 									readOnly={!!profileUser}
 								/>
-								{/* 
-								{receiverUsername && (
-									<div className="selected-user">
-										<PiUserCircle />
-										<span>{receiverUsername}</span>
-									</div>
-								)}
-								{showSearchResults && (
-									<div className="search-results">
-										{searchResults.map((user) => (
-											<div key={user.id} className="search-result-item" onClick={() => selectUser(user)}>
-												<PiUserCircle />
-												<div className="user-info">
-													<span className="username">{user.username}</span>
-													<span className="email">{user.email}</span>
-												</div>
-											</div>
-										))}
-									</div>
-								)} */}
 							</div>
 						</div>
 

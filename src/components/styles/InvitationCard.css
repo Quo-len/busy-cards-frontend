@@ -134,6 +134,10 @@
 	background-color: #805ad5;
 }
 
+.role .user-name:before {
+	background-color: #1ae000;
+}
+
 .invitation-actions {
 	display: flex;
 	justify-content: flex-end;

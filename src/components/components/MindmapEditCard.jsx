@@ -56,7 +56,7 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel, onDelete }) => {
 
 	return (
 		<div className="mindmap-edit-card">
-			<h3>Редагування інтелект-карти:</h3>
+			<h3>{isOwner ? "Редагування інтелект-карти:" : "Перегляд інтелект-карти"}</h3>
 			<form onSubmit={handleSubmit}>
 				<div className="form-group">
 					{isOwner && (
@@ -112,7 +112,7 @@ const MindmapEditCard = ({ mindmap, onSave, onCancel, onDelete }) => {
 
 				{error && <div className="error-message">{error}</div>}
 
-				<ParticipantList mindmap={mindmap} isEditable={false} />
+				<ParticipantList mindmap={mindmap} isEditable={isOwner} />
 			</form>
 		</div>
 	);

@@ -19,12 +19,10 @@ aside {
 	transition: transform 0.3s ease-in-out, height 0.3s ease-in-out;
 }
 
-/* Height adjustment when minimap is visible */
 aside.minimap-visible {
-	height: calc(100vh - 64px - 200px); /* Adjust height to make room for minimap */
+	height: calc(100vh - 64px - 200px);
 }
 
-/* Animation classes */
 .dropbar.slide-in {
 	transform: translateX(0);
 	animation: slideIn 0.3s ease-in-out forwards;
@@ -102,7 +100,6 @@ aside::-webkit-scrollbar-thumb:hover {
 	transform: translateY(0);
 }
 
-/* Responsive adjustments */
 @media (max-width: 992px) {
 	aside {
 		width: 260px;
@@ -128,7 +125,6 @@ aside::-webkit-scrollbar-thumb:hover {
 	}
 }
 
-/* Adjust for different header heights on mobile if necessary */
 @media (max-width: 480px) {
 	aside {
 		top: 56px;

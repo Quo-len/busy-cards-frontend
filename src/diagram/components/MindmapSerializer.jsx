@@ -7,6 +7,24 @@ import { useRef } from "react";
 import jsPDF from "jspdf";
 import "../styles/MindmapSerializer.css";
 
+const nodeFields = {
+	custom: {
+		fields: ["label", "description", "color", "status", "priority", "options", "comments"],
+	},
+	actor: {
+		fields: ["label", "description", "color", "priority", "options", "comments"],
+	},
+	image: {
+		fields: ["label", "description", "image", "comments"],
+	},
+	note: {
+		fields: ["label", "color", "comments"],
+	},
+	mygroup: {
+		fields: ["label", "description", "options", "comments"],
+	},
+};
+
 const MindmapSerializer = ({ mindmap, isVisible, isEditable }) => {
 	const fileInputRef = useRef(null);
 
@@ -119,6 +137,7 @@ const MindmapSerializer = ({ mindmap, isVisible, isEditable }) => {
 			toast.error("Відсутні вузли для експорту.");
 			return;
 		}
+
 		try {
 			const dataUrl = await exportToPng(fileName);
 			const pdf = new jsPDF({
@@ -126,28 +145,35 @@ const MindmapSerializer = ({ mindmap, isVisible, isEditable }) => {
 				unit: "mm",
 				format: "a4",
 			});
+
 			pdf.addFont("/fonts/NotoSans-Regular.ttf", "NotoSans", "normal");
 			pdf.addFont("/fonts/NotoSans-Bold.ttf", "NotoSans", "bold");
 			pdf.setFont("NotoSans");
+
 			const pdfWidth = pdf.internal.pageSize.getWidth();
 			const pdfHeight = pdf.internal.pageSize.getHeight();
 			const imgProps = pdf.getImageProperties(dataUrl);
-			const imgWidth = pdfWidth - 20; // 10mm margin on each side
+			const imgWidth = pdfWidth - 20;
 			const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
 			const yOffset = Math.max(10, (pdfHeight - imgHeight) / 2);
+
 			pdf.addImage(dataUrl, "PNG", 10, yOffset, imgWidth, imgHeight);
+
 			const title = mindmap?.title || "Untitled Mindmap";
 			pdf.setFontSize(16);
 			pdf.setTextColor(0, 0, 0);
 			pdf.text(title, pdfWidth / 2, 10, { align: "center" });
+
 			pdf.addPage("a4", "portrait");
 			const contentPageWidth = pdf.internal.pageSize.getWidth();
 			const contentPageHeight = pdf.internal.pageSize.getHeight();
+
 			pdf.setFontSize(18);
 			pdf.text(title, contentPageWidth / 2, 15, { align: "center" });
 			pdf.setFontSize(14);
 			pdf.text("Вміст вузлів", contentPageWidth / 2, 25, { align: "center" });
 			pdf.setFontSize(12);
+
 			let yPosition = 35;
 			const checkAndAddPage = (height) => {
 				if (yPosition + height > contentPageHeight - 15) {
@@ -155,47 +181,119 @@ const MindmapSerializer = ({ mindmap, isVisible, isEditable }) => {
 					yPosition = 20;
 				}
 			};
+
 			nodes.forEach((node, index) => {
 				checkAndAddPage(15);
+
 				pdf.setFont("NotoSans", "bold");
 				pdf.text(`${index + 1}. ${node.data.label || "Unnamed Node"}`, 10, yPosition);
 				yPosition += 8;
+
 				pdf.setFont("NotoSans", "normal");
 				pdf.setFontSize(8);
 				pdf.setTextColor(100, 100, 100);
 				pdf.text(`Ідентифікатор: ${node.id} | Тип: ${node.type || "default"}`, 15, yPosition);
-				yPosition += 5;
+				yPosition += 8;
+
 				pdf.setFontSize(12);
 				pdf.setTextColor(0, 0, 0);
-				const nodeKeys = Object.keys(node).filter(
-					(key) =>
-						key !== "children" &&
-						key !== "data" &&
-						key !== "position" &&
-						key !== "width" &&
-						key !== "height" &&
-						typeof node[key] !== "function"
-				);
-				if (nodeKeys.length > 0) {
+
+				const nodeType = node.type || "custom";
+				const allowedFields = nodeFields[nodeType]?.fields || nodeFields.custom.fields;
+
+				const relevantData = {};
+				allowedFields.forEach((field) => {
+					if (node.data && node.data[field] !== undefined) {
+						relevantData[field] = node.data[field];
+					}
+				});
+
+				Object.keys(relevantData).forEach((key) => {
+					if (key === "label") return;
+
 					checkAndAddPage(10);
-					pdf.setFontSize(9);
-					pdf.setTextColor(80, 80, 80);
-					const keysStr = nodeKeys
-						.map((key) => {
-							const value = node[key];
-							if (typeof value === "object" && value !== null) {
-								return `${key}: [Object]`;
-							} else {
-								return `${key}: ${value}`;
-							}
-						})
-						.join(", ");
-					const keyLines = pdf.splitTextToSize(`Властивості: ${keysStr}`, contentPageWidth - 30);
-					pdf.text(keyLines, 15, yPosition);
-					yPosition += keyLines.length * 4 + 2;
-					pdf.setFontSize(12);
-					pdf.setTextColor(0, 0, 0);
-				}
+
+					const value = relevantData[key];
+					let displayValue;
+
+					if (typeof value === "object" && value !== null) {
+						displayValue = JSON.stringify(value, null, 2);
+					} else {
+						displayValue = String(value);
+					}
+
+					pdf.setFont("NotoSans", "bold");
+					pdf.setFontSize(10);
+
+					const fieldTranslations = {
+						description: "Опис",
+						color: "Колір",
+						status: "Статус",
+						priority: "Пріоритет",
+						options: "Опції",
+						image: "Зображення",
+						comments: "Коментарі",
+					};
+
+					const fieldLabel = fieldTranslations[key] || key;
+
+					if (key === "comments" && Array.isArray(value)) {
+						pdf.setFont("NotoSans", "bold");
+						pdf.text(`${fieldLabel}:`, 15, yPosition);
+						yPosition += 8;
+
+						if (value.length > 0) {
+							value.forEach((comment, commentIndex) => {
+								checkAndAddPage(20);
+
+								pdf.setFont("NotoSans", "bold");
+								pdf.setFontSize(9);
+								pdf.text(`Коментар ${commentIndex + 1}:`, 20, yPosition);
+								yPosition += 5;
+
+								pdf.setFont("NotoSans", "normal");
+								pdf.setFontSize(8);
+								pdf.setTextColor(80, 80, 80);
+
+								const timestamp = new Date(comment.timestamp).toLocaleString("uk-UA");
+								let authorInfo = `Автор: ${comment.author || "Невідомий"} | Дата: ${timestamp}`;
+
+								if (comment.edited && comment.editTimestamp) {
+									const editTimestamp = new Date(comment.editTimestamp).toLocaleString("uk-UA");
+									authorInfo += ` | Відредаговано: ${editTimestamp}`;
+								}
+
+								pdf.text(authorInfo, 25, yPosition);
+								yPosition += 5;
+
+								pdf.setFont("NotoSans", "normal");
+								pdf.setFontSize(10);
+								pdf.setTextColor(0, 0, 0);
+
+								const commentLines = pdf.splitTextToSize(comment.text, contentPageWidth - 35);
+								pdf.text(commentLines, 25, yPosition);
+								yPosition += commentLines.length * 5 + 5;
+							});
+						} else {
+							pdf.setFont("NotoSans", "normal");
+							pdf.setFontSize(9);
+							pdf.setTextColor(80, 80, 80);
+							pdf.text("Коментарі відсутні", 20, yPosition);
+							yPosition += 8;
+							pdf.setTextColor(0, 0, 0);
+						}
+					} else {
+						pdf.text(`${fieldLabel}:`, 15, yPosition);
+						yPosition += 5;
+
+						pdf.setFont("NotoSans", "normal");
+						pdf.setFontSize(10);
+						const valueLines = pdf.splitTextToSize(displayValue, contentPageWidth - 25);
+						pdf.text(valueLines, 20, yPosition);
+						yPosition += valueLines.length * 5 + 3;
+					}
+				});
+
 				if (node.position) {
 					checkAndAddPage(5);
 					pdf.setFontSize(9);
@@ -203,58 +301,17 @@ const MindmapSerializer = ({ mindmap, isVisible, isEditable }) => {
 					pdf.text(`Позиція: x=${Math.round(node.position.x)}, y=${Math.round(node.position.y)}`, 15, yPosition);
 					pdf.setFontSize(12);
 					pdf.setTextColor(0, 0, 0);
-					yPosition += 5;
-				}
-				if (node.data.content) {
-					checkAndAddPage(10);
-					pdf.setFont("NotoSans", "normal");
-					pdf.setFontSize(10);
-					pdf.setFont("NotoSans", "bold");
-					pdf.text("Вміст:", 15, yPosition);
-					yPosition += 5;
-					pdf.setFont("NotoSans", "normal");
-					pdf.setFontSize(12);
-					const contentLines = pdf.splitTextToSize(node.data.content, contentPageWidth - 20);
-					pdf.text(contentLines, 15, yPosition);
-					yPosition += contentLines.length * 6 + 5;
-				} else {
-					yPosition += 5;
-				}
-				if (node.data) {
-					const dataKeys = Object.keys(node.data).filter(
-						(key) => key !== "label" && key !== "content" && typeof node.data[key] !== "function"
-					);
-					if (dataKeys.length > 0) {
-						checkAndAddPage(10);
-						pdf.setFontSize(9);
-						pdf.setTextColor(80, 80, 80);
-						dataKeys.forEach((key) => {
-							const value = node.data[key];
-							let displayValue;
-							if (typeof value === "object" && value !== null) {
-								displayValue = JSON.stringify(value).substring(0, 50);
-								if (JSON.stringify(value).length > 50) displayValue += "...";
-							} else {
-								displayValue = String(value);
-							}
-							const keyLine = `${key}: ${displayValue}`;
-							const keyLineWrapped = pdf.splitTextToSize(keyLine, contentPageWidth - 30);
-							pdf.text(keyLineWrapped, 15, yPosition);
-							yPosition += keyLineWrapped.length * 4 + 2;
-						});
-
-						pdf.setFontSize(12);
-						pdf.setTextColor(0, 0, 0);
-						yPosition += 2;
-					}
-				}
-				pdf.setDrawColor(200, 200, 200);
-				checkAndAddPage(5);
-				if (index < nodes.length - 1) {
-					pdf.line(10, yPosition, contentPageWidth - 10, yPosition);
 					yPosition += 8;
 				}
+
+				if (index < nodes.length - 1) {
+					checkAndAddPage(5);
+					pdf.setDrawColor(200, 200, 200);
+					pdf.line(10, yPosition, contentPageWidth - 10, yPosition);
+					yPosition += 10;
+				}
 			});
+
 			const totalPages = pdf.internal.getNumberOfPages();
 			for (let i = 1; i <= totalPages; i++) {
 				pdf.setPage(i);
@@ -270,6 +327,7 @@ const MindmapSerializer = ({ mindmap, isVisible, isEditable }) => {
 					{ align: "center" }
 				);
 			}
+
 			const formattedName = fileName
 				? `${fileName.replace(/[^\u0400-\u04FFa-zA-Z0-9\s\-_]/g, " ").replace(/\s+/g, " ")}.pdf`
 				: "mindmap.pdf";

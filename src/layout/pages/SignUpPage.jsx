@@ -63,7 +63,7 @@ const SignInPage = () => {
 
 				<form onSubmit={handleSubmit(onSubmit)} className="signup-form">
 					<div className="form-group">
-						<label className="form-label">Виберіть ім'я користувача</label>
+						<label className="form-label">Виберіть ім&apos;я користувача</label>
 						<div className="form-hint">використовується для входу у ваш обліковий запис</div>
 						<input
 							className={`form-input ${errors.username ? "input-error" : ""}`}
@@ -73,6 +73,10 @@ const SignInPage = () => {
 								minLength: {
 									value: 5,
 									message: "Ім'я повинно містити щонайменше 5 символів",
+								},
+								maxLength: {
+									value: 30,
+									message: "Ім'я користувача не повинно перевищувати 30 символів",
 								},
 							})}
 						/>
@@ -86,7 +90,11 @@ const SignInPage = () => {
 							className={`form-input ${errors.email ? "input-error" : ""}`}
 							placeholder="example@example.com"
 							{...register("email", {
-								required: "Поле пошти - обов'якове",
+								required: "Поле пошти обов'язкове",
+								pattern: {
+									value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+									message: "Невірний формат електронної пошти",
+								},
 							})}
 						/>
 						{errors.email && <span className="error-message">{errors.email.message}</span>}
@@ -105,6 +113,10 @@ const SignInPage = () => {
 									minLength: {
 										value: 5,
 										message: "Пароль повинен містити щонайменше 5 символів",
+									},
+									maxLength: {
+										value: 128,
+										message: "Пароль не повинен перевищувати 128 символів",
 									},
 									onChange: (e) => checkPasswordStrength(e.target.value),
 								})}

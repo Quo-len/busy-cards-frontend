@@ -9,8 +9,6 @@ export function getAuthTokenFromCookies() {
 
 export const logout = () => {
 	Cookies.remove("authToken", { path: "/" });
-
-	// window.location.href = "/signin";
 };
 
 export const isTokenExpired = () => {

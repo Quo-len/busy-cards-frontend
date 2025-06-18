@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useEffect, useState } from "react";
 import "../styles/DropBar.css";
 import useCanvasStore from "../../store/useCanvasStore";
+import { nodeTypeNamesUa } from "../../diagram/components";
 
 const DropBar = ({ isVisible, isVisibleMap, isEditable }) => {
 	const reactFlowInstance = useReactFlow();
@@ -27,7 +28,6 @@ const DropBar = ({ isVisible, isVisibleMap, isEditable }) => {
 		}
 		setType(nodeType);
 		event.dataTransfer.effectAllowed = "move";
-		console.log(nodeType);
 	};
 
 	const onAddNodeToCenter = (nodeType) => {
@@ -44,7 +44,7 @@ const DropBar = ({ isVisible, isVisibleMap, isEditable }) => {
 		const newNode = {
 			id,
 			position: { x: centerX, y: centerY },
-			data: { label: `${nodeType} node` },
+			data: { label: `${nodeTypeNamesUa[nodeType]}` },
 			type: nodeType,
 			...(nodeType === "mygroup" ? { zIndex: -999 } : {}),
 		};
@@ -82,7 +82,7 @@ const DropBar = ({ isVisible, isVisibleMap, isEditable }) => {
 				draggable={isEditable}
 				disabled={!isEditable}
 			>
-				Моя Група
+				Група
 			</button>
 
 			<button
@@ -104,15 +104,6 @@ const DropBar = ({ isVisible, isVisibleMap, isEditable }) => {
 				Замітка
 			</button>
 			<button
-				className="link-node"
-				onClick={() => onAddNodeToCenter("link")}
-				onDragStart={(event) => onDragStart(event, "link")}
-				draggable={isEditable}
-				disabled={!isEditable}
-			>
-				Посилання
-			</button>
-			<button
 				className="image-node"
 				onClick={() => onAddNodeToCenter("image")}
 				onDragStart={(event) => onDragStart(event, "image")}
@@ -120,16 +111,6 @@ const DropBar = ({ isVisible, isVisibleMap, isEditable }) => {
 				disabled={!isEditable}
 			>
 				Зображення
-			</button>
-
-			<button
-				className="default"
-				onClick={() => onAddNodeToCenter("default")}
-				onDragStart={(event) => onDragStart(event, "default")}
-				draggable={isEditable}
-				disabled={!isEditable}
-			>
-				Default
 			</button>
 		</aside>
 	);

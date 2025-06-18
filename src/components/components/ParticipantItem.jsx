@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import * as api from "./../../api";
 import "./../styles/ParticipantItem.css";
+import { Link } from "react-router-dom";
 
 const accessLevels = ["Глядач", "Коментатор", "Редактор"];
 
@@ -56,7 +57,9 @@ const ParticipantItem = ({ participant, isEditable, onRemove }) => {
 			</div>
 
 			<div className="participant-info">
-				<div className="participant-name">{participant.user.username}</div>
+				<Link to={`/profile/${participant.user.id}`} className="participant-name" onClick={(e) => e.stopPropagation()}>
+					{participant.user.username}
+				</Link>
 				<div className="participant-email">{participant.user.email}</div>
 				<div className="participant-joined">{formatDate()}</div>
 			</div>

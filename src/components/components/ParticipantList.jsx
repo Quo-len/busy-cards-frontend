@@ -36,7 +36,12 @@ const ParticipantList = ({ mindmap, isEditable }) => {
 					}
 
 					return participants.map((participant) => (
-						<ParticipantItem key={participant.id} participant={participant} isEditable={true} onRemove={handleRemove} />
+						<ParticipantItem
+							key={participant.id}
+							participant={participant}
+							isEditable={isEditable}
+							onRemove={handleRemove}
+						/>
 					));
 				})()}
 			</div>

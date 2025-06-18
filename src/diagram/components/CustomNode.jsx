@@ -1,17 +1,7 @@
-import { Handle, Position, NodeResizer, NodeToolbar } from "reactflow";
-import { memo, useCallback } from "react";
+import { Handle, Position, NodeResizer } from "reactflow";
+import { memo } from "react";
 import { useNodeResize } from "../utils/utils";
 import "../styles/CustomNode.css";
-
-const nodeColors = {
-	blue: "#3498db",
-	green: "#2ecc71",
-	red: "#e74c3c",
-	purple: "#9b59b6",
-	orange: "#e67e22",
-	yellow: "#f1c40f",
-	gray: "#95a5a6",
-};
 
 const CustomNode = ({ id, data, selected }) => {
 	const handleResize = useNodeResize(id);
@@ -20,7 +10,7 @@ const CustomNode = ({ id, data, selected }) => {
 		<div
 			className={`custom-node ${selected ? "selected" : ""}`}
 			style={{
-				background: data.color ? nodeColors[data.color] : "#fff",
+				background: data.color ? data.color : "#fff",
 				width: data.width,
 				height: data.height,
 			}}
@@ -33,12 +23,6 @@ const CustomNode = ({ id, data, selected }) => {
 			<Handle type="source" id="right" position={Position.Right} className="handle right" />
 			<Handle type="source" id="top" position={Position.Top} className="handle top" />
 			<Handle type="source" id="bottom" position={Position.Bottom} className="handle bottom" />
-
-			<NodeToolbar isVisible={data.toolbarVisible} position={data.toolbarPosition}>
-				<button>Видалити</button>
-				<button>Скопіювати</button>
-				<button>Вставити</button>
-			</NodeToolbar>
 		</div>
 	);
 };
